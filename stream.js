@@ -1,5 +1,5 @@
 
-MadError = {
+Mad.Error = {
   NONE	   : 0x0000,	/* no error */
 
   BUFLEN	   : 0x0001,	/* input buffer too small (or EOF) */
@@ -28,10 +28,10 @@ MadError = {
   BADSTEREO	   : 0x0239	/* incompatible block_type for JS */
 };
 
-var MAD_BUFFER_GUARD = 8
-var MAD_BUFFER_MDLEN = (511 + 2048 + MAD_BUFFER_GUARD)
+Mad.BUFFER_GUARD = 8
+Mad.BUFFER_MDLEN = (511 + 2048 + Mad.BUFFER_GUARD)
 
-function MadStream(data) {
+Mad.Stream = function (data) {
     if(typeof(data) != "string") {
         console.log("Invalid data type: " + typeof(data));
         return;
@@ -59,18 +59,18 @@ function MadStream(data) {
     //unsigned int md_len;			/* bytes in main_data */
 
     var options = 0;				/* decoding options (see below) */
-    var error = MadError.NONE;			/* error code (see above) */
+    var error = Mad.Error.NONE;			/* error code (see above) */
 }
 
-MadStream.fromFile = function(file, callback) {
+Mad.Stream.fromFile = function(file, callback) {
     var reader = new FileReader();
     reader.onloadend = function (evt) {
-        callback(new MadStream(evt.target.result));
+        callback(new Mad.Stream(evt.target.result));
     };
     reader.readAsBinaryString(file);
 };
 
-MadStream.prototype.readShort = function(bBigEndian) {
+Mad.Stream.prototype.readShort = function(bBigEndian) {
     if(typeof(bBigEndian) == "undefined") {
         bBigEndian = false;
     }
@@ -83,7 +83,7 @@ MadStream.prototype.readShort = function(bBigEndian) {
     return iShort;
 };
     
-MadStream.prototype.readSShort = function(bBigEndian) {
+Mad.Stream.prototype.readSShort = function(bBigEndian) {
     var iUShort = this.readShort(bBigEndian);
     if (iUShort > 32767)
         return iUShort - 65536;
@@ -91,13 +91,13 @@ MadStream.prototype.readSShort = function(bBigEndian) {
         return iUShort;
 };
 
-MadStream.prototype.readU8 = function() {
+Mad.Stream.prototype.readU8 = function() {
     var c = this.data.charCodeAt(this.buffer);
     this.buffer++;
     return c;
 };
 
-MadStream.prototype.readChars = function(length) {
+Mad.Stream.prototype.readChars = function(length) {
     var bytes = this.data.slice(this.buffer, this.buffer + length);
     this.buffer += length;
     return bytes;

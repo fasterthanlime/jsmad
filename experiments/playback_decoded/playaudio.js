@@ -6,7 +6,7 @@ function readFile() {
     if(!file) return;
     
     // Perform file ops
-    MadStream.fromFile(file, function(stream) {
+    Mad.Stream.fromFile(file, function(stream) {
         console.log("Reading a " + Math.round(stream.bufend / 1024) + "KB file");
         
         var channelCount = 2;
