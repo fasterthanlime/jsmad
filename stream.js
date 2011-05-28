@@ -10,6 +10,14 @@ function MadStream(data) {
     this.bufend = data.length;
 }
 
+MadStream.fromFile = function(file, callback) {
+    var reader = new FileReader();
+    reader.onloadend = function (evt) {
+      callback(new MadStream(evt.target.result));
+    };
+    reader.readAsBinaryString(file);
+}
+
 MadStream.prototype.readU8 = function() {
     var c = this.data.charCodeAt(this.buffer);
     this.buffer++;
