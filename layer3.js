@@ -163,61 +163,65 @@ Mad.layer_III = function (stream, frame) {
     header.flags        |= priv_bitlen;
     header.private_bits |= si.private_bits;
 
-//    /* find main_data of next frame */
-//    {
-//        struct mad_bitptr peek;
-//        unsigned long header;
-//
-//        mad_bit_init(&peek, stream.next_frame);
-//
-//        header = mad_bit_read(&peek, 32);
-//        if ((header & 0xffe60000L) /* syncword | layer */ == 0xffe20000L) {
-//            if (!(header & 0x00010000L))  /* protection_bit */
-//                mad_bit_skip(&peek, 16);  /* crc_check */
-//
-//            next_md_begin = mad_bit_read(&peek, (header & 0x00080000L) /* ID */ ? 9 : 8);
-//        }
-//
-//        mad_bit_finish(&peek);
-//    }
-//
-//    /* find main_data of this frame */
-//    frame_space = stream.next_frame - mad_bit_nextbyte(&stream.ptr);
-//
-//    if (next_md_begin > si.main_data_begin + frame_space)
-//        next_md_begin = 0;
-//
-//    md_len = si.main_data_begin + frame_space - next_md_begin;
-//
-//    frame_used = 0;
-//
-//    if (si.main_data_begin == 0) {
-//        ptr = stream.ptr;
-//        stream.md_len = 0;
-//
-//        frame_used = md_len;
-//    } else {
-//        if (si.main_data_begin > stream.md_len) {
-//            if (result == 0) {
-//                stream.error = Mad.Error.BADDATAPTR;
-//                result = -1;
-//            }
-//        } else {
-//            mad_bit_init(&ptr, *stream.main_data + stream.md_len - si.main_data_begin);
-//            
-//            if (md_len > si.main_data_begin) {
-//                assert(stream.md_len + md_len - si.main_data_begin <= MAD_BUFFER_MDLEN);
-//                memcpy(*stream.main_data + stream.md_len,
-//                    mad_bit_nextbyte(&stream.ptr),
-//                    frame_used = md_len - si.main_data_begin
-//                );
-//            stream.md_len += frame_used;
-//            }
-//        }
-//    }
-//
-//    frame_free = frame_space - frame_used;
-//
+    /* find main_data of next frame */
+    {
+        var peek = new Mad.Bit(stream.data, stream.next_frame);
+
+        header = peek.read(32);
+        if ((header & 0xffe60000) /* syncword | layer */ == 0xffe20000) { 
+            if (!(header & 0x00010000))  /* protection_bit */
+                peek.skip(16);  /* crc_check */
+
+            next_md_begin = peek.read((header & 0x00080000) /* ID */ ? 9 : 8);
+        }
+    }
+
+    /* find main_data of this frame */
+    frame_space = stream.next_frame - stream.ptr.nextbyte();
+
+    if (next_md_begin > si.main_data_begin + frame_space)
+        next_md_begin = 0;
+
+    md_len = si.main_data_begin + frame_space - next_md_begin;
+
+    frame_used = 0;
+
+    if (si.main_data_begin == 0) {
+        ptr = stream.ptr;
+        stream.md_len = 0;
+
+        frame_used = md_len;
+    } else {
+        if (si.main_data_begin > stream.md_len) {
+            if (result == 0) {
+                stream.error = Mad.Error.BADDATAPTR;
+                result = -1;
+            }
+        } else {
+            if (md_len > si.main_data_begin) {
+                assert(stream.md_len + md_len - si.main_data_begin <= MAD_BUFFER_MDLEN);
+            
+                frame_used = md_len - si.main_data_begin;
+                
+                /* memcpy(dst, dstOffset, src, srcOffset, length) - returns a copy of dst with modified bytes */
+                stream.main_data = Mad.memcpy(stream.main_data, stream.md_len, stream.buffer, stream.ptr.nextbyte(), frame_used);
+                
+                /*
+                // Keeping this here as a handy little reference
+                memcpy(*stream.main_data + stream.md_len,
+                    mad_bit_nextbyte(&stream.ptr),
+                    frame_used = md_len - si.main_data_begin
+                );
+                */
+                stream.md_len += frame_used;
+            }
+            
+            var ptr = new Mad.Bit(stream.main_data, stream.md_len - si.main_data_begin);
+        }
+    }
+
+    frame_free = frame_space - frame_used;
+
 //    /* decode main_data */
 //    if (result == 0) {
 //        error = Mad.III_decode(&ptr, frame, &si, nch);
@@ -232,14 +236,14 @@ Mad.layer_III = function (stream, frame) {
 //        stream.anc_bitlen = md_len * CHAR_BIT - data_bitlen;
 //    }
 //  
-//    // DEBUG
-//    console.log(
-//      "main_data_begin:" + si.main_data_begin +
-//      ", md_len:" + md_len +
-//      ", frame_free:" + frame_free +
-//      ", data_bitlen:" + data_bitlen +
-//      ", anc_bitlen: " + stream.anc_bitlen);
-//
+    // DEBUG
+    console.log(
+      "main_data_begin:" + si.main_data_begin +
+      ", md_len:" + md_len +
+      ", frame_free:" + frame_free +
+      ", data_bitlen:" + data_bitlen +
+      ", anc_bitlen: " + stream.anc_bitlen);
+
 //    /* preload main_data buffer with up to 511 bytes for next frame(s) */
 //    if (frame_free >= next_md_begin) {
 //        memcpy(*stream.main_data, stream.next_frame - next_md_begin, next_md_begin);

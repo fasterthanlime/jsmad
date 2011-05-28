@@ -10,17 +10,19 @@ function readFile() {
         console.log("Reading a " + Math.round(stream.bufend / 1024) + "KB file");
         ID3_skipHeader(stream);
         
-        //stream.ptr.skip(0x413 * 8); // skip first sync mark
-        //stream.doSync(); // and re-sync
+        var STEPS_COUNT = 0;
         
-        //console.log("Found second frame at " + stream.ptr.offset);
-        //stream.next_frame = stream.ptr.offset;
-        
-        for(var i = 0; i < 5; i++) {
+        while(true) {
             var frame = Mad.Frame.decode(stream);
             if(frame == null) {
+                if(stream.error == Mad.Error.BUFLEN) {
+                    console.log("End of file!");
+                    break;
+                }
                 console.log("Error! code = " + stream.error);
             }
+            
+            if(STEPS_COUNT++ >= 4) break;
         }
     });
     

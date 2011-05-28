@@ -8,8 +8,7 @@ var CHAR_BIT = 8;
  */
 Mad.Bit = function (data, offset) {
     if(typeof(data) != "string") {
-        console.log("Invalid data type: " + typeof(data));
-        return;
+        throw new Exception("Invalid data type: " + typeof(data));
     }
     
     this.data = data;

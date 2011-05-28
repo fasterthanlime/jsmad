@@ -53,7 +53,7 @@ Mad.Stream = function (data) {
     this.anc_ptr = /* MadBit */ null;		/* ancillary bits pointer */
     this.anc_bitlen = 0;		            /* number of ancillary bits */
 
-    this.main_data = new ArrayBuffer(Mad.BUFFER_MDLEN); /* Layer III main_data() */
+    this.main_data = /* string */ null; /* Layer III main_data() */
     this.md_len = 0; /* bytes in main_data */
 
     var options = 0;				/* decoding options (see below) */
