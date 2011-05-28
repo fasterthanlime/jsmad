@@ -15,12 +15,14 @@ function readFile() {
 
         // Create a device.
         var dev = audioLib.AudioDevice(function(sampleBuffer){
-            // Fill the buffer here.
+            // Fill the buffer here
             console.log("sample buffer type = " + typeof(sampleBuffer) + ", length = " + sampleBuffer.length);
             
             var i = 0;
             while(i < sampleBuffer.length) {
-              sampleBuffer[i++] = stream.readU8();
+                var intValue = stream.readSShort();
+                
+                sampleBuffer[i++] = intValue / 32768.0;
             }
         }, channelCount, preBufferSize / 2, sampleRate);
 
