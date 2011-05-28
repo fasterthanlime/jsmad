@@ -182,12 +182,12 @@ Mad.layer_III = function (stream, frame) {
 
     //console.log("next_frame = " + stream.next_frame + ", nextbyte = " + stream.ptr.nextbyte() + ", frame_space = " + frame_space);
 
-    console.log("before, next_md_begin = " + next_md_begin);
+    //console.log("before, next_md_begin = " + next_md_begin);
 
     if (next_md_begin > si.main_data_begin + frame_space)
         next_md_begin = 0;
 
-    console.log("so far, md_len = " + md_len + ", si.main_data_begin = " + si.main_data_begin + ", frame_space = " + frame_space + ", next_md_begin = " + next_md_begin);
+    //console.log("so far, md_len = " + md_len + ", si.main_data_begin = " + si.main_data_begin + ", frame_space = " + frame_space + ", next_md_begin = " + next_md_begin);
     
     md_len = si.main_data_begin + frame_space - next_md_begin;
 
@@ -199,7 +199,7 @@ Mad.layer_III = function (stream, frame) {
 
         frame_used = md_len;
     } else {
-        console.log("si.main_data_begin = " + si.main_data_begin + ", stream.md_len = " + stream.md_len);
+        //console.log("si.main_data_begin = " + si.main_data_begin + ", stream.md_len = " + stream.md_len);
         if (si.main_data_begin > stream.md_len) {
             if (result == 0) {
                 stream.error = Mad.Error.BADDATAPTR;
@@ -232,20 +232,20 @@ Mad.layer_III = function (stream, frame) {
 
     frame_free = frame_space - frame_used;
 
-//    /* decode main_data */
-//    if (result == 0) {
-//        error = Mad.III_decode(&ptr, frame, &si, nch);
-//        
-//        if (error) {
-//          stream.error = error;
-//          result = -1;
-//        }
-//
-//        /* designate ancillary bits */
-//        stream.anc_ptr    = ptr;
-//        stream.anc_bitlen = md_len * CHAR_BIT - data_bitlen;
-//    }
-//  
+    /* decode main_data */
+    if (result == 0) {
+        //error = Mad.III_decode(&ptr, frame, &si, nch);
+        
+        if (error) {
+          stream.error = error;
+          result = -1;
+        }
+        
+        /* designate ancillary bits */
+        stream.anc_ptr    = ptr;
+        stream.anc_bitlen = md_len * CHAR_BIT - data_bitlen;
+    }
+  
     // DEBUG
     console.log(
       "main_data_begin:" + si.main_data_begin +
