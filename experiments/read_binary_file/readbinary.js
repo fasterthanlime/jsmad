@@ -13,7 +13,6 @@ function MadStream(data) {
 }
 
 MadStream.prototype.readU8 = function() {
-    console.log("Reading byte #" + this.buffer);
     var c = this.data.charCodeAt(this.buffer);
     this.buffer++;
     return c;
@@ -34,20 +33,15 @@ function ID3_skipHeader(stream) {
     }
     
     // skip flags
-    stream.readChars(2);
+    var flags = stream.readChars(2);
     
     // read header length
-    var csize1 = stream.readU8() << 21;
-    var csize2 = stream.readU8() << 14;
-    var csize3 = stream.readU8() << 7;
-    var csize4 = stream.readU8();
-    
-    var size = csize1 | csize2 | csize3 | csize4;
-    console.log("csize1 = " + csize1);
-    console.log("csize2 = " + csize2);
-    console.log("csize3 = " + csize3);
-    console.log("csize4 = " + csize4);
+    var size = stream.readU8() << 21 | stream.readU8() << 14 | stream.readU8() << 7 | stream.readU8();
     console.log("header length = " + size);
+    
+    // skip over the header
+    var header = stream.readChars(size);
+    console.log("header = " + header);
 }
 
 function readFile() {
