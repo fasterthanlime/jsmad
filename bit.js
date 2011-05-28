@@ -6,7 +6,7 @@ var CHAR_BIT = 8;
  * NAME:	bit.init()
  * DESCRIPTION:	initialize bit pointer struct
  */
-function MadBit(data, offset) {
+Mad.Bit = function (data, offset) {
     if(typeof(data) != "string") {
         console.log("Invalid data type: " + typeof(data));
         return;
@@ -22,7 +22,7 @@ function MadBit(data, offset) {
  * NAME:	bit.length()
  * DESCRIPTION:	return number of bits between start and end points
  */
-MadBit.prototype.length = function(end) {
+Mad.Bit.prototype.length = function(end) {
     return this.left + CHAR_BIT * (end.offset - (this.offset + 1)) + (CHAR_BIT - end.left);
 }
 
@@ -30,7 +30,7 @@ MadBit.prototype.length = function(end) {
  * NAME:	bit.nextbyte()
  * DESCRIPTION:	return pointer to next unprocessed byte
  */
-MadBit.prototype.nextbyte = function() {
+Mad.Bit.prototype.nextbyte = function() {
     return this.left == CHAR_BIT ? this.offset : this.offset + 1;
 }
 
@@ -38,7 +38,7 @@ MadBit.prototype.nextbyte = function() {
  * NAME:	bit.skip()
  * DESCRIPTION:	advance bit pointer
  */
-MadBit.prototype.skip = function(len) {
+Mad.Bit.prototype.skip = function(len) {
   this.offset += len / CHAR_BIT;
   this.left -= len % CHAR_BIT;
 
@@ -55,7 +55,7 @@ MadBit.prototype.skip = function(len) {
  * NAME:	bit.read()
  * DESCRIPTION:	read an arbitrary number of bits and return their UIMSBF value
  */
-MadBit.prototype.read = function(len) {
+Mad.Bit.prototype.read = function(len) {
   var value;
 
   if (this.left == CHAR_BIT)
@@ -84,7 +84,7 @@ MadBit.prototype.read = function(len) {
   }
 
   if (len > 0) {
-    this.cache = *this.offset;
+    this.cache = this.data[this.offset];
 
     value = (value << len) | (this.cache >> (CHAR_BIT - len));
     this.left -= len;

@@ -91,6 +91,11 @@ Mad.Stream.prototype.readSShort = function(bBigEndian) {
         return iUShort;
 };
 
+Mad.Stream.prototype.getU8 = function(index) {
+    return this.data.charCodeAt(index);
+};
+
+
 Mad.Stream.prototype.readU8 = function() {
     var c = this.data.charCodeAt(this.buffer);
     this.buffer++;
@@ -102,3 +107,24 @@ Mad.Stream.prototype.readChars = function(length) {
     this.buffer += length;
     return bytes;
 };
+
+/*
+ * NAME:	stream->sync()
+ * DESCRIPTION:	locate the next stream sync word
+ */
+Mad.Stream.prototype.doSync = function() {
+    var ptr = this.ptr.nextbyte();
+    var end = this.bufend;
+
+    while (ptr < end - 1 &&
+            !(this.getU8(ptr) == 0xff && (this.getU8(ptr + 1) & 0xe0) == 0xe0))
+        ++ptr;
+
+    if (end - ptr < Mad.BUFFER_GUARD)
+        return -1;
+
+    this.ptr = new Mad.Bit(this.data, ptr);
+    return 0;
+}
+
+
