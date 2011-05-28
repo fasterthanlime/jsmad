@@ -1,10 +1,12 @@
 Mad.SubStream = function(stream, offset, length) {
-    this.parentStream = stream;
+    this.state = { 'offset': 0 };
+    
     this.state['start'] = offset;
-    this.state['length'] = length;
+    
+    this.parentStream = stream;
 }
 
-Mad.SubStream.prototype = new Mad.ByteStream();
+Mad.SubStream.prototype = new Mad.ByteStream;
 
 Mad.SubStream.prototype.absoluteAvailable = function(n) {
     return this.parentStream.absoluteAvailable(this.state['start'] + n);
@@ -27,7 +29,7 @@ Mad.SubStream.prototype.peek = function(n) {
 }
 
 Mad.SubStream.prototype.get = function(offset, length) {
-    return this.parentStream.get(this.state['start'] + this.state['offset'], n);
+    return this.parentStream.get(this.state['start'] + this.state['offset'], length);
 }
 
 Mad.SubStream.prototype.requestAbsolute = function(n, callback) {

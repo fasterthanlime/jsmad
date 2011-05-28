@@ -1,4 +1,6 @@
 Mad.AjaxStream = function(url) {
+    this.state = { 'offset': 0 };
+    
     var request = window.XMLHttpRequest ? new XMLHttpRequest() :  ActiveXObject("Microsoft.XMLHTTP");
     
     request.open('GET', url);
