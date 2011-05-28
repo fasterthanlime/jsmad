@@ -41,10 +41,6 @@ Mad.AjaxStream.prototype.updateBuffer = function() {
     }
 }
 
-Mad.AjaxStream.prototype.available = function(n) {
-    return this.absoluteAvailable(this.state['offset'] + n);
-}
-
 Mad.AjaxStream.prototype.absoluteAvailable = function(n, updated) {
     if (n > this.state['amountRead']) {
         if (updated) {
@@ -77,7 +73,7 @@ Mad.AjaxStream.prototype.peek = function(n) {
     if (this.available(n)) {
         var offset = this.state['offset'];
         
-        var result = this.state['buffer'].slice(offset, offset + n);
+        var result = this.get(offset, n);
         
         return result;
     } else {

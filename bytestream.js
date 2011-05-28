@@ -4,6 +4,10 @@ Mad.ByteStream = function(url) {
     }
 }
 
+Mad.ByteStream.prototype.available = function(n) {
+    return this.absoluteAvailable(this.state['offset'] + n);
+}
+
 Mad.ByteStream.prototype.getU8 = function(offset, bigEndian) {
     var bytes = this.get(offset, 1);
     
