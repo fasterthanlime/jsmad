@@ -16,7 +16,13 @@ function readFile() {
         // Create a device.
         var dev = audioLib.AudioDevice(function(sampleBuffer){
             // Fill the buffer here.
-        }, channelCount, preBufferSize, sampleRate);
+            console.log("sample buffer type = " + typeof(sampleBuffer) + ", length = " + sampleBuffer.length);
+            
+            var i = 0;
+            while(i < sampleBuffer.length) {
+              sampleBuffer[i++] = stream.readU8();
+            }
+        }, channelCount, preBufferSize / 2, sampleRate);
 
         // Note that all the arguments are optional, so if you want to create a write-only device, you can leave the arguments blank.
         // Writing buffers:
