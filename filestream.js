@@ -44,10 +44,10 @@ Mad.FileStream.prototype.get = function(offset, length) {
     }
 }
 
-Mad.AjaxStream.prototype.requestAbsolute = function(n, callback) {
+Mad.FileStream.prototype.requestAbsolute = function(n, callback) {
     callback();
 }
 
-Mad.AjaxStream.prototype.request = function(n, callback) {
+Mad.FileStream.prototype.request = function(n, callback) {
     callback();
 }
