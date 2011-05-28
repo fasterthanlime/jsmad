@@ -17,6 +17,12 @@ var bitrate_table /* [5][15] */ = [
 
 var samplerate_table /* [3] */ = [ 44100, 48000, 32000 ];
 
+var decoder_table = [
+    function() { console.log("Layer I decoding is not implemented!"); },
+    function() { console.log("Layer II decoding is not implemented!"); },
+    Mad.layer_III,
+];
+
 Mad.Layer = {
     I: 1,
     II: 2,
@@ -55,11 +61,11 @@ Mad.Header = function () {
     //this.duration       = mad_timer_zero;         /* audio playing time of frame */
 };
 
-Mad.Header.nchannels = function () {
+Mad.Header.prototype.nchannels = function () {
     return this.mode == 0 ? 1 : 2;
 }
 
-Mad.Header.nbsamples = function() {
+Mad.Header.prototype.nbsamples = function() {
     return (this.layer == Mad.Layer.I ? 12 : 
         ((this.layer == Mad.Layer.III && (this.flags & Mad.Flag.LSF_EXT)) ? 18 : 16));
 }
@@ -91,8 +97,6 @@ Mad.Header.actually_decode = function(stream) {
 
     /* layer */
     header.layer = 4 - stream.ptr.read(2);
-    
-    console.log("When done reading the layer, we're at " + stream.ptr.offset);
 
     if (header.layer == 4) {
         stream.error = Mad.Error.BADLAYER;
@@ -101,20 +105,14 @@ Mad.Header.actually_decode = function(stream) {
 
     /* protection_bit */
     if (stream.ptr.read(1) == 0) {
-        console.log("Protection!");
         header.flags    |= Mad.Flag.PROTECTION;
         // TODO: crc
         //header.crc_check = mad_bit_crc(stream.ptr, 16, 0xffff);
         stream.ptr.skip(16);
-    } else {
-        console.log("No protection.");
     }
 
     /* bitrate_index */
-    console.log("Before reading index, we're at " + stream.ptr.offset + ", left = " + stream.ptr.left);
     var index = stream.ptr.read(4);
-    console.log("index = " + index);
-
     if (index == 15) {
         stream.error = Mad.Error.BADBITRATE;
         return header;
@@ -245,69 +243,74 @@ Mad.Header.decode = function(stream) {
             ptr = stream.ptr.nextbyte();
         }
 
-    /* begin processing */
-    stream.this_frame = ptr;
-    stream.next_frame = ptr + 1;  /* possibly bogus sync word */
+        /* begin processing */
+        stream.this_frame = ptr;
+        stream.next_frame = ptr + 1;  /* possibly bogus sync word */
 
-    stream.ptr = new Mad.Bit(stream.data, stream.this_frame);
-    
-    header = Mad.Header.actually_decode(stream);
-    if(header == null) return null; // well Duh^2
-
-    /* calculate frame duration */
-    //mad_timer_set(&header.duration, 0, 32 * MAD_NSBSAMPLES(header), header.samplerate);
-
-    /* calculate free bit rate */
-//    if (header.bitrate == 0) {
-//        if ((stream.freerate == 0 || !stream.sync ||
-//                (header.layer == Mad.Layer.III && stream.freerate > 640000)) &&
-//                free_bitrate(stream, header) == -1)
-//            return null;
-//
-//        header.bitrate = stream.freerate;
-//        header.flags  |= Mad.Flag.FREEFORMAT;
-//    }
-//
-
-    /* calculate beginning of next frame */
-    pad_slot = (header.flags & Mad.Flag.PADDING) ? 1 : 0;
-
-    if (header.layer == Mad.Layer.I)
-        N = ((12 * header.bitrate / header.samplerate) + pad_slot) * 4;
-    else {
-        var slots_per_frame = (header.layer == Mad.Layer.III &&
-               (header.flags & Mad.Flag.LSF_EXT)) ? 72 : 144;
-        console.log("slots_per_frame = " + slots_per_frame + ", bitrate = " + header.bitrate + ", samplerate = " + header.samplerate);
-
-        N = (slots_per_frame * header.bitrate / header.samplerate) + pad_slot;
-    }
+        stream.ptr = new Mad.Bit(stream.data, stream.this_frame);
         
+        header = Mad.Header.actually_decode(stream);
+        if(header == null) return null; // well Duh^2
+        
+        console.log("============= Decoding layer " + header.layer + " audio in mode " +
+            header.mode + " with " + header.bitrate +
+            " bps and a samplerate of " + header.samplerate);
 
-    /* verify there is enough data left in buffer to decode this frame */
-    if (N + Mad.BUFFER_GUARD > end - stream.this_frame) {
-        stream.next_frame = stream.this_frame;
+        /* calculate frame duration */
+        //mad_timer_set(&header.duration, 0, 32 * MAD_NSBSAMPLES(header), header.samplerate);
 
-        stream.error = Mad.Error.BUFLEN;
-        return null;
-    }
+        /* calculate free bit rate */
+        if (header.bitrate == 0) {
+            console.log("Uh oh. VBR. We're fucked.");
+            return null;
+            
+    //        if ((stream.freerate == 0 || !stream.sync ||
+    //                        (header.layer == Mad.Layer.III && stream.freerate > 640000)) &&
+    //                free_bitrate(stream, header) == -1)
+    //            return null;
+    //
+    //        header.bitrate = stream.freerate;
+    //        header.flags  |= Mad.Flag.FREEFORMAT;
+        }
 
-    stream.next_frame = stream.this_frame + N;
+        /* calculate beginning of next frame */
+        pad_slot = (header.flags & Mad.Flag.PADDING) ? 1 : 0;
 
-    console.log("N = " + N + ", pad_slot = " + pad_slot + ", next_frame = " + stream.next_frame);
+        if (header.layer == Mad.Layer.I)
+            N = (((12 * header.bitrate / header.samplerate) << 0) + pad_slot) * 4;
+        else {
+            var slots_per_frame = (header.layer == Mad.Layer.III &&
+                   (header.flags & Mad.Flag.LSF_EXT)) ? 72 : 144;
+            //console.log("slots_per_frame = " + slots_per_frame + ", bitrate = " + header.bitrate + ", samplerate = " + header.samplerate);
 
-//    if (!stream.sync) {
-//        /* check that a valid frame header follows this frame */
-//        ptr = stream.next_frame;
-//        if (!(ptr[0] == 0xff && (ptr[1] & 0xe0) == 0xe0)) {
-//            ptr = stream.next_frame = stream.this_frame + 1;
-//      
-//            // emulating 'goto sync'
-//            syncing = true;
-//            continue;
-//        }
-//        stream.sync = 1;
-//    }
-//
+            N = ((slots_per_frame * header.bitrate / header.samplerate) << 0) + pad_slot;
+        }
+            
+
+        /* verify there is enough data left in buffer to decode this frame */
+        if (N + Mad.BUFFER_GUARD > end - stream.this_frame) {
+            stream.next_frame = stream.this_frame;
+
+            stream.error = Mad.Error.BUFLEN;
+            return null;
+        }
+
+        stream.next_frame = stream.this_frame + N;
+
+        console.log("N = " + N + ", pad_slot = " + pad_slot + ", next_frame = " + stream.next_frame);
+
+        if (!stream.sync) {
+            /* check that a valid frame header follows this frame */
+            ptr = stream.next_frame;
+            if (!(stream.getU8(ptr) == 0xff && (stream.getU8(ptr + 1) & 0xe0) == 0xe0)) {
+                ptr = stream.next_frame = stream.this_frame + 1;
+          
+                // emulating 'goto sync'
+                syncing = true;
+                continue;
+            }
+            stream.sync = 1;
+        }
     } // end of goto emulation (label 'sync')
     
     header.flags |= Mad.Flag.INCOMPLETE;
@@ -344,14 +347,13 @@ Mad.Frame.decode = function(stream) {
     frame.header.flags &= ~Mad.Flag.INCOMPLETE;
 
     // TODO: actually decode the data :)
-    /*
     if (decoder_table[frame.header.layer - 1](stream, frame) == -1) {
-    if (!MAD_RECOVERABLE(stream.error))
+    
+    if (!Mad.recoverable(stream.error))
         stream.next_frame = stream.this_frame;
-        goto fail;
+        return null;
     }
-    */
-
+    
     return frame;
 }
 
