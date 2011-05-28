@@ -97,8 +97,6 @@ Mad.Header.actually_decode = function(stream) {
 
     /* layer */
     header.layer = 4 - stream.ptr.read(2);
-    
-    console.log("When done reading the layer, we're at " + stream.ptr.offset);
 
     if (header.layer == 4) {
         stream.error = Mad.Error.BADLAYER;
@@ -107,20 +105,14 @@ Mad.Header.actually_decode = function(stream) {
 
     /* protection_bit */
     if (stream.ptr.read(1) == 0) {
-        console.log("Protection!");
         header.flags    |= Mad.Flag.PROTECTION;
         // TODO: crc
         //header.crc_check = mad_bit_crc(stream.ptr, 16, 0xffff);
         stream.ptr.skip(16);
-    } else {
-        console.log("No protection.");
     }
 
     /* bitrate_index */
-    console.log("Before reading index, we're at " + stream.ptr.offset + ", left = " + stream.ptr.left);
     var index = stream.ptr.read(4);
-    console.log("index = " + index);
-
     if (index == 15) {
         stream.error = Mad.Error.BADBITRATE;
         return header;
@@ -289,7 +281,7 @@ Mad.Header.decode = function(stream) {
         else {
             var slots_per_frame = (header.layer == Mad.Layer.III &&
                    (header.flags & Mad.Flag.LSF_EXT)) ? 72 : 144;
-            console.log("slots_per_frame = " + slots_per_frame + ", bitrate = " + header.bitrate + ", samplerate = " + header.samplerate);
+            //console.log("slots_per_frame = " + slots_per_frame + ", bitrate = " + header.bitrate + ", samplerate = " + header.samplerate);
 
             N = (slots_per_frame * header.bitrate / header.samplerate) >> 0 + pad_slot;
         }
