@@ -21,10 +21,6 @@ function readFile() {
         if(frame == null) {
             console.log("Error! code = " + stream.error);
         }
-        
-        console.log("Decoding layer " + frame.header.layer + " audio in mode " +
-            frame.header.mode + " with " + frame.header.bitrate +
-            " bps and a samplerate of " + frame.header.samplerate);
     });
     
     return false;
