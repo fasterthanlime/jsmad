@@ -1,4 +1,74 @@
 
+/*
+ * MPEG-1 scalefactor band widths
+ * derived from Table B.8 of ISO/IEC 11172-3
+ */
+var sfb_48000_long = [
+   4,  4,  4,  4,  4,  4,  6,  6,  6,   8,  10,
+  12, 16, 18, 22, 28, 34, 40, 46, 54,  54, 192
+];
+
+var sfb_44100_long = [
+   4,  4,  4,  4,  4,  4,  6,  6,  8,   8,  10,
+  12, 16, 20, 24, 28, 34, 42, 50, 54,  76, 158
+];
+
+var sfb_32000_long = [
+   4,  4,  4,  4,  4,  4,  6,  6,  8,  10,  12,
+  16, 20, 24, 30, 38, 46, 56, 68, 84, 102,  26
+];
+
+var sfb_48000_short = [
+   4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  6,
+   6,  6,  6,  6,  6, 10, 10, 10, 12, 12, 12, 14, 14,
+  14, 16, 16, 16, 20, 20, 20, 26, 26, 26, 66, 66, 66
+];
+
+var sfb_44100_short = [
+   4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  6,
+   6,  6,  8,  8,  8, 10, 10, 10, 12, 12, 12, 14, 14,
+  14, 18, 18, 18, 22, 22, 22, 30, 30, 30, 56, 56, 56
+];
+
+var sfb_32000_short = [
+   4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  6,
+   6,  6,  8,  8,  8, 12, 12, 12, 16, 16, 16, 20, 20,
+  20, 26, 26, 26, 34, 34, 34, 42, 42, 42, 12, 12, 12
+];
+
+var sfb_48000_mixed = [
+  /* long */   4,  4,  4,  4,  4,  4,  6,  6,
+  /* short */  4,  4,  4,  6,  6,  6,  6,  6,  6, 10,
+              10, 10, 12, 12, 12, 14, 14, 14, 16, 16,
+              16, 20, 20, 20, 26, 26, 26, 66, 66, 66
+];
+
+var sfb_44100_mixed = [
+  /* long */   4,  4,  4,  4,  4,  4,  6,  6,
+  /* short */  4,  4,  4,  6,  6,  6,  8,  8,  8, 10,
+              10, 10, 12, 12, 12, 14, 14, 14, 18, 18,
+              18, 22, 22, 22, 30, 30, 30, 56, 56, 56
+];
+
+var sfb_32000_mixed = [
+  /* long */   4,  4,  4,  4,  4,  4,  6,  6,
+  /* short */  4,  4,  4,  6,  6,  6,  8,  8,  8, 12,
+              12, 12, 16, 16, 16, 20, 20, 20, 26, 26,
+              26, 34, 34, 34, 42, 42, 42, 12, 12, 12
+];
+
+var sfbwidth_table = [
+  { l: sfb_48000_long, s: sfb_48000_short, m: sfb_48000_mixed },
+  { l: sfb_44100_long, s: sfb_44100_short, m: sfb_44100_mixed },
+  { l: sfb_32000_long, s: sfb_32000_short, m: sfb_32000_mixed },
+  { l: sfb_24000_long, s: sfb_24000_short, m: sfb_24000_mixed },
+  { l: sfb_22050_long, s: sfb_22050_short, m: sfb_22050_mixed },
+  { l: sfb_16000_long, s: sfb_16000_short, m: sfb_16000_mixed },
+  { l: sfb_12000_long, s: sfb_12000_short, m: sfb_12000_mixed },
+  { l: sfb_11025_long, s: sfb_11025_short, m: sfb_11025_mixed },
+  { l:  sfb_8000_long, s:  sfb_8000_short, m:  sfb_8000_mixed }
+];
+
 Mad.SideInfo = function() {
     this.gr = []; // array of Mad.Granule
     this.scfsi = []; // array of ints?
@@ -110,6 +180,166 @@ Mad.III_sideinfo = function (ptr, nch, lsf) {
     };
 }
 
+
+/*
+ * NAME:	III_decode()
+ * DESCRIPTION:	decode frame main_data
+ * 
+ * result struct:
+ * {
+ *    result,
+ *    ptr,
+ *    si,
+ * }
+ */
+Mad.III_decode = function (ptr, frame, si, nch) {
+    var header = frame.header;
+    var sfreqi;
+  
+    {
+        var sfreq = header.samplerate;
+
+        if (header.flags & Mad.Flag.MPEG_2_5_EXT)
+          sfreq *= 2;
+
+        /* 48000 => 0, 44100 => 1, 32000 => 2,
+           24000 => 3, 22050 => 4, 16000 => 5 */
+        sfreqi = ((sfreq >>  7) & 0x000f) +
+                 ((sfreq >> 15) & 0x0001) - 8;
+
+        if (header.flags & Mad.Flag.MPEG_2_5_EXT)
+          sfreqi += 3;
+    }
+  
+    /* scalefactors, Huffman decoding, requantization */
+    var ngr = (header.flags & Mad.Flag.LSF_EXT) ? 1 : 2;
+  
+    for (var gr = 0; gr < ngr; ++gr) {
+        var granule = si.gr[gr];
+        var sfbwidth = [];
+        /* unsigned char const *sfbwidth[2]; */
+        var xr = [ new Float64Array(new ArrayBuffer(576)), new Float64Array(new ArrayBuffer(576)) ];
+        
+        var error;
+
+        for (var ch = 0; ch < nch; ++ch) {
+            var channel = granule.ch[ch];
+            var part2_length;
+
+            sfbwidth[ch] = sfbwidth_table[sfreqi].l;
+
+            if (channel.block_type == 2) {
+                sfbwidth[ch] = (channel.flags & mixed_block_flag) ?
+                    sfbwidth_table[sfreqi].m : sfbwidth_table[sfreqi].s;
+            }
+
+            if (header.flags & Mad.Flag.LSF_EXT) {
+                part2_length = Mad.III_scalefactors_lsf(ptr, channel,
+					    ch == 0 ? 0 : si.gr[1].ch[1], header.mode_extension);
+            } else {
+                part2_length = Mad.III_scalefactors(ptr, channel, si.gr[0].ch[ch],
+					gr == 0 ? 0 : si.scfsi[ch]);
+            }
+
+            error = Mad.III_huffdecode(ptr, xr[ch], channel, sfbwidth[ch], part2_length);
+            if (error)
+                return error;
+        }
+
+        /* joint stereo processing */
+        if (header.mode == MAD_MODE_JOINT_STEREO && header.mode_extension) {
+            error = Mad.III_stereo(xr, granule, header, sfbwidth[0]);
+            
+            if (error)
+                return error;
+        }
+
+        /* reordering, alias reduction, IMDCT, overlap-add, frequency inversion */
+        for (var ch = 0; ch < nch; ++ch) {
+            var channel = granule.ch[ch];
+            var sample = frame.sbsample[ch][18 * gr];
+        
+            var sb, l = 0, i, sblimit;
+            var output = new Float64Array(new ArrayBuffer(36));
+
+            if (channel.block_type == 2) {
+                Mad.III_reorder(xr[ch], channel, sfbwidth[ch]);
+
+                /*
+                 * According to ISO/IEC 11172-3, "Alias reduction is not applied for
+                 * granules with block_type == 2 (short block)." However, other
+                 * sources suggest alias reduction should indeed be performed on the
+                 * lower two subbands of mixed blocks. Most other implementations do
+                 * this, so by default we will too.
+                 */
+                if (channel.flags & mixed_block_flag)
+                    Mad.III_aliasreduce(xr[ch], 36);
+            } else {
+                Mad.III_aliasreduce(xr[ch], 576);
+            }
+
+            /* subbands 0-1 */
+            if (channel.block_type != 2 || (channel.flags & mixed_block_flag)) {
+                var block_type = channel.block_type;
+                if (channel.flags & mixed_block_flag)
+                    block_type = 0;
+
+                /* long blocks */
+                for (var sb = 0; sb < 2; ++sb, l += 18) {
+                    Mad.III_imdct_l(xr[ch][l], output, block_type);
+                    Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
+                }
+            } else {
+                /* short blocks */
+                for (var sb = 0; sb < 2; ++sb, l += 18) {
+                    Mad.III_imdct_s(xr[ch][l], output);
+                    Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
+                }
+            }
+
+            Mad.III_freqinver(sample, 1);
+
+            /* (nonzero) subbands 2-31 */
+            i = 576;
+            while (i > 36 && xr[ch][i - 1] == 0)
+                --i;
+
+            sblimit = 32 - (((576 - i) / 18) << 0);
+
+            if (channel.block_type != 2) {
+                /* long blocks */
+                for (var sb = 2; sb < sblimit; ++sb, l += 18) {
+                    Mad.III_imdct_l(xr[ch][l], output, channel.block_type);
+                    Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
+
+                    if (sb & 1)
+                        sample = Mad.III_freqinver(sample, sb);
+                }
+            } else {
+                /* short blocks */
+                for (var sb = 2; sb < sblimit; ++sb, l += 18) {
+                    Mad.III_imdct_s(xr[ch][l], output);
+                    Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
+
+                    if (sb & 1)
+                        Mad.III_freqinver(sample, sb);
+                }
+            }
+
+            /* remaining (zero) subbands */
+            for (var sb = sblimit; sb < 32; ++sb) {
+                Mad.III_overlap_z(frame.overlap[ch][sb], sample, sb);
+
+                if (sb & 1)
+                    Mad.III_freqinver(sample, sb);
+            }
+        }
+    }
+
+    return Mad.Error.NONE;
+}
+
+
 /*
  * NAME:	layer.III()
  * DESCRIPTION:	decode a single Layer III frame
@@ -182,12 +412,12 @@ Mad.layer_III = function (stream, frame) {
 
     //console.log("next_frame = " + stream.next_frame + ", nextbyte = " + stream.ptr.nextbyte() + ", frame_space = " + frame_space);
 
-    console.log("before, next_md_begin = " + next_md_begin);
+    //console.log("before, next_md_begin = " + next_md_begin);
 
     if (next_md_begin > si.main_data_begin + frame_space)
         next_md_begin = 0;
 
-    console.log("so far, md_len = " + md_len + ", si.main_data_begin = " + si.main_data_begin + ", frame_space = " + frame_space + ", next_md_begin = " + next_md_begin);
+    //console.log("so far, md_len = " + md_len + ", si.main_data_begin = " + si.main_data_begin + ", frame_space = " + frame_space + ", next_md_begin = " + next_md_begin);
     
     md_len = si.main_data_begin + frame_space - next_md_begin;
 
@@ -199,7 +429,7 @@ Mad.layer_III = function (stream, frame) {
 
         frame_used = md_len;
     } else {
-        console.log("si.main_data_begin = " + si.main_data_begin + ", stream.md_len = " + stream.md_len);
+        //console.log("si.main_data_begin = " + si.main_data_begin + ", stream.md_len = " + stream.md_len);
         if (si.main_data_begin > stream.md_len) {
             if (result == 0) {
                 stream.error = Mad.Error.BADDATAPTR;
@@ -232,20 +462,24 @@ Mad.layer_III = function (stream, frame) {
 
     frame_free = frame_space - frame_used;
 
-//    /* decode main_data */
-//    if (result == 0) {
-//        error = Mad.III_decode(&ptr, frame, &si, nch);
-//        
-//        if (error) {
-//          stream.error = error;
-//          result = -1;
-//        }
-//
-//        /* designate ancillary bits */
-//        stream.anc_ptr    = ptr;
-//        stream.anc_bitlen = md_len * CHAR_BIT - data_bitlen;
-//    }
-//  
+    /* decode main_data */
+    if (result == 0) {
+        var result = Mad.III_decode(ptr, frame, si, nch);
+        
+        ptr = result.ptr;
+        si = result.si;
+        error = result.error;
+        
+        if (error) {
+          stream.error = error;
+          result = -1;
+        }
+        
+        /* designate ancillary bits */
+        stream.anc_ptr    = ptr;
+        stream.anc_bitlen = md_len * CHAR_BIT - data_bitlen;
+    }
+  
     // DEBUG
     console.log(
       "main_data_begin:" + si.main_data_begin +
