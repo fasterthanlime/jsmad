@@ -6,9 +6,14 @@ function readFile() {
     if(!file) return;
     
     // Perform file ops
-    MadStream.fromFile(file, function(stream) {
+    Mad.Stream.fromFile(file, function(stream) {
         console.log("Reading a " + Math.round(stream.bufend / 1024) + "KB file");
         ID3_skipHeader(stream);
+        var frame = Mad.Frame.decode(stream);
+        
+        console.log("Decoding layer " + frame.header.layer + " audio in mode " +
+            frame.header.mode + " with " + frame.header.bitrate +
+            " bps and a samplerate of " + frame.header.samplerate);
     });
     
     return false;

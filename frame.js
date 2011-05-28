@@ -6,17 +6,17 @@ Mad.Layer = {
 };
 
 Mad.Mode = {
-    SINGLE_CHANNEL        = 0,
-    MAD_MODE_DUAL_CHANNEL = 1,		/* dual channel */
-    MAD_MODE_JOINT_STEREO = 2,		/* joint (MS/intensity) stereo */
-    MAD_MODE_STEREO 	  = 3		/* normal LR stereo */
+    SINGLE_CHANNEL        : 0,
+    MAD_MODE_DUAL_CHANNEL : 1,		/* dual channel */
+    MAD_MODE_JOINT_STEREO : 2,		/* joint (MS/intensity) stereo */
+    MAD_MODE_STEREO 	  : 3		/* normal LR stereo */
 };
 
 Mad.Emphasis = {
-    NONE	   = 0,		/* no emphasis */
-    _50_15_US  = 1,		/* 50/15 microseconds emphasis */
-    CCITT_J_17 = 3,		/* CCITT J.17 emphasis */
-    RESERVED   = 2		/* unknown emphasis */
+    NONE	   : 0,		/* no emphasis */
+    _50_15_US  : 1,		/* 50/15 microseconds emphasis */
+    CCITT_J_17 : 3,		/* CCITT J.17 emphasis */
+    RESERVED   : 2		/* unknown emphasis */
 };
 
 Mad.Header = function () {
@@ -41,9 +41,17 @@ Mad.Header.nchannels = function () {
     return this.mode == 0 ? 1 : 2;
 }
 
-Mad.Header.nbsamples = {
+Mad.Header.nbsamples = function() {
     return (this.layer == Mad.Layer.I ? 12 : 
         ((this.layer == Mad.Layer.III && (this.flags & Mad.Flag.LSF_EXT)) ? 18 : 16));
+}
+
+Mad.Header.decode = function() {
+    var header = new Mad.Header();
+    
+    // TODO: read header
+    
+    return header;
 }
 
 Mad.Frame = function () {
@@ -54,6 +62,38 @@ Mad.Frame = function () {
     this.sbsample = new ArrayBuffer(2 * 36 * 32);	/* synthesis subband filter samples */
     this.overlap  = new ArrayBuffer(2 * 32 * 18);	/* Layer III block overlap data */
 };
+
+Mad.Frame.decode = function(stream) {
+    var frame = new Mad.Frame();
+
+    frame.options = stream.options;
+    
+    /* header() */
+    /* error_check() */
+
+    if (!(frame.header.flags & Mad.Flag.INCOMPLETE)) {
+        frame.header = Mad.Header.decode(stream);
+        if(frame.header == null) {
+            // something went wrong
+            return null;
+        }
+    }
+
+    /* audio_data() */
+
+    frame.header.flags &= ~Mad.Flag.INCOMPLETE;
+
+    // TODO: actually decode the data :)
+    /*
+    if (decoder_table[frame->header.layer - 1](stream, frame) == -1) {
+    if (!MAD_RECOVERABLE(stream->error))
+        stream->next_frame = stream->this_frame;
+        goto fail;
+    }
+    */
+
+    return frame;
+}
 
 Mad.sbsampleIndex = function (i, j, k) {
     return i * 36 * 32 + j * 32 + k;
