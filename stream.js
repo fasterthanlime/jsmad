@@ -1,13 +1,65 @@
 
+MadError = {
+  NONE	   : 0x0000,	/* no error */
+
+  BUFLEN	   : 0x0001,	/* input buffer too small (or EOF) */
+  BUFPTR	   : 0x0002,	/* invalid (null) buffer pointer */
+
+  NOMEM	   : 0x0031,	/* not enough memory */
+
+  LOSTSYNC	   : 0x0101,	/* lost synchronization */
+  BADLAYER	   : 0x0102,	/* reserved header layer value */
+  BADBITRATE	   : 0x0103,	/* forbidden bitrate value */
+  BADSAMPLERATE  : 0x0104,	/* reserved sample frequency value */
+  BADEMPHASIS	   : 0x0105,	/* reserved emphasis value */
+
+  BADCRC	       : 0x0201,	/* CRC check failed */
+  BADBITALLOC	   : 0x0211,	/* forbidden bit allocation value */
+  BADSCALEFACTOR : 0x0221,	/* bad scalefactor index */
+  BADMODE        : 0x0222,	/* bad bitrate/mode combination */
+  BADFRAMELEN	   : 0x0231,	/* bad frame length */
+  BADBIGVALUES   : 0x0232,	/* bad big_values count */
+  BADBLOCKTYPE   : 0x0233,	/* reserved block_type */
+  BADSCFSI	   : 0x0234,	/* bad scalefactor selection info */
+  BADDATAPTR	   : 0x0235,	/* bad main_data_begin pointer */
+  BADPART3LEN	   : 0x0236,	/* bad audio data length */
+  BADHUFFTABLE   : 0x0237,	/* bad Huffman table select */
+  BADHUFFDATA	   : 0x0238,	/* Huffman data overrun */
+  BADSTEREO	   : 0x0239	/* incompatible block_type for JS */
+};
+
+var MAD_BUFFER_GUARD = 8
+var MAD_BUFFER_MDLEN = (511 + 2048 + MAD_BUFFER_GUARD)
+
 function MadStream(data) {
     if(typeof(data) != "string") {
         console.log("Invalid data type: " + typeof(data));
         return;
     }
   
-    this.data = data;
-    this.buffer = 0;
-    this.bufend = data.length;
+    this.data = data; /* actual buffer (js doesn't have pointers!) */
+    this.buffer = 0; /* input bitstream buffer */
+    this.bufend = data.length; /* input bitstream buffer */
+    this.skiplen = 0; /* bytes to skip before next frame */
+
+    this.sync = 0;			/* stream sync found */
+    this.freerate = 0;		/* free bitrate (fixed) */
+
+    this.this_frame = 0;	/* start of current frame */
+    this.next_frame = 0;	/* start of next frame */
+    
+    this.ptr = /* MadBit */ null; /* current processing bit pointer */
+    
+    this.anc_ptr = /* MadBit */ null;		/* ancillary bits pointer */
+    this.anc_bitlen = 0;		            /* number of ancillary bits */
+
+    this.main_data = null; /*  */
+
+    //unsigned char (*main_data)[MAD_BUFFER_MDLEN]; /* Layer III main_data() */
+    //unsigned int md_len;			/* bytes in main_data */
+
+    var options = 0;				/* decoding options (see below) */
+    var error = MadError.NONE;			/* error code (see above) */
 }
 
 MadStream.fromFile = function(file, callback) {
