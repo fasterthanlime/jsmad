@@ -1,6 +1,4 @@
 
-console.log("readbinary.js loaded");
-
 function readFile() {
     // uploadData is a form element
     // fileChooser is input element of type 'file'
