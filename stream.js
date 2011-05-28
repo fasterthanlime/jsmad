@@ -48,7 +48,7 @@ Mad.Stream = function (data) {
     this.this_frame = 0;	/* start of current frame */
     this.next_frame = 0;	/* start of next frame */
     
-    this.ptr = /* MadBit */ null; /* current processing bit pointer */
+    this.ptr = new Mad.Bit(this.data, this.buffer); /* current processing bit pointer */
     
     this.anc_ptr = /* MadBit */ null;		/* ancillary bits pointer */
     this.anc_bitlen = 0;		            /* number of ancillary bits */

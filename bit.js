@@ -59,7 +59,7 @@ Mad.Bit.prototype.read = function(len) {
     var value = 0;
 
     if (this.left == CHAR_BIT)
-        this.cache = this[this.offset];
+        this.cache = this.data.charCodeAt(this.offset);
 
     if (len < this.left) {
         value = (this.cache & ((1 << this.left) - 1)) >> (this.left - len);

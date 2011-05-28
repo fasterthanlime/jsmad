@@ -21,4 +21,8 @@ function ID3_skipHeader(stream) {
     // skip over the header
     var header = stream.readChars(size);
     console.log("header = " + header);
+    
+    stream.ptr.offset = stream.buffer;
+    //stream.doSync();
+    //stream.next_frame = stream.ptr.offset;
 }

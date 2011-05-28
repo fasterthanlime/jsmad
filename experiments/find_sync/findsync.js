@@ -9,6 +9,13 @@ function readFile() {
     Mad.Stream.fromFile(file, function(stream) {
         console.log("Reading a " + Math.round(stream.bufend / 1024) + "KB file");
         ID3_skipHeader(stream);
+        
+        //stream.ptr.skip(0x413 * 8); // skip first sync mark
+        //stream.doSync(); // and re-sync
+        
+        //console.log("Found second frame at " + stream.ptr.offset);
+        //stream.next_frame = stream.ptr.offset;
+        
         var frame = Mad.Frame.decode(stream);
         
         if(frame == null) {
