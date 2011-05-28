@@ -1,4 +1,22 @@
 
+var bitrate_table /* [5][15] */ = [
+  /* MPEG-1 */
+  [ 0,  32000,  64000,  96000, 128000, 160000, 192000, 224000,  /* Layer I   */
+       256000, 288000, 320000, 352000, 384000, 416000, 448000 ],
+  [ 0,  32000,  48000,  56000,  64000,  80000,  96000, 112000,  /* Layer II  */
+       128000, 160000, 192000, 224000, 256000, 320000, 384000 ],
+  [ 0,  32000,  40000,  48000,  56000,  64000,  80000,  96000,  /* Layer III */
+       112000, 128000, 160000, 192000, 224000, 256000, 320000 ],
+
+  /* MPEG-2 LSF */
+  [ 0,  32000,  48000,  56000,  64000,  80000,  96000, 112000,  /* Layer I   */
+       128000, 144000, 160000, 176000, 192000, 224000, 256000 ],
+  [ 0,   8000,  16000,  24000,  32000,  40000,  48000,  56000,  /* Layers    */
+        64000,  80000,  96000, 112000, 128000, 144000, 160000 ] /* II & III  */
+];
+
+var samplerate_table /* [3] */ = [ 44100, 48000, 32000 ];
+
 Mad.Layer = {
     I: 1,
     II: 2,
@@ -59,38 +77,47 @@ Mad.Header.actually_decode = function(stream) {
     stream.ptr.skip(11);
     
     /* MPEG 2.5 indicator (really part of syncword) */
-    if (stream.ptr.read(1) == 0)
+    if (stream.ptr.read(1) == 0) {
         header.flags |= Mad.Flag.MPEG_2_5_EXT;
+    }
 
     /* ID */
-    if (stream.ptr.read(1) == 0)
-    header.flags |= Mad.Flag.LSF_EXT;
-    else if (header.flags & Mad.Flag.MPEG_2_5_EXT) {
-    stream.error = Mad.Error.LOSTSYNC;
-    return -1;
+    if (stream.ptr.read(1) == 0) {
+        header.flags |= Mad.Flag.LSF_EXT;
+    } else if (header.flags & Mad.Flag.MPEG_2_5_EXT) {
+        stream.error = Mad.Error.LOSTSYNC;
+        return null;
     }
 
     /* layer */
     header.layer = 4 - stream.ptr.read(2);
+    
+    console.log("When done reading the layer, we're at " + stream.ptr.offset);
 
     if (header.layer == 4) {
-    stream.error = Mad.Error.BADLAYER;
-    return -1;
+        stream.error = Mad.Error.BADLAYER;
+        return header;
     }
 
     /* protection_bit */
     if (stream.ptr.read(1) == 0) {
+        console.log("Protection!");
         header.flags    |= Mad.Flag.PROTECTION;
         // TODO: crc
         //header.crc_check = mad_bit_crc(stream.ptr, 16, 0xffff);
+        stream.ptr.skip(16);
+    } else {
+        console.log("No protection.");
     }
 
     /* bitrate_index */
+    console.log("Before reading index, we're at " + stream.ptr.offset + ", left = " + stream.ptr.left);
     var index = stream.ptr.read(4);
+    console.log("index = " + index);
 
     if (index == 15) {
         stream.error = Mad.Error.BADBITRATE;
-        return -1;
+        return header;
     }
 
     if (header.flags & Mad.Flag.LSF_EXT) {
@@ -104,7 +131,7 @@ Mad.Header.actually_decode = function(stream) {
 
     if (index == 3) {
         stream.error = Mad.Error.BADSAMPLERATE;
-        return -1;
+        return header;
     }
 
     header.samplerate = samplerate_table[index];
@@ -233,7 +260,7 @@ Mad.Header.decode = function(stream) {
     /* calculate free bit rate */
 //    if (header.bitrate == 0) {
 //        if ((stream.freerate == 0 || !stream.sync ||
-//                (header.layer == MAD_LAYER_III && stream.freerate > 640000)) &&
+//                (header.layer == Mad.Layer.III && stream.freerate > 640000)) &&
 //                free_bitrate(stream, header) == -1)
 //            return null;
 //
@@ -241,30 +268,33 @@ Mad.Header.decode = function(stream) {
 //        header.flags  |= Mad.Flag.FREEFORMAT;
 //    }
 //
-//    /* calculate beginning of next frame */
-//    pad_slot = (header.flags & Mad.Flag.PADDING) ? 1 : 0;
-//
-//    if (header.layer == MAD_LAYER_I)
-//        N = ((12 * header.bitrate / header.samplerate) + pad_slot) * 4;
-//    else {
-//        unsigned int slots_per_frame;
-//
-//        slots_per_frame = (header.layer == MAD_LAYER_III &&
-//               (header.flags & Mad.Flag.LSF_EXT)) ? 72 : 144;
-//
-//        N = (slots_per_frame * header.bitrate / header.samplerate) + pad_slot;
-//    }
-//
-//    /* verify there is enough data left in buffer to decode this frame */
-//    if (N + Mad.BUFFER_GUARD > end - stream.this_frame) {
-//        stream.next_frame = stream.this_frame;
-//
-//        stream.error = Mad.Error.BUFLEN;
-//        return null;
-//    }
-//
-//    stream.next_frame = stream.this_frame + N;
-//
+
+    /* calculate beginning of next frame */
+    pad_slot = (header.flags & Mad.Flag.PADDING) ? 1 : 0;
+
+    if (header.layer == Mad.Layer.I)
+        N = ((12 * header.bitrate / header.samplerate) + pad_slot) * 4;
+    else {
+        var slots_per_frame = (header.layer == Mad.Layer.III &&
+               (header.flags & Mad.Flag.LSF_EXT)) ? 72 : 144;
+        console.log("slots_per_frame = " + slots_per_frame + ", bitrate = " + header.bitrate + ", samplerate = " + header.samplerate);
+
+        N = (slots_per_frame * header.bitrate / header.samplerate) + pad_slot;
+    }
+        
+
+    /* verify there is enough data left in buffer to decode this frame */
+    if (N + Mad.BUFFER_GUARD > end - stream.this_frame) {
+        stream.next_frame = stream.this_frame;
+
+        stream.error = Mad.Error.BUFLEN;
+        return null;
+    }
+
+    stream.next_frame = stream.this_frame + N;
+
+    console.log("N = " + N + ", pad_slot = " + pad_slot + ", next_frame = " + stream.next_frame);
+
 //    if (!stream.sync) {
 //        /* check that a valid frame header follows this frame */
 //        ptr = stream.next_frame;
