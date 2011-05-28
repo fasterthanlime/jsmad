@@ -322,8 +322,23 @@ Mad.Frame = function () {
     
     this.options = 0;                   /* decoding options (from stream) */
 
-    this.sbsample = new ArrayBuffer(2 * 36 * 32);   /* synthesis subband filter samples */
-    this.overlap  = new ArrayBuffer(2 * 32 * 18);   /* Layer III block overlap data */
+    // sbsample[2][36][32]
+    this.sbsample = [];   /* synthesis subband filter samples */
+    for(var ch = 0; ch < 2; ch++) {
+        this.sbsample[ch] = [];
+        for(var grp = 0; grp < 36; grp++) {
+            this.sbsample[ch][grp] = new Float64Array(new ArrayBuffer(32))
+        }
+    }
+    
+    // overlap[2][32][18]
+    this.overlap = []; /* Layer III block overlap data */
+    for(var ch = 0; ch < 2; ch++) {
+        this.overlap[ch] = [];
+        for(var sb = 0; sb < 32; sb++) {
+            this.overlap[ch][sb] = new Float64Array(new ArrayBuffer(16));
+        }
+    }
 };
 
 Mad.Frame.decode = function(stream) {
