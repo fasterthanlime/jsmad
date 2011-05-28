@@ -50,7 +50,102 @@ Mad.Header.nbsamples = function() {
 Mad.Header.actually_decode = function(stream) {
     var header = new Mad.Header();
     
-    // TODO: actually decode it.
+    header.flags        = 0;
+    header.private_bits = 0;
+
+    /* header() */
+
+    /* syncword */
+    stream.ptr.skip(11);
+    
+    /* MPEG 2.5 indicator (really part of syncword) */
+    if (stream.ptr.read(1) == 0)
+        header.flags |= Mad.Flag.MPEG_2_5_EXT;
+
+    /* ID */
+    if (stream.ptr.read(1) == 0)
+    header.flags |= Mad.Flag.LSF_EXT;
+    else if (header.flags & Mad.Flag.MPEG_2_5_EXT) {
+    stream.error = Mad.Error.LOSTSYNC;
+    return -1;
+    }
+
+    /* layer */
+    header.layer = 4 - stream.ptr.read(2);
+
+    if (header.layer == 4) {
+    stream.error = Mad.Error.BADLAYER;
+    return -1;
+    }
+
+    /* protection_bit */
+    if (stream.ptr.read(1) == 0) {
+        header.flags    |= Mad.Flag.PROTECTION;
+        // TODO: crc
+        //header.crc_check = mad_bit_crc(stream.ptr, 16, 0xffff);
+    }
+
+    /* bitrate_index */
+    var index = stream.ptr.read(4);
+
+    if (index == 15) {
+        stream.error = Mad.Error.BADBITRATE;
+        return -1;
+    }
+
+    if (header.flags & Mad.Flag.LSF_EXT) {
+        header.bitrate = bitrate_table[3 + (header.layer >> 1)][index];
+    } else {
+        header.bitrate = bitrate_table[header.layer - 1][index];
+    }
+
+    /* sampling_frequency */
+    index = stream.ptr.read(2);
+
+    if (index == 3) {
+        stream.error = Mad.Error.BADSAMPLERATE;
+        return -1;
+    }
+
+    header.samplerate = samplerate_table[index];
+
+    if (header.flags & Mad.Flag.LSF_EXT) {
+        header.samplerate /= 2;
+
+        if (header.flags & Mad.Flag.MPEG_2_5_EXT)
+            header.samplerate /= 2;
+    }
+
+    /* padding_bit */
+    if (stream.ptr.read(1))
+        header.flags |= Mad.Flag.PADDING;
+
+    /* private_bit */
+    if (stream.ptr.read(1))
+        header.private_bits |= MAD_PRIVATE_HEADER;
+
+    /* mode */
+    header.mode = 3 - stream.ptr.read(2);
+
+    /* mode_extension */
+    header.mode_extension = stream.ptr.read(2);
+
+    /* copyright */
+    if (stream.ptr.read(1))
+        header.flags |= Mad.Flag.COPYRIGHT;
+
+    /* original/copy */
+    if (stream.ptr.read(1))
+        header.flags |= Mad.Flag.ORIGINAL;
+
+    /* emphasis */
+    header.emphasis = stream.ptr.read(2);
+    
+    /* error_check() */
+
+    /* crc_check */
+    if (header.flags & Mad.Flag.PROTECTION)
+        header.crc_target = stream.ptr.read(16);
     
     return header;
 }

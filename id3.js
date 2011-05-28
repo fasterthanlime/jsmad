@@ -1,11 +1,15 @@
 
 function ID3_skipHeader(stream) {
     // read magic, should be ID3
-    var magic = stream.readChars(3);
-    console.log("Magic = " + magic);
+    var magic = stream.peekChars(3);
+    
     if(magic != "ID3") {
-      console.log("Not an MP3 file or not a recognized variant of MP3! Magic = " + magic + ", should be ID3");
+        console.log("No ID3 tag in this file!");
+        return;
     }
+    
+    // skip magic
+    stream.readChars(3);
     
     // skip flags
     var flags = stream.readChars(2);

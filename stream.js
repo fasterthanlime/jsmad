@@ -108,6 +108,10 @@ Mad.Stream.prototype.readChars = function(length) {
     return bytes;
 };
 
+Mad.Stream.prototype.peekChars = function(length) {
+    return this.data.slice(this.buffer, this.buffer + length);
+}
+
 /*
  * NAME:	stream->sync()
  * DESCRIPTION:	locate the next stream sync word

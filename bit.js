@@ -39,16 +39,16 @@ Mad.Bit.prototype.nextbyte = function() {
  * DESCRIPTION:	advance bit pointer
  */
 Mad.Bit.prototype.skip = function(len) {
-  this.offset += len / CHAR_BIT;
-  this.left -= len % CHAR_BIT;
+    this.offset += (len / CHAR_BIT) >> 0; // javascript trick to get integer divison
+    this.left   -= len % CHAR_BIT;
 
-  if (this.left > CHAR_BIT) {
-    this.offset++;
-    this.left += CHAR_BIT;
-  }
+    if (this.left > CHAR_BIT) {
+        this.offset++;
+        this.left += CHAR_BIT;
+    }
 
-  if (this.left < CHAR_BIT)
-    this.cache = this.data[this.offset];
+    if (this.left < CHAR_BIT)
+        this.cache = this.data.charCodeAt(this.offset);
 }
 
 /*
@@ -56,40 +56,38 @@ Mad.Bit.prototype.skip = function(len) {
  * DESCRIPTION:	read an arbitrary number of bits and return their UIMSBF value
  */
 Mad.Bit.prototype.read = function(len) {
-  var value;
+    var value = 0;
 
-  if (this.left == CHAR_BIT)
-    this.cache = this[this.offset];
+    if (this.left == CHAR_BIT)
+        this.cache = this[this.offset];
 
-  if (len < this.left) {
-    value = (this.cache & ((1 << this.left) - 1)) >> (this.left - len);
-    this.left -= len;
+    if (len < this.left) {
+        value = (this.cache & ((1 << this.left) - 1)) >> (this.left - len);
+        this.left -= len;
+
+        return value;
+    }
+
+    /* remaining bits in current byte */
+    value = this.cache & ((1 << this.left) - 1);
+    len  -= this.left;
+
+    this.offset++;
+    this.left = CHAR_BIT;
+
+    /* more bytes */
+    while (len >= CHAR_BIT) {
+        value = (value << CHAR_BIT) | this.data.charCodeAt(this.offset++);
+        len  -= CHAR_BIT;
+    }
+
+    if (len > 0) {
+        this.cache = this.data.charCodeAt(this.offset);
+
+        value = (value << len) | (this.cache >> (CHAR_BIT - len));
+        this.left -= len;
+    }
 
     return value;
-  }
-
-  /* remaining bits in current byte */
-
-  value = this.cache & ((1 << this.left) - 1);
-  len  -= this.left;
-
-  this.offset++;
-  this.left = CHAR_BIT;
-
-  /* more bytes */
-
-  while (len >= CHAR_BIT) {
-    value = (value << CHAR_BIT) | this.data[this.offset++];
-    len  -= CHAR_BIT;
-  }
-
-  if (len > 0) {
-    this.cache = this.data[this.offset];
-
-    value = (value << len) | (this.cache >> (CHAR_BIT - len));
-    this.left -= len;
-  }
-
-  return value;
 }
 
