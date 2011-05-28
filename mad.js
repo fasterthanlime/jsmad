@@ -1,0 +1,5 @@
+
+/* Global namespace */
+Mad = {};
+
+

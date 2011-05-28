@@ -5,7 +5,7 @@ MadError = {
   BUFLEN	   : 0x0001,	/* input buffer too small (or EOF) */
   BUFPTR	   : 0x0002,	/* invalid (null) buffer pointer */
 
-  NOMEM	   : 0x0031,	/* not enough memory */
+  NOMEM	   : 0x0031,	    /* not enough memory */
 
   LOSTSYNC	   : 0x0101,	/* lost synchronization */
   BADLAYER	   : 0x0102,	/* reserved header layer value */

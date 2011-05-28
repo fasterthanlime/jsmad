@@ -27,7 +27,7 @@ function readFile() {
 
         // Note that all the arguments are optional, so if you want to create a write-only device, you can leave the arguments blank.
         // Writing buffers:
-        dev.writeBuffer(buffer);
+        //dev.writeBuffer(buffer);
     });
     
     return false;
