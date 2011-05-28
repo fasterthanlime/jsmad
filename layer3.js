@@ -244,29 +244,39 @@ Mad.layer_III = function (stream, frame) {
       ", data_bitlen:" + data_bitlen +
       ", anc_bitlen: " + stream.anc_bitlen);
 
-//    /* preload main_data buffer with up to 511 bytes for next frame(s) */
-//    if (frame_free >= next_md_begin) {
-//        memcpy(*stream.main_data, stream.next_frame - next_md_begin, next_md_begin);
-//        stream.md_len = next_md_begin;
-//    } else {
-//        if (md_len < si.main_data_begin) {
-//            var extra = si.main_data_begin - md_len;
-//            if (extra + frame_free > next_md_begin)
-//                extra = next_md_begin - frame_free;
-//
-//            if (extra < stream.md_len) {
-//                memmove(*stream.main_data,
-//                    *stream.main_data + stream.md_len - extra, extra);
-//                stream.md_len = extra;
-//            }
-//        } else {
-//            stream.md_len = 0;
-//        }
-//
-//        memcpy(*stream.main_data + stream.md_len,
-//           stream.next_frame - frame_free, frame_free);
-//        stream.md_len += frame_free;
-//    }
-//
+    /* preload main_data buffer with up to 511 bytes for next frame(s) */
+    if (frame_free >= next_md_begin) {
+        stream.main_data = Mad.memcpy(stream.main_data, 0, stream.data, stream.next_frame - next_md_begin, next_md_begin);
+        /*
+        // Keeping here for reference
+        memcpy(*stream.main_data, stream.next_frame - next_md_begin, next_md_begin);
+        */
+        stream.md_len = next_md_begin;
+    } else {
+        if (md_len < si.main_data_begin) {
+            var extra = si.main_data_begin - md_len;
+            if (extra + frame_free > next_md_begin)
+                extra = next_md_begin - frame_free;
+
+            if (extra < stream.md_len) {
+                stream.main_data = Mad.memcpy(stream.main_data, 0, stream.main_data, stream.md_len - extra, extra);
+                /*
+                // Keeping here for reference
+                memmove(*stream.main_data, *stream.main_data + stream.md_len - extra, extra);
+                */
+                stream.md_len = extra;
+            }
+        } else {
+            stream.md_len = 0;
+        }
+
+        stream.main_data = Mad.memcpy(stream.main_data, stream.md_len, stream.data, stream.next_frame - frame_free, frame_free);
+        /*
+        // Keeping here for reference
+        memcpy(*stream.main_data + stream.md_len, stream.next_frame - frame_free, frame_free);
+        */
+        stream.md_len += frame_free;
+    }
+
     return result;
 }
