@@ -1,13 +1,70 @@
+var trimString = function (string) {
+  return string.replace(/\0$/, "");
+};
+
+var stringToEncoding = function(string, encoding) {
+    switch (encoding) {
+        case 0:
+            return trimString(string);
+        case 1:
+            var ix = 2, offset1 = 1, offset2 = 0;
+            
+            if (string.slice(0, 2) == "\xFE\xFF") {
+                offset1 = 0, offset2 = 1;
+            } else {
+                offset1 = 1, offset2 = 0;
+            }
+            
+            var result = "";
+            
+            for (var ix = 2; ix < string.length; ix += 2) {
+                var byte1 = string[ix + offset1].charCodeAt(0);
+                var byte2 = string[ix + offset2].charCodeAt(0);
+                
+                var word1 = (byte1 << 8) | byte2;
+                
+                if (byte1 < 0xD8 || byte1 >= 0xE0) {
+                    result += String.fromCharCode(word1);
+                } else {
+                    ix += 2;
+                    
+                    var byte3 = string[ix + offset1].charCodeAt(0);
+                    var byte4 = string[ix + offset2].charCodeAt(0);
+                    
+                    var word2 = (byte3 << 8) | byte4;
+                    
+                    result += String.fromCharCode(word1, word2);
+                }
+            }
+            
+            return trimString(result);
+        default:
+            return string;
+    }
+}
+
 var decodeTextFrame = function(header, stream) {
     var encoding = stream.readU8();
     var data = stream.read(header['length'] - 1);
     
     return {
         'header': header,
-        'encoding': encoding,
-        'description': data
+        'value': stringToEncoding(data, encoding)
     };
 }
+
+var decodeIdentifierFrame = function(header, stream) {
+    var data = stream.read(header['length']);
+    
+    var array = data.split("\0");
+    
+    return {
+        'header': header,
+        'owner': array[0],
+        'identifier': array[1]
+    };
+}
+
 
 var decodeCommentFrame = function(header, stream) {
     var encoding = stream.readU8();
@@ -19,14 +76,22 @@ var decodeCommentFrame = function(header, stream) {
     
     return {
         'header': header,
-        'encoding': encoding,
-        'language': language,
-        'description': array[0],
-        'value': array[1],
+        'language': stringToEncoding(language, 0),
+        'description': stringToEncoding(array[0], 0),
+        'value': stringToEncoding(array[1], encoding)
     };
 }
 
-var decodeUserDefinedLink = function(header, stream) {
+var decodeBinaryFrame = function(header, stream) {
+    var data = stream.read(header['length']);
+    
+    return {
+        'header': header,
+        'value': data
+    };
+}
+
+var decodeUserDefinedLinkFrame = function(header, stream) {
     var encoding = stream.readU8();
     var data = stream.read(header['length'] - 1);
     
@@ -34,10 +99,57 @@ var decodeUserDefinedLink = function(header, stream) {
     
     return {
         'header': header,
-        'encoding': encoding,
-        'description': array[0],
-        'value': array[1],
+        'description': stringToEncoding(array[0], 0),
+        'value': stringToEncoding(array[1], encoding)
     };
+}
+
+var extendWithValueFrame = function(tags, frame) {
+    tags[frame['name']] = frame['value'];
+    
+    return tags;
+}
+
+var extendWithIdentifierFrame = function(tags, frame) {
+    tags[frame['name']] = {
+        'owner': frame['value'],
+        'identifier': frame['identifier']
+    };
+    
+    return tags;
+}
+
+var extendWithCommentFrame = function(tags, frame) {
+    if (!tags[frame['name']]) {
+        tags[frame['name']] = []
+    }
+    
+    tags[frame['name']][frame['description']] = {
+        'language': frame['language'],
+        'value': frame['value']
+    };
+    
+    return tags;
+}
+
+var extendWithUserDefinedLinkFrame = function(tags, frame) {
+    if (!tags[frame['name']]) {
+        tags[frame['name']] = {}
+    }
+    
+    tags[frame['name']][frame['description']] = frame['value'];
+    
+    return tags;
+}
+
+var extendWithPrivateFrame = function(tags, frame) {
+    if (!tags[frame['name']]) {
+        tags[frame['name']] = []
+    }
+    
+    tags[frame['name']].push(frame['value']);
+    
+    return tags;
 }
 
 Mad.ID3Stream = function(header, stream) {
@@ -102,13 +214,20 @@ Mad.ID3Stream = function(header, stream) {
         'TSOP': decodeTextFrame,
         'TSOT': decodeTextFrame,
         
-        /* Comment Frame */
+        /* Unique Identifier Frame */
+        'UFID': decodeIdentifierFrame,
         
+        /* Music CD Identifier Frame */
+        'MCDI': decodeBinaryFrame,
+        
+        /* Comment Frame */
         'COMM': decodeCommentFrame,
         
         /* User Defined URL Link Frame */
+        'WXXX': decodeUserDefinedLinkFrame,
         
-        'WXXX': decodeUserDefinedLink,
+        /* Private Frame */
+        'PRIV': decodeBinaryFrame,
         
         /* Deprecated ID3v2 Frames */
         'TDAT': decodeTextFrame,
@@ -175,13 +294,20 @@ Mad.ID3Stream = function(header, stream) {
         'TSOP': 'Performer sort order',
         'TSOT': 'Title sort order',
         
-        /* Comment Frame */
+        /* Unique Identifier Frame */
+        'UFID': 'Unique Identifier',
         
+        /* Music CD Identifier Frame */
+        'MCDI': 'Music CD Identifier',
+        
+        /* Comment Frame */
         'COMM': 'Comment',
         
         /* User Defined URL Link Frame */
-        
         'WXXX': 'User defined URL link',
+        
+        /* Private Frame */
+        'PRIV': 'Private',
         
         /* Deprecated ID3v2 frames */
         'TDAT': 'Date',
@@ -190,6 +316,86 @@ Mad.ID3Stream = function(header, stream) {
         'TRDA': 'Recording dates',
         'TSIZ': 'Size',
         'TYER': 'Year'
+    };
+    
+    this.extenders = {
+        /* Identification Frames */
+        'TIT1': extendWithValueFrame,
+        'TIT2': extendWithValueFrame,
+        'TIT3': extendWithValueFrame,
+        'TALB': extendWithValueFrame,
+        'TOAL': extendWithValueFrame,
+        'TRCK': extendWithValueFrame,
+        'TPOS': extendWithValueFrame,
+        'TSST': extendWithValueFrame,
+        'TSRC': extendWithValueFrame,
+        
+        /* Involved Persons Frames */
+        'TPE1': extendWithValueFrame,
+        'TPE2': extendWithValueFrame,
+        'TPE3': extendWithValueFrame,
+        'TPE4': extendWithValueFrame,
+        'TOPE': extendWithValueFrame,
+        'TEXT': extendWithValueFrame,
+        'TOLY': extendWithValueFrame,
+        'TCOM': extendWithValueFrame,
+        'TMCL': extendWithValueFrame,
+        'TIPL': extendWithValueFrame,
+        'TENC': extendWithValueFrame,
+        
+        /* Derived and Subjective Properties Frames */
+        'TBPM': extendWithValueFrame,
+        'TLEN': extendWithValueFrame,
+        'TKEY': extendWithValueFrame,
+        'TLAN': extendWithValueFrame,
+        'TCON': extendWithValueFrame,
+        'TFLT': extendWithValueFrame,
+        'TMED': extendWithValueFrame,
+        'TMOO': extendWithValueFrame,
+        
+        /* Rights and Licence Frames */
+        'TCOP': extendWithValueFrame,
+        'TPRO': extendWithValueFrame,
+        'TPUB': extendWithValueFrame,
+        'TOWN': extendWithValueFrame,
+        'TRSN': extendWithValueFrame,
+        'TRSO': extendWithValueFrame,
+        
+        /* Other Text Frames */
+        'TOFN': extendWithValueFrame,
+        'TDLY': extendWithValueFrame,
+        'TDEN': extendWithValueFrame,
+        'TDOR': extendWithValueFrame,
+        'TDRC': extendWithValueFrame,
+        'TDRL': extendWithValueFrame,
+        'TDTG': extendWithValueFrame,
+        'TSSE': extendWithValueFrame,
+        'TSOA': extendWithValueFrame,
+        'TSOP': extendWithValueFrame,
+        'TSOT': extendWithValueFrame,
+        
+        /* Unique Identifier Frame */
+        'UFID': extendWithIdentifierFrame,
+        
+        /* Music CD Identifier */
+        'MCDI': extendWithValueFrame,
+        
+        /* Comment Frame */
+        'COMM': extendWithCommentFrame,
+        
+        /* User Defined URL Link Frame */
+        'WXXX': extendWithUserDefinedLinkFrame,
+        
+        /* Private Frame */
+        'PRIV': extendWithPrivateFrame,
+        
+        /* Deprecated ID3v2 Frames */
+        'TDAT': extendWithValueFrame,
+        'TIME': extendWithValueFrame,
+        'TORY': extendWithValueFrame,
+        'TRDA': extendWithValueFrame,
+        'TSIZ': extendWithValueFrame,
+        'TYER': extendWithValueFrame
     };
 }
 
@@ -228,7 +434,7 @@ Mad.ID3Stream.prototype.readFrame = function() {
         this.stream.read(length);
     }
     
-    result['Name'] = this.names[identifier] ? this.names[identifier] : 'UNKNOWN';
+    result['name'] = this.names[identifier] ? this.names[identifier] : 'UNKNOWN';
     
     this.offset += 10 + length;
     
@@ -245,4 +451,22 @@ Mad.ID3Stream.prototype.read = function() {
     }
     
     return this.array;
+}
+
+Mad.ID3Stream.prototype.toHash = function() {
+    var frames = this.read();
+    
+    var hash = {};
+    
+    for (var i = 0; i < frames.length; i++) {
+        var frame = frames[i];
+        
+        var extender = this.extenders[frame['header']['identifier']];
+        
+        if (extender) {
+            hash = extender(hash, frames[i]);
+        }
+    }
+    
+    return hash;
 }
