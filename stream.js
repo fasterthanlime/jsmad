@@ -1,8 +1,8 @@
 
 function MadStream(data) {
     if(typeof(data) != "string") {
-      console.log("Invalid data type: " + typeof(data));
-      return;
+        console.log("Invalid data type: " + typeof(data));
+        return;
     }
   
     this.data = data;
@@ -13,7 +13,7 @@ function MadStream(data) {
 MadStream.fromFile = function(file, callback) {
     var reader = new FileReader();
     reader.onloadend = function (evt) {
-      callback(new MadStream(evt.target.result));
+        callback(new MadStream(evt.target.result));
     };
     reader.readAsBinaryString(file);
 };
