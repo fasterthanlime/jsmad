@@ -1,7 +1,4 @@
 Mad.AjaxStream = function(url) {
-    this.inheritFrom = Mad.ByteStream;
-    this.inheritFrom();
-    
     var request = window.XMLHttpRequest ? new XMLHttpRequest() :  ActiveXObject("Microsoft.XMLHTTP");
     
     request.open('GET', url);
@@ -26,6 +23,8 @@ Mad.AjaxStream = function(url) {
     
     request.send(null);
 }
+
+Mad.AjaxStream.prototype = new Mad.ByteStream();
 
 Mad.AjaxStream.prototype.updateBuffer = function() {
     if (!this.state['finalAmount']) {

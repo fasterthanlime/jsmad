@@ -1,5 +1,3 @@
 
 /* Global namespace */
 Mad = {};
-
-
