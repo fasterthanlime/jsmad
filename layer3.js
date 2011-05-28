@@ -117,7 +117,7 @@ Mad.III_sideinfo = function (ptr, nch, lsf) {
 Mad.layer_III = function (stream, frame) {
     var header = frame.header;
     var nch, next_md_begin = 0;
-    var si_len, data_bitlen, md_len;
+    var si_len, data_bitlen, md_len = 0;
     var frame_space, frame_used, frame_free;
     var /* Mad.Error */ error;
     var result = 0;
@@ -168,20 +168,27 @@ Mad.layer_III = function (stream, frame) {
         var peek = new Mad.Bit(stream.data, stream.next_frame);
 
         header = peek.read(32);
-        if ((header & 0xffe60000) /* syncword | layer */ == 0xffe20000) { 
-            if (!(header & 0x00010000))  /* protection_bit */
+        
+        if (Mad.bitwiseAnd(header, 0xffe60000) /* syncword | layer */ == 0xffe20000) { 
+            if (!(Mad.bitwiseAnd(header, 0x00010000)))  /* protection_bit */
                 peek.skip(16);  /* crc_check */
 
-            next_md_begin = peek.read((header & 0x00080000) /* ID */ ? 9 : 8);
+            next_md_begin = peek.read(Mad.bitwiseAnd(header, 0x00080000) /* ID */ ? 9 : 8);
         }
     }
 
     /* find main_data of this frame */
     frame_space = stream.next_frame - stream.ptr.nextbyte();
 
+    //console.log("next_frame = " + stream.next_frame + ", nextbyte = " + stream.ptr.nextbyte() + ", frame_space = " + frame_space);
+
+    console.log("before, next_md_begin = " + next_md_begin);
+
     if (next_md_begin > si.main_data_begin + frame_space)
         next_md_begin = 0;
 
+    console.log("so far, md_len = " + md_len + ", si.main_data_begin = " + si.main_data_begin + ", frame_space = " + frame_space + ", next_md_begin = " + next_md_begin);
+    
     md_len = si.main_data_begin + frame_space - next_md_begin;
 
     frame_used = 0;
@@ -192,6 +199,7 @@ Mad.layer_III = function (stream, frame) {
 
         frame_used = md_len;
     } else {
+        console.log("si.main_data_begin = " + si.main_data_begin + ", stream.md_len = " + stream.md_len);
         if (si.main_data_begin > stream.md_len) {
             if (result == 0) {
                 stream.error = Mad.Error.BADDATAPTR;
@@ -199,12 +207,14 @@ Mad.layer_III = function (stream, frame) {
             }
         } else {
             if (md_len > si.main_data_begin) {
-                assert(stream.md_len + md_len - si.main_data_begin <= MAD_BUFFER_MDLEN);
+                if(!(stream.md_len + md_len - si.main_data_begin <= Mad.BUFFER_MDLEN)) {
+                    throw new Error("Assertion failed: (stream.md_len + md_len - si.main_data_begin <= MAD_BUFFER_MDLEN)");
+                }
             
                 frame_used = md_len - si.main_data_begin;
                 
                 /* memcpy(dst, dstOffset, src, srcOffset, length) - returns a copy of dst with modified bytes */
-                stream.main_data = Mad.memcpy(stream.main_data, stream.md_len, stream.buffer, stream.ptr.nextbyte(), frame_used);
+                stream.main_data = Mad.memcpy(stream.main_data, stream.md_len, stream.data, stream.ptr.nextbyte(), frame_used);
                 
                 /*
                 // Keeping this here as a handy little reference

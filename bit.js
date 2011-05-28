@@ -55,6 +55,8 @@ Mad.Bit.prototype.skip = function(len) {
  * DESCRIPTION:	read an arbitrary number of bits and return their UIMSBF value
  */
 Mad.Bit.prototype.read = function(len) {
+    if(len > 31) return this.readBig(len);
+    
     var value = 0;
 
     if (this.left == CHAR_BIT)
@@ -84,6 +86,42 @@ Mad.Bit.prototype.read = function(len) {
         this.cache = this.data.charCodeAt(this.offset);
 
         value = (value << len) | (this.cache >> (CHAR_BIT - len));
+        this.left -= len;
+    }
+
+    return value;
+}
+
+Mad.Bit.prototype.readBig = function(len) {
+    var value = 0;
+
+    if (this.left == CHAR_BIT)
+        this.cache = this.data.charCodeAt(this.offset);
+
+    if (len < this.left) {
+        value = (this.cache & ((1 << this.left) - 1)) >> (this.left - len);
+        this.left -= len;
+
+        return value;
+    }
+
+    /* remaining bits in current byte */
+    value = this.cache & ((1 << this.left) - 1);
+    len  -= this.left;
+
+    this.offset++;
+    this.left = CHAR_BIT;
+
+    /* more bytes */
+    while (len >= CHAR_BIT) {
+        value = Mad.bitwiseOr(Mad.lshift(value, CHAR_BIT), this.data.charCodeAt(this.offset++));
+        len  -= CHAR_BIT;
+    }
+
+    if (len > 0) {
+        this.cache = this.data.charCodeAt(this.offset);
+
+        value = Mad.bitwiseOr(Mad.lshift(value, len), (this.cache >> (CHAR_BIT - len)));
         this.left -= len;
     }
 
