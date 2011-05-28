@@ -277,13 +277,13 @@ Mad.Header.decode = function(stream) {
         pad_slot = (header.flags & Mad.Flag.PADDING) ? 1 : 0;
 
         if (header.layer == Mad.Layer.I)
-            N = ((12 * header.bitrate / header.samplerate) >> 0 + pad_slot) * 4;
+            N = (((12 * header.bitrate / header.samplerate) << 0) + pad_slot) * 4;
         else {
             var slots_per_frame = (header.layer == Mad.Layer.III &&
                    (header.flags & Mad.Flag.LSF_EXT)) ? 72 : 144;
             //console.log("slots_per_frame = " + slots_per_frame + ", bitrate = " + header.bitrate + ", samplerate = " + header.samplerate);
 
-            N = (slots_per_frame * header.bitrate / header.samplerate) >> 0 + pad_slot;
+            N = ((slots_per_frame * header.bitrate / header.samplerate) << 0) + pad_slot;
         }
             
 
