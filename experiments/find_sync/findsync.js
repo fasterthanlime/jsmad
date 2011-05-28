@@ -16,10 +16,11 @@ function readFile() {
         //console.log("Found second frame at " + stream.ptr.offset);
         //stream.next_frame = stream.ptr.offset;
         
-        var frame = Mad.Frame.decode(stream);
-        
-        if(frame == null) {
-            console.log("Error! code = " + stream.error);
+        for(var i = 0; i < 5; i++) {
+            var frame = Mad.Frame.decode(stream);
+            if(frame == null) {
+                console.log("Error! code = " + stream.error);
+            }
         }
     });
     
