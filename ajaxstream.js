@@ -6,20 +6,49 @@ Mad.AjaxStream = function(url) {
     this.state['request'] = request;
     this.state['amountRead'] = 0;
     this.state['inProgress'] = true;
+    this.state['callbacks'] = [];
     
-    var state = this.state
+    var self = this;
+    
+    var iteration = 0;
     
     var onstatechange = function () {
-        if (request.readyState == 4) {
-            window.clearInterval(state['timer']);
+        iteration += 1;
+        
+        if (self.state['callbacks'].length > 0 && iteration % 64 == 0) {
+            self.updateBuffer();
             
-            state['inProgress'] = false;
+            var newCallbacks = [];
+            
+            for (var i = 0; i < self.state['callbacks'].length; i++) {
+                var callback = self.state['callbacks'][i];
+                
+                if (callback[0] < self.state['amountRead']) {
+                    callback[1]();
+                } else {
+                    newCallbacks.push(callback);
+                }
+            }
+            
+            self.state['callbacks'] = newCallbacks;
+        }
+        
+        if (request.readyState == 4) {
+            for (var i = 0; i < self.state['callbacks'].length; i++) {
+                var callback = self.state['callbacks'][i];
+                
+                callback[1]();
+            }
+            
+            window.clearInterval(self.state['timer']);
+            
+            self.state['inProgress'] = false;
         }
     }
     
     request.onreadystatechange = onstatechange;
     
-    state['timer'] = window.setInterval(onstatechange, 1000);
+    this.state['timer'] = window.setInterval(onstatechange, 1000);
     
     request.send(null);
 }
@@ -90,4 +119,16 @@ Mad.AjaxStream.prototype.get = function(offset, length) {
         
         return;
     }
+}
+
+Mad.AjaxStream.prototype.requestAbsolute = function(n, callback) {
+    if (n < this.state['amountRead']) {
+        callback();
+    } else {
+        this.state['callbacks'].push([n, callback]);
+    }
+}
+
+Mad.AjaxStream.prototype.request = function(n, callback) {
+    this.requestAbsolute(this.state['offset'] + n, callback);
 }
