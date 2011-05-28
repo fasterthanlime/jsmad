@@ -21,7 +21,6 @@ function readFile() {
             var i = 0;
             while(i < sampleBuffer.length) {
                 var intValue = stream.readSShort();
-                
                 sampleBuffer[i++] = intValue / 32768.0;
             }
         }, channelCount, preBufferSize / 2, sampleRate);
