@@ -1,4 +1,6 @@
 Mad.FileStream = function(file) {
+    this.state = { 'offset': 0 };
+    
     this.state['buffer'] = file.getAsBinary()
     this.state['amountRead'] = this.state['buffer'].length;
 }
@@ -29,8 +31,7 @@ Mad.FileStream.prototype.peek = function(n) {
         
         return result;
     } else {
-        console.log('TODO: THROW PEEK ERROR!');
-        return;
+        throw 'TODO: THROW PEEK ERROR!';
     }
 }
 
@@ -38,16 +39,6 @@ Mad.FileStream.prototype.get = function(offset, length) {
     if (this.absoluteAvailable(offset + length)) {
         return this.state['buffer'].slice(offset, offset + length);
     } else {
-        console.log('TODO: THROW GET ERROR!');
-        
-        return;
+        throw 'TODO: THROW GET ERROR!';
     }
-}
-
-Mad.FileStream.prototype.requestAbsolute = function(n, callback) {
-    callback();
-}
-
-Mad.FileStream.prototype.request = function(n, callback) {
-    callback();
 }

@@ -1,8 +1,4 @@
-Mad.ByteStream = function(url) {
-    this.state = {
-        'offset': 0
-    }
-}
+Mad.ByteStream = function(url) { }
 
 Mad.ByteStream.prototype.available = function(n) {
     return this.absoluteAvailable(this.state['offset'] + n);
@@ -31,7 +27,7 @@ Mad.ByteStream.prototype.getU32 = function(offset, bigEndian) {
         bytes = bytes.reverse();
     }
     
-    return (bytes.charCodeAt(0) << 8) | bytes.charCodeAt(1);
+    return (bytes.charCodeAt(0) << 24) | (bytes.charCodeAt(1) << 16) | (bytes.charCodeAt(2) << 8) | bytes.charCodeAt(3);
 }
 
 Mad.ByteStream.prototype.getI8 = function(offset, bigEndian) {
@@ -44,6 +40,12 @@ Mad.ByteStream.prototype.getI16 = function(offset, bigEndian) {
 
 Mad.ByteStream.prototype.getI32 = function(offset, bigEndian) {
     return this.getU32(offset, bigEndian) - 2147483648;    // 2 ** 31
+}
+
+Mad.ByteStream.prototype.getSyncInteger = function(offset) {
+    var bytes = this.get(offset, 4);
+    
+    return (bytes.charCodeAt(0) << 21) | (bytes.charCodeAt(1) << 14) | (bytes.charCodeAt(2) << 7) | bytes.charCodeAt(3);
 }
 
 Mad.ByteStream.prototype.peekU8 = function(bigEndian) {
@@ -68,6 +70,10 @@ Mad.ByteStream.prototype.peekI16 = function(bigEndian) {
 
 Mad.ByteStream.prototype.peekI32 = function(bigEndian) {
     return this.getI32(this.state['offset'], bigEndian);
+}
+
+Mad.ByteStream.prototype.peekSyncInteger = function() {
+    return this.getSyncInteger(this.state['offset']);
 }
 
 Mad.ByteStream.prototype.readU8 = function(bigEndian) {
@@ -112,6 +118,14 @@ Mad.ByteStream.prototype.readI16 = function(bigEndian) {
 
 Mad.ByteStream.prototype.readI32 = function(bigEndian) {
     var result = this.peekI32(bigEndian);
+    
+    this.seek(4);
+    
+    return result;
+}
+
+Mad.ByteStream.prototype.readSyncInteger = function() {
+    var result = this.getSyncInteger(this.state['offset']);
     
     this.seek(4);
     
