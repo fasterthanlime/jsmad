@@ -60,19 +60,30 @@ var sfb_32000_mixed = [
 var sfbwidth_table = [
   { l: sfb_48000_long, s: sfb_48000_short, m: sfb_48000_mixed },
   { l: sfb_44100_long, s: sfb_44100_short, m: sfb_44100_mixed },
-  { l: sfb_32000_long, s: sfb_32000_short, m: sfb_32000_mixed },
+  { l: sfb_32000_long, s: sfb_32000_short, m: sfb_32000_mixed } /*, // fuck MPEG 2.5
   { l: sfb_24000_long, s: sfb_24000_short, m: sfb_24000_mixed },
   { l: sfb_22050_long, s: sfb_22050_short, m: sfb_22050_mixed },
   { l: sfb_16000_long, s: sfb_16000_short, m: sfb_16000_mixed },
   { l: sfb_12000_long, s: sfb_12000_short, m: sfb_12000_mixed },
   { l: sfb_11025_long, s: sfb_11025_short, m: sfb_11025_mixed },
-  { l:  sfb_8000_long, s:  sfb_8000_short, m:  sfb_8000_mixed }
+  { l:  sfb_8000_long, s:  sfb_8000_short, m:  sfb_8000_mixed }*/
 ];
 
 Mad.SideInfo = function() {
     this.gr = []; // array of Mad.Granule
-    this.scfsi = []; // array of ints?
+    this.scfsi = []; // array of ints
 };
+
+/*
+ * scalefactor bit lengths
+ * derived from section 2.4.2.7 of ISO/IEC 11172-3
+ */
+var sflen_table = [
+  { slen1: 0, slen2: 0 }, { slen1: 0, slen2: 1 }, { slen1: 0, slen2: 2 }, { slen1: 0, slen2: 3 },
+  { slen1: 3, slen2: 0 }, { slen1: 1, slen2: 1 }, { slen1: 1, slen2: 2 }, { slen1: 1, slen2: 3 },
+  { slen1: 2, slen2: 1 }, { slen1: 2, slen2: 2 }, { slen1: 2, slen2: 3 }, { slen1: 3, slen2: 1 },
+  { slen1: 3, slen2: 2 }, { slen1: 3, slen2: 3 }, { slen1: 4, slen2: 2 }, { slen1: 4, slen2: 3 }    
+];
 
 Mad.Granule = function() {
     this.ch = []; // list of Mad.Channel    
@@ -80,6 +91,343 @@ Mad.Granule = function() {
 
 Mad.Channel = function() {
     this.table_select = []; // list of Numbers (I guess)
+    this.scalefac = []; // list of integers
+}
+
+
+/* we must take care that sz >= bits and sz < sizeof(long) lest bits == 0 */
+function Mad.MASK(cache, sz, bits) {
+    return (((cache) >> ((sz) - (bits))) & ((1 << (bits)) - 1));
+}
+    
+function Mad.MASK1BIT(cache, sz) {
+    return ((cache) & (1 << ((sz) - 1)));
+}
+
+/*
+ * NAME:	III_huffdecode()
+ * DESCRIPTION:	decode Huffman code words of one channel of one granule
+ */
+Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth, part2_length) {
+    var exponents = new Int32Array(new ArrayBuffer(4 * 39));
+    var expptr = 0;
+    var peek;
+    var bits_left, cachesz;
+    var xrptr;
+    var sfbound;
+    var bitcache;
+    var sfbwidthptr = 0;
+    
+    bits_left = channel.part2_3_length - part2_length;
+    if (bits_left < 0)
+        return Mad.Error.BADPART3LEN;
+
+    Mad.III_exponents(channel, sfbwidth, exponents);
+
+    peek = ptr;
+    ptr.skip(bits_left);
+
+    /* align bit reads to byte boundaries */
+    cachesz  = peek.bitsleft();
+    cachesz += ((32 - 1 - 24) + (24 - cachesz)) & ~7;
+
+    bitcache   = peek.read(cachesz);
+    bits_left -= cachesz;
+
+    xrptr = 0;
+
+    /* big_values */
+    {
+        var region = 0, rcount;
+        
+        var reqcache = new Float64Array(new ArrayBuffer(8 * 16));
+
+        sfbound = xrptr + sfbwidth[sfbwidthptr++];
+        rcount  = channel.region0_count + 1;
+
+        var entry = mad_huff_pair_table[channel.table_select[region]];
+        var table     = entry.table;
+        var linbits   = entry.linbits;
+        var startbits = entry.startbits;
+
+        if (typeof(table) == 'undefined')
+            return Mad.Error.BADHUFFTABLE;
+
+        expptr = 0;
+        exp     = exponents[expptr++];
+        var reqhits = 0;
+        var big_values = channel.big_values;
+
+        while (big_values-- && cachesz + bits_left > 0) {
+            var pair;
+            var clumpsz, value;
+            var requantized;
+
+            if (xrptr == sfbound) {
+                sfbound += sfbwidth[sfbwidthptr++];
+
+                /* change table if region boundary */
+                if (--rcount == 0) {
+                    if (region == 0)
+                        rcount = channel.region1_count + 1;
+                    else
+                        rcount = 0;  /* all remaining */
+
+                    entry     = mad_huff_pair_table[channel.table_select[++region]];
+                    table     = entry.table;
+                    linbits   = entry.linbits;
+                    startbits = entry.startbits;
+
+                    if (typeof(table) == 'undefined')
+                        return Mad.Error.BADHUFFTABLE;
+                }
+
+                if (exp != exponents[expptr]) {
+                    exp = exponents[expptr];
+                    reqhits = 0;
+                }
+
+                ++expptr;
+            }
+
+            if (cachesz < 21) {
+                var bits       = ((32 - 1 - 21) + (21 - cachesz)) & ~7;
+                bitcache   = (bitcache << bits) | peek.read(bits);
+                cachesz   += bits;
+                bits_left -= bits;
+            }
+
+            /* hcod (0..19) */
+            clumpsz = startbits;
+            pair    = table[Mad.MASK(bitcache, cachesz, clumpsz)];
+
+            while (!pair.final) {
+                cachesz -= clumpsz;
+
+                clumpsz = pair.ptr.bits;
+                pair    = table[pair.ptr.offset + Mad.MASK(bitcache, cachesz, clumpsz)];
+            }
+
+            cachesz -= pair.value.hlen;
+
+            if (linbits) {
+                /* x (0..14) */
+                value = pair.value.x;
+                var x_final = false;
+
+                switch (value) {
+                    case 0:
+                      xr[xrptr] = 0;
+                      break;
+
+                    case 15:
+                      if (cachesz < linbits + 2) {
+                        bitcache   = (bitcache << 16) | peek.read(16);
+                        cachesz   += 16;
+                        bits_left -= 16;
+                      }
+
+                      value += Mad.MASK(bitcache, cachesz, linbits);
+                      cachesz -= linbits;
+
+                      requantized = Mad.III_requantize(value, exp);
+                      x_final = true; // simulating goto, yay
+                      break;
+
+                    default:
+                      if (reqhits & (1 << value))
+                        requantized = reqcache[value];
+                      else {
+                        reqhits |= (1 << value);
+                        requantized = reqcache[value] = Mad.III_requantize(value, exp);
+                      }
+                      x_final = true;
+                }
+                
+                if(x_final) {
+                      xr[xrptr] = Mad.MASK1BIT(bitcache, cachesz--) ?
+                        -requantized : requantized;
+                }
+
+                /* y (0..14) */
+                value = pair.value.y;
+
+                switch (value) {
+                    case 0:
+                        xr[xrptr + 1] = 0;
+                        break;
+
+                    case 15:
+                        if (cachesz < linbits + 1) {
+                            bitcache   = (bitcache << 16) | peek.read(16);
+                            cachesz   += 16;
+                            bits_left -= 16;
+                        }
+
+                        value += Mad.MASK(bitcache, cachesz, linbits);
+                        cachesz -= linbits;
+
+                        requantized = Mad.III_requantize(value, exp);
+                        y_final = true;
+                        break; // simulating goto, yayzor
+
+                    default:
+                        if (reqhits & (1 << value))
+                            requantized = reqcache[value];
+                        else {
+                            reqhits |= (1 << value);
+                            reqcache[value] = Mad.III_requantize(value, exp);
+                            requantized = reqcache[value];
+                        }
+                        y_final = true;
+                }
+                
+                if(y_final) {
+                  xr[xrptr + 1] = Mad.MASK1BIT(bitcache, cachesz--) ?
+                    -requantized : requantized;
+                }
+      } else {
+            /* x (0..1) */
+            value = pair.value.x;
+
+            if (value == 0) {
+                xr[xrptr] = 0;
+            } else {
+                if (reqhits & (1 << value))
+                    requantized = reqcache[value];
+                else {
+                    reqhits |= (1 << value);
+                    requantized = reqcache[value] = Mad.III_requantize(value, exp);
+                }
+
+                xr[xrptr] = Mad.MASK1BIT(bitcache, cachesz--) ?
+                    -requantized : requantized;
+            }
+
+            /* y (0..1) */
+            value = pair.value.y;
+
+            if (value == 0)
+                xr[xrptr + 1] = 0;
+            else {
+                if (reqhits & (1 << value))
+                    requantized = reqcache[value];
+                else {
+                    reqhits |= (1 << value);
+                    requantized = reqcache[value] = III_requantize(value, exp);
+                }
+
+                xr[xrptr + 1] = Mad.MASK1BIT(bitcache, cachesz--) ?
+                    -requantized : requantized;
+            }
+      }
+
+      xrptr += 2;
+    }
+  }
+
+  if (cachesz + bits_left < 0)
+    return Mad.Error.BADHUFFDATA;  /* big_values overrun */
+
+  /* count1 */
+  {
+    var table = mad_huff_quad_table[channel.flags & count1table_select];
+    var requantized = Mad.III_requantize(1, exp);
+
+    while (cachesz + bits_left > 0 && xrptr <= 572) {
+        /* hcod (1..6) */
+        if (cachesz < 10) {
+            bitcache   = (bitcache << 16) | peek.read(16);
+            cachesz   += 16;
+            bits_left -= 16;
+        }
+    
+        var quad = table[Mad.MASK(bitcache, cachesz, 4)];
+
+        /* quad tables guaranteed to have at most one extra lookup */
+        if (!quad.final) {
+            cachesz -= 4;
+
+            quad = table[quad.ptr.offset +
+		      Mad.MASK(bitcache, cachesz, quad.ptr.bits)];
+        }
+
+        cachesz -= quad.value.hlen;
+
+        if (xrptr == sfbound) {
+            sfbound += sfbwidth[sfbwidthptr++];
+
+	if (exp != exponents[expptr]) {
+	  exp = exponents[expptr];
+	  requantized = Mad.III_requantize(1, exp);
+	}
+
+	++expptr;
+      }
+
+      /* v (0..1) */
+      xr[xrptr] = quad.value.v ?
+	(Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
+
+      /* w (0..1) */
+      xr[xrptr + 1] = quad.value.w ?
+	(Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
+
+      xrptr += 2;
+
+      if (xrptr == sfbound) {
+        sfbound += sfbwidth[sfbwidthptr++];
+
+        if (exp != exponents[expptr]) {
+          exp = exponents[expptr];
+          requantized = Mad.III_requantize(1, exp);
+        }
+
+        ++expptr;
+      }
+
+      /* x (0..1) */
+      xr[xrptr] = quad.value.x ?
+	(Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
+
+      /* y (0..1) */
+      xr[xrptr + 1] = quad.value.y ?
+	(Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
+
+      xrptr += 2;
+    }
+
+    if (cachesz + bits_left < 0) {
+//# if 0 && defined(DEBUG)
+      console.log("huffman count1 overrun (" + (-(cachesz + bits_left)) + " bits)");
+//# endif
+
+      /* technically the bitstream is misformatted, but apparently
+	 some encoders are just a bit sloppy with stuffing bits */
+      xrptr -= 4;
+    }
+  }
+
+  if (!(-bits_left <= MAD_BUFFER_GUARD * CHAR_BIT)) {
+      throw new Error("assertion failed: (-bits_left <= MAD_BUFFER_GUARD * CHAR_BIT)");
+  }
+
+//# if 0 && defined(DEBUG)
+  if (bits_left < 0)
+    console.log("read " + (-bits_left) + " bits too many");
+  else if (cachesz + bits_left > 0)
+    console.log((cachesz + bits_left) + " stuffing bits");
+//# endif
+
+  /* rzero */
+  while (xrptr < 576) {
+    xr[xrptr]     = 0;
+    xr[xrptr + 1] = 0;
+
+    xrptr += 2;
+  }
+
+  return Mad.Error.NONE;
 }
 
 /*
@@ -179,6 +527,78 @@ Mad.III_sideinfo = function (ptr, nch, lsf) {
         priv_bitlen: priv_bitlen
     };
 }
+
+/*
+ * NAME:	III_scalefactors()
+ * DESCRIPTION:	decode channel scalefactors of one granule from a bitstream
+ */
+Mad.III_scalefactors = function (ptr, channel, gr0ch, scfsi) {
+  var start; /* Mad.Bit */
+  var slen1, slen2, sfbi;
+
+  var start = ptr;
+
+  var slen1 = sflen_table[channel.scalefac_compress].slen1;
+  var slen2 = sflen_table[channel.scalefac_compress].slen2;
+
+  if (channel.block_type == 2) {
+    sfbi = 0;
+
+    var nsfb = (channel.flags & mixed_block_flag) ? 8 + 3 * 3 : 6 * 3;
+    while (nsfb--)
+      channel.scalefac[sfbi++] = ptr.read(slen1);
+
+    nsfb = 6 * 3;
+    while (nsfb--)
+      channel.scalefac[sfbi++] = ptr.read(slen2);
+
+    nsfb = 1 * 3;
+    while (nsfb--)
+      channel.scalefac[sfbi++] = 0;
+  }
+  else {  /* channel.block_type != 2 */
+    if (scfsi & 0x8) {
+      for (sfbi = 0; sfbi < 6; ++sfbi)
+	channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
+    }
+    else {
+      for (sfbi = 0; sfbi < 6; ++sfbi)
+	channel.scalefac[sfbi] = ptr.read(slen1);
+    }
+
+    if (scfsi & 0x4) {
+      for (sfbi = 6; sfbi < 11; ++sfbi)
+	channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
+    }
+    else {
+      for (sfbi = 6; sfbi < 11; ++sfbi)
+	channel.scalefac[sfbi] = ptr.read(slen1);
+    }
+
+    if (scfsi & 0x2) {
+      for (sfbi = 11; sfbi < 16; ++sfbi)
+	channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
+    }
+    else {
+      for (sfbi = 11; sfbi < 16; ++sfbi)
+	channel.scalefac[sfbi] = ptr.read(slen2);
+    }
+
+    if (scfsi & 0x1) {
+      for (sfbi = 16; sfbi < 21; ++sfbi)
+	channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
+    }
+    else {
+      for (sfbi = 16; sfbi < 21; ++sfbi)
+	channel.scalefac[sfbi] = ptr.read(slen2);
+    }
+
+    channel.scalefac[21] = 0;
+  }
+
+  return ptr.length(start);
+}
+
 
 
 /*
