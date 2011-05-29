@@ -20,9 +20,14 @@ Mad.Synth = function () {
  */
 Mad.Synth.prototype.mute = function () {
     for (var ch = 0; ch < 2; ++ch) {
-        synth.filter[ch] = [];
+        synth.filter[ch] = [ [ [], [] ], [ [], [] ] ];
+        
         for (var s = 0; s < 16; ++s) {
-            synth.filter[ch][s] = [];
+            synth.filter[ch][0][0][s] = [];
+            synth.filter[ch][0][1][s] = [];
+            synth.filter[ch][1][0][s] = [];
+            synth.filter[ch][1][1][s] = [];
+            
             for (var v = 0; v < 8; ++v) {
                 synth.filter[ch][0][0][s][v] = 0;
                 synth.filter[ch][0][1][s][v] = 0;
@@ -34,43 +39,6 @@ Mad.Synth.prototype.mute = function () {
   }
 }
 
-/*
- * An optional optimization called here the Subband Synthesis Optimization
- * (SSO) improves the performance of subband synthesis at the expense of
- * accuracy.
- *
- * The idea is to simplify 32x32.64-bit multiplication to 32x32.32 such
- * that extra scaling and rounding are not necessary. This often allows the
- * compiler to use faster 32-bit multiply-accumulate instructions instead of
- * explicit 64-bit multiply, shift, and add instructions.
- *
- * SSO works like this: a full 32x32.64-bit multiply of two mad_fixed_t
- * values requires the result to be right-shifted 28 bits to be properly
- * scaled to the same fixed-point format. Right shifts can be applied at any
- * time to either operand or to the result, so the optimization involves
- * careful placement of these shifts to minimize the loss of accuracy.
- *
- * First, a 14-bit shift is applied with rounding at compile-time to the D[]
- * table of coefficients for the subband synthesis window. This only loses 2
- * bits of accuracy because the lower 12 bits are always zero. A second
- * 12-bit shift occurs after the DCT calculation. This loses 12 bits of
- * accuracy. Finally, a third 2-bit shift occurs just before the sample is
- * saved in the PCM buffer. 14 + 12 + 2 == 28 bits.
- */
-
-/* FPM_DEFAULT without OPT_SSO will actually lose accuracy and performance */
-
-# if defined(FPM_DEFAULT) && !defined(OPT_SSO)
-#  define OPT_SSO
-# endif
-
-/* second SSO shift, with rounding */
-
-# if defined(OPT_SSO)
-#  define SHIFT(x)  (((x) + (1L << 11)) >> 12)
-# else
-#  define SHIFT(x)  (x)
-# endif
 
 /* possible DCT speed optimization */
 
