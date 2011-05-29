@@ -21,11 +21,11 @@ Mad.memcpy = function (dst, dstOffset, src, srcOffset, length) {
 }
 
 Mad.rshift = function (num, bits) {
-    return num / Math.pow(2,bits);
+    return Math.floor(num / Math.pow(2, bits));
 }
 
 Mad.lshift = function (num, bits) {
-    return num * Math.pow(2,bits);
+    return num * Math.pow(2, bits);
 }
 
 Mad.bitwiseOr = function (a, b) {
