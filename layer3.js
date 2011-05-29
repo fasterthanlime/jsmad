@@ -974,7 +974,7 @@ Mad.III_imdct_s = function (X /* [18] */, z /* [36] */)
  * NAME:	III_imdct_l()
  * DESCRIPTION:	perform IMDCT and windowing for long blocks
  */
-Mad.III_imdct_l = function (X, z, block_type) {
+Mad.III_imdct_l = function (X /* 18 */, z /* 36 */, block_type) {
   /* IMDCT */
   imdct36(X, z);
 
@@ -1044,6 +1044,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
         var granule = si.gr[gr];
         var sfbwidth = [];
         /* unsigned char const *sfbwidth[2]; */
+        var l = 0;
         var xr = [ new Float64Array(new ArrayBuffer(8 * 576)), new Float64Array(new ArrayBuffer(8 * 576)) ];
         
         var error;
@@ -1113,13 +1114,13 @@ Mad.III_decode = function (ptr, frame, si, nch) {
 
                 /* long blocks */
                 for (var sb = 0; sb < 2; ++sb, l += 18) {
-                    Mad.III_imdct_l(xr[ch][l], output, block_type);
+                    Mad.III_imdct_l(xr[ch].subarray(l, l + 18), output, block_type);
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
                 }
             } else {
                 /* short blocks */
                 for (var sb = 0; sb < 2; ++sb, l += 18) {
-                    Mad.III_imdct_s(xr[ch][l], output);
+                    Mad.III_imdct_s(xr[ch].subarray(l, l + 18), output);
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
                 }
             }
@@ -1136,7 +1137,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
             if (channel.block_type != 2) {
                 /* long blocks */
                 for (var sb = 2; sb < sblimit; ++sb, l += 18) {
-                    Mad.III_imdct_l(xr[ch][l], output, channel.block_type);
+                    Mad.III_imdct_l(xr[ch].subarray(l, l + 18), output, channel.block_type);
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
 
                     if (sb & 1)
@@ -1145,7 +1146,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
             } else {
                 /* short blocks */
                 for (var sb = 2; sb < sblimit; ++sb, l += 18) {
-                    Mad.III_imdct_s(xr[ch][l], output);
+                    Mad.III_imdct_s(xr[ch].subarray(l, l + 18), output);
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
 
                     if (sb & 1)
@@ -1398,6 +1399,10 @@ Mad.III_exponents = function(channel, sfbwidth, exponents) {
 }
 
 Mad.III_requantize = function(value, exp) {
+    // DEBUG
+    return value;
+    // END DEBUG
+    
     var frac = exp % 4;
     
     exp /= 4;
