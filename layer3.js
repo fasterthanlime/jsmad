@@ -1412,3 +1412,17 @@ Mad.III_aliasreduce = function(xr, lines) {
         }
     }
 }
+
+Mad.III_overlap(output /* [36] */, overlap /* [18] */, sample /* [18][32] */, sb) {
+    for (i = 0; i < 18; ++i) {
+        sample[i][sb] = output[i +  0] + overlap[i];
+        overlap[i]    = output[i + 18];
+    }
+}
+
+Mad.III_overlap_z(output /* [36] */, overlap /* [18] */, sample /* [18][32] */, sb) {
+    for (i = 0; i < 18; ++i) {
+      sample[i][sb] = overlap[i];
+      overlap[i]    = 0;
+    }
+}
