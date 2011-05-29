@@ -623,7 +623,191 @@ Mad.III_scalefactors = function (ptr, channel, gr0ch, scfsi) {
   return ptr.length(start);
 }
 
+var c0 = 2 * Math.cos( 1 * Math.PI / 18);
+var c1 = 2 * Math.cos( 3 * Math.PI / 18);
+var c2 = 2 * Math.cos( 4 * Math.PI / 18);
+var c3 = 2 * Math.cos( 5 * Math.PI / 18);
+var c4 = 2 * Math.cos( 7 * Math.PI / 18);
+var c5 = 2 * Math.cos( 8 * Math.PI / 18);
+var c6 = 2 * Math.cos(16 * Math.PI / 18);
 
+var fastsdct = function (x /* [9] */, y /* [18] */) {
+  var a0,  a1,  a2,  a3,  a4,  a5,  a6,  a7,  a8,  a9,  a10, a11, a12;
+  var a13, a14, a15, a16, a17, a18, a19, a20, a21, a22, a23, a24, a25;
+  var m0,  m1,  m2,  m3,  m4,  m5,  m6,  m7;
+
+  a0 = x[3] + x[5];
+  a1 = x[3] - x[5];
+  a2 = x[6] + x[2];
+  a3 = x[6] - x[2];
+  a4 = x[1] + x[7];
+  a5 = x[1] - x[7];
+  a6 = x[8] + x[0];
+  a7 = x[8] - x[0];
+
+  a8  = a0  + a2;
+  a9  = a0  - a2;
+  a10 = a0  - a6;
+  a11 = a2  - a6;
+  a12 = a8  + a6;
+  a13 = a1  - a3;
+  a14 = a13 + a7;
+  a15 = a3  + a7;
+  a16 = a1  - a7;
+  a17 = a1  + a3;
+
+  m0 = a17 * -c3;
+  m1 = a16 * -c0;
+  m2 = a15 * -c4;
+  m3 = a14 * -c1;
+  m4 = a5  * -c1;
+  m5 = a11 * -c6;
+  m6 = a10 * -c5;
+  m7 = a9  * -c2;
+
+  a18 =     x[4] + a4;
+  a19 = 2 * x[4] - a4;
+  a20 = a19 + m5;
+  a21 = a19 - m5;
+  a22 = a19 + m6;
+  a23 = m4  + m2;
+  a24 = m4  - m2;
+  a25 = m4  + m1;
+
+  /* output to every other slot for convenience */
+  y[ 0] = a18 + a12;
+  y[ 2] = m0  - a25;
+  y[ 4] = m7  - a20;
+  y[ 6] = m3;
+  y[ 8] = a21 - m6;
+  y[10] = a24 - m1;
+  y[12] = a12 - 2 * a18;
+  y[14] = a23 + m0;
+  y[16] = a22 + m7;
+}
+
+/* sdctII_scale[i] = 2 * cos(PI * (2 * i + 1) / (2 * 18)) */
+var sdctII_scale = [];
+for(var i = 0; i < 9; ++i) {
+    sdctII_scale[i] = 2 * Math.cos(Math.PI * (2 * i + 1) / (2 * 18));
+}
+
+var sdctII_tmp = new Float64Array(new ArrayBuffer(8 * 9));
+
+var sdctII = function (x /* [18] */, X /* [18] */) {
+  /* divide the 18-point SDCT-II into two 9-point SDCT-IIs */
+
+  /* even input butterfly */
+
+  for (i = 0; i < 9; ++i) {
+    sdctII_tmp[i] = x[i] + x[18 - i - 1];
+  }
+
+  fastsdct(sdctII_tmp, X);
+
+  /* odd input butterfly and scaling */
+
+  for (i = 0; i < 9; ++i) {
+    sdctII_tmp[i] = (x[i] - x[18 - i - 1]) * sdctII_scale[i];
+  }
+
+  fastsdct(sdctII_tmp, X.subarray(1));
+
+  /* output accumulation */
+  
+  for (i = 3; i < 18; i += 2) {
+    X[i] -= X[i - 2];
+  }
+}
+
+/* dctIV_scale[i] = 2 * cos(PI * (2 * i + 1) / (4 * 18)) */  
+var dctIV_scale = [];
+for(i = 0; i < 18; i++) {
+    dctIV_scale[i] = 2 * Math.cos(Math.PI * (2 * i + 1) / (4 * 18));
+}
+
+var dctIV_tmp = new Float64Array(new ArrayBuffer(8 * 18));
+
+var dctIV = function (y /* [18] */, X /* [18] */) {
+
+  /* scaling */
+
+  for (i = 0; i < 18; i += 3) {
+    dctIV_tmp[i + 0] = mad_f_mul(y[i + 0], scale[i + 0]);
+    dctIV_tmp[i + 1] = mad_f_mul(y[i + 1], scale[i + 1]);
+    dctIV_tmp[i + 2] = mad_f_mul(y[i + 2], scale[i + 2]);
+  }
+
+  /* SDCT-II */
+
+  sdctII(dctIV_tmp, X);
+
+  /* scale reduction and output accumulation */
+
+  X[0] /= 2;
+  for (i = 1; i < 17; i += 4) {
+    X[i + 0] = X[i + 0] / 2 - X[(i + 0) - 1];
+    X[i + 1] = X[i + 1] / 2 - X[(i + 1) - 1];
+    X[i + 2] = X[i + 2] / 2 - X[(i + 2) - 1];
+    X[i + 3] = X[i + 3] / 2 - X[(i + 3) - 1];
+  }
+  X[17] = X[17] / 2 - X[16];
+}
+
+var imdct36_tmp = new Float64Array(new ArrayBuffer(8 * 18));
+
+/*
+ * NAME:	imdct36
+ * DESCRIPTION:	perform X[18]->x[36] IMDCT using Szu-Wei Lee's fast algorithm
+ */
+var imdct36 = function (x /* [18] */, y /* [36] */) {
+  /* DCT-IV */
+  dctIV(x, imdct36_tmp);
+
+  /* convert 18-point DCT-IV to 36-point IMDCT */
+
+  for (var i =  0; i <  9; ++i) {
+    y[i] =  imdct36_tmp[9 + i];
+  }
+  for (var i =  9; i < 27; ++i) {
+    y[i] = -imdct36_tmp[36 - (9 + i) - 1];
+  }
+  for (var i = 27; i < 36; ++i) {
+    y[i] = -imdct36_tmp[i - 27];
+  }
+}
+
+
+/*
+ * NAME:	III_imdct_l()
+ * DESCRIPTION:	perform IMDCT and windowing for long blocks
+ */
+Mad.III_imdct_l = function (X, z, block_type) {
+  /* IMDCT */
+  imdct36(X, z);
+
+  /* windowing */
+
+  switch (block_type) {
+  case 0:  /* normal window */
+    for (var i = 0; i < 36; ++i) z[i] = z[i] * window_l[i];
+    break;
+
+  case 1:  /* start block */
+    for (var i =  0; i < 18; ++i) z[i] = z[i] * window_l[i];
+    /*  (var i = 18; i < 24; ++i) z[i] unchanged */
+    for (var i = 24; i < 30; ++i) z[i] = z[i] * window_s[i - 18];
+    for (var i = 30; i < 36; ++i) z[i] = 0;
+    break;
+
+  case 3:  /* stop block */
+    for (var i =  0; i <  6; ++i) z[i] = 0;
+    for (var i =  6; i < 12; ++i) z[i] = z[i] * window_s[i - 6];
+    /*  (var i = 12; i < 18; ++i) z[i] unchanged */
+    for (var i = 18; i < 36; ++i) z[i] = z[i] * window_l[i];
+    break;
+  }
+}
 
 /*
  * NAME:	III_decode()
