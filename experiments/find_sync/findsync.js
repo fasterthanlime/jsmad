@@ -39,7 +39,7 @@ function readFile() {
                 for(var i = 0; i < channelCount; ++i) {
                     //console.log("i = " + i);
                     sampleBuffer[index++] = synth.pcm.samples[i][offset] / 8.0;
-                    console.log(synth.pcm.samples[i][offset] / 8.0);
+                    //console.log(synth.pcm.samples[i][offset] / 8.0);
                 }
                 
                 offset++;
