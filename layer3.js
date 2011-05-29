@@ -1449,3 +1449,46 @@ Mad.III_overlap_z = function (overlap /* [18] */, sample /* [18][32] */, sb) {
       overlap[i]    = 0;
     }
 }
+
+Mad.III_reorder = function (xr /* [576] */, channel, sfbwidth /* [39] */) {
+    var tmp = new Float64Array(new ArrayBuffer(8 * 32 * 3 * 6));
+    var sbw = new Float64Array(new ArrayBuffer(8 * 3));
+    var sw  = new Float64Array(new ArrayBuffer(8 * 3));
+    
+    var sfbwidthPointer = 0;
+    
+    /* this is probably wrong for 8000 Hz mixed blocks */
+
+    var sb = 0;
+    if (channel.flags & Mad.mixed_block_flag) {
+      var sb = 2;
+
+      var l = 0;
+      while (l < 36)
+        l += sfbwidth[sfbwidthPointer++];
+    }
+
+    for (var w = 0; w < 3; ++w) {
+      sbw[w] = sb;
+      sw[w]  = 0;
+    }
+
+    f = sfbwidth[sfbwidthPointer++];
+    w = 0;
+
+    for (var l = 18 * sb; l < 576; ++l) {
+        if (f-- == 0) {
+            f = sfbwidth[sfbwidthPointer++] - 1;
+            w = (w + 1) % 3;
+        }
+        
+      tmp[sbw[w]* 32 * 3 + 32 * w + sw[w]++] = xr[l];
+
+      if (sw[w] == 6) {
+        sw[w] = 0;
+        ++sbw[w];
+      }
+    }
+    
+    Mad.memcpy(xr, 18 * sb, tmp, sb, 8 * (576 - 18 * sb));
+}
