@@ -69,6 +69,22 @@ var sfbwidth_table = [
   { l:  sfb_8000_long, s:  sfb_8000_short, m:  sfb_8000_mixed }*/
 ];
 
+/*
+ * fractional powers of two
+ * used for requantization and joint stereo decoding
+ *
+ * root_table[3 + x] = 2^(x/4)
+ */
+var root_table /* 7 */ = {
+  /* 2^(-3/4) */ 0.59460355750136,
+  /* 2^(-2/4) */ 0.70710678118655,
+  /* 2^(-1/4) */ 0.84089641525371,
+  /* 2^( 0/4) */ 1.00000000000000,
+  /* 2^(+1/4) */ 1.18920711500272,
+  /* 2^(+2/4) */ 1.41421356237310,
+  /* 2^(+3/4) */ 1.68179283050743
+};
+
 Mad.count1table_select = 0x01;
 Mad.scalefac_scale     = 0x02;
 Mad.preflag	           = 0x04;
@@ -339,7 +355,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
   /* count1 */
   {
-    var table = Mad.huff_quad_table[channel.flags & count1table_select];
+    var table = Mad.huff_quad_table[channel.flags & Mad.count1table_select];
     var requantized = Mad.III_requantize(1, exp);
 
     while (cachesz + bits_left > 0 && xrptr <= 572) {
@@ -1004,25 +1020,15 @@ Mad.III_requantize = function(value, exp) {
     
     exp /= 4;
     
-    power = result;
-    
-    power = rq_table[value];
+    power = Mad.rq_table[value];
     requantized = power.mantissa;
     exp += power.exponent;
     
     if (exp < 0) {
-        if (-exp >= sizeof(mad_fixed_t) * CHAR_BIT) {
-            requantized = 0;
-        } else {
-            requantized += 1 << (-exp - 1);
-            requantized >>= -exp;
-        }
+        requantized += 1 << (-exp - 1);
+        requantized >>= -exp;
     } else {
-        if (exp >= 5) {
-            requntized = MAD_F_MAX;
-        } else {
-            requntized <<= exp;
-        }
+        requantized <<= exp;
     }
     
     return frac ? requantized * root_table[3 + frac] : requantized;
