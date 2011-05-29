@@ -241,22 +241,22 @@ void dct32(mad_fixed_t const in[32], unsigned int slot,
   t113 = t69  + t70;
   t114 = t71  + t72;
 
-  /*  0 */ hi[15][slot] = SHIFT(t113 + t114);
-  /* 16 */ lo[ 0][slot] = SHIFT(MUL(t113 - t114, costab16));
+  /*  0 */ hi[15][slot] = t113 + t114;
+  /* 16 */ lo[ 0][slot] = MUL(t113 - t114, costab16);
 
   t115 = t73  + t74;
   t116 = t75  + t76;
 
   t32  = t115 + t116;
 
-  /*  1 */ hi[14][slot] = SHIFT(t32);
+  /*  1 */ hi[14][slot] = t32;
 
   t118 = t78  + t79;
   t119 = t80  + t81;
 
   t58  = t118 + t119;
 
-  /*  2 */ hi[13][slot] = SHIFT(t58);
+  /*  2 */ hi[13][slot] = t58;
 
   t121 = t83  + t84;
   t122 = t85  + t86;
@@ -265,14 +265,14 @@ void dct32(mad_fixed_t const in[32], unsigned int slot,
 
   t49  = (t67 * 2) - t32;
 
-  /*  3 */ hi[12][slot] = SHIFT(t49);
+  /*  3 */ hi[12][slot] = t49;
 
   t125 = t89  + t90;
   t126 = t91  + t92;
 
   t93  = t125 + t126;
 
-  /*  4 */ hi[11][slot] = SHIFT(t93);
+  /*  4 */ hi[11][slot] = t93;
 
   t128 = t94  + t95;
   t129 = t96  + t97;
@@ -281,7 +281,7 @@ void dct32(mad_fixed_t const in[32], unsigned int slot,
 
   t68  = (t98 * 2) - t49;
 
-  /*  5 */ hi[10][slot] = SHIFT(t68);
+  /*  5 */ hi[10][slot] = t68;
 
   t132 = t100 + t101;
   t133 = t102 + t103;
@@ -290,7 +290,7 @@ void dct32(mad_fixed_t const in[32], unsigned int slot,
 
   t82  = (t104 * 2) - t58;
 
-  /*  6 */ hi[ 9][slot] = SHIFT(t82);
+  /*  6 */ hi[ 9][slot] = t82;
 
   t136 = t106 + t107;
   t137 = t108 + t109;
@@ -301,15 +301,15 @@ void dct32(mad_fixed_t const in[32], unsigned int slot,
 
   t77  = (t87 * 2) - t68;
 
-  /*  7 */ hi[ 8][slot] = SHIFT(t77);
+  /*  7 */ hi[ 8][slot] = t77;
 
   t141 = MUL(t69 - t70, costab8);
   t142 = MUL(t71 - t72, costab24);
   t143 = t141 + t142;
 
-  /*  8 */ hi[ 7][slot] = SHIFT(t143);
+  /*  8 */ hi[ 7][slot] = t143;
   /* 24 */ lo[ 8][slot] =
-	     SHIFT((MUL(t141 - t142, costab16) * 2) - t143);
+	     (MUL(t141 - t142, costab16) * 2) - t143;
 
   t144 = MUL(t73 - t74, costab8);
   t145 = MUL(t75 - t76, costab24);
@@ -317,7 +317,7 @@ void dct32(mad_fixed_t const in[32], unsigned int slot,
 
   t88  = (t146 * 2) - t77;
 
-  /*  9 */ hi[ 6][slot] = SHIFT(t88);
+  /*  9 */ hi[ 6][slot] = t88;
 
   t148 = MUL(t78 - t79, costab8);
   t149 = MUL(t80 - t81, costab24);
@@ -325,7 +325,7 @@ void dct32(mad_fixed_t const in[32], unsigned int slot,
 
   t105 = (t150 * 2) - t82;
 
-  /* 10 */ hi[ 5][slot] = SHIFT(t105);
+  /* 10 */ hi[ 5][slot] = t105;
 
   t152 = MUL(t83 - t84, costab8);
   t153 = MUL(t85 - t86, costab24);
@@ -335,7 +335,7 @@ void dct32(mad_fixed_t const in[32], unsigned int slot,
 
   t99  = (t111 * 2) - t88;
 
-  /* 11 */ hi[ 4][slot] = SHIFT(t99);
+  /* 11 */ hi[ 4][slot] = t99;
 
   t157 = MUL(t89 - t90, costab8);
   t158 = MUL(t91 - t92, costab24);
@@ -343,13 +343,13 @@ void dct32(mad_fixed_t const in[32], unsigned int slot,
 
   t127 = (t159 * 2) - t93;
 
-  /* 12 */ hi[ 3][slot] = SHIFT(t127);
+  /* 12 */ hi[ 3][slot] = t127;
 
   t160 = (MUL(t125 - t126, costab16) * 2) - t127;
 
-  /* 20 */ lo[ 4][slot] = SHIFT(t160);
+  /* 20 */ lo[ 4][slot] = t160;
   /* 28 */ lo[12][slot] =
-	     SHIFT((((MUL(t157 - t158, costab16) * 2) - t159) * 2) - t160);
+	     (((MUL(t157 - t158, costab16) * 2) - t159) * 2) - t160;
 
   t161 = MUL(t94 - t95, costab8);
   t162 = MUL(t96 - t97, costab24);
@@ -359,7 +359,7 @@ void dct32(mad_fixed_t const in[32], unsigned int slot,
 
   t112 = (t130 * 2) - t99;
 
-  /* 13 */ hi[ 2][slot] = SHIFT(t112);
+  /* 13 */ hi[ 2][slot] = t112;
 
   t164 = (MUL(t128 - t129, costab16) * 2) - t130;
 
@@ -371,23 +371,23 @@ void dct32(mad_fixed_t const in[32], unsigned int slot,
 
   t120 = (t134 * 2) - t105;
 
-  /* 14 */ hi[ 1][slot] = SHIFT(t120);
+  /* 14 */ hi[ 1][slot] = t120;
 
   t135 = (MUL(t118 - t119, costab16) * 2) - t120;
 
-  /* 18 */ lo[ 2][slot] = SHIFT(t135);
+  /* 18 */ lo[ 2][slot] = t135;
 
   t169 = (MUL(t132 - t133, costab16) * 2) - t134;
 
   t151 = (t169 * 2) - t135;
 
-  /* 22 */ lo[ 6][slot] = SHIFT(t151);
+  /* 22 */ lo[ 6][slot] = t151;
 
   t170 = (((MUL(t148 - t149, costab16) * 2) - t150) * 2) - t151;
 
-  /* 26 */ lo[10][slot] = SHIFT(t170);
+  /* 26 */ lo[10][slot] = t170;
   /* 30 */ lo[14][slot] =
-	     SHIFT((((((MUL(t166 - t167, costab16) * 2) -
+	     (((((MUL(t166 - t167, costab16) * 2 -
 		       t168) * 2) - t169) * 2) - t170);
 
   t171 = MUL(t106 - t107, costab8);
@@ -402,19 +402,19 @@ void dct32(mad_fixed_t const in[32], unsigned int slot,
 
   t117 = (t123 * 2) - t112;
 
-  /* 15 */ hi[ 0][slot] = SHIFT(t117);
+  /* 15 */ hi[ 0][slot] = t117;
 
   t124 = (MUL(t115 - t116, costab16) * 2) - t117;
 
-  /* 17 */ lo[ 1][slot] = SHIFT(t124);
+  /* 17 */ lo[ 1][slot] = t124;
 
   t131 = (t139 * 2) - t124;
 
-  /* 19 */ lo[ 3][slot] = SHIFT(t131);
+  /* 19 */ lo[ 3][slot] = t131;
 
   t140 = (t164 * 2) - t131;
 
-  /* 21 */ lo[ 5][slot] = SHIFT(t140);
+  /* 21 */ lo[ 5][slot] = t140;
 
   t174 = (MUL(t136 - t137, costab16) * 2) - t138;
 
@@ -422,24 +422,24 @@ void dct32(mad_fixed_t const in[32], unsigned int slot,
 
   t147 = (t155 * 2) - t140;
 
-  /* 23 */ lo[ 7][slot] = SHIFT(t147);
+  /* 23 */ lo[ 7][slot] = t147;
 
   t156 = (((MUL(t144 - t145, costab16) * 2) - t146) * 2) - t147;
 
-  /* 25 */ lo[ 9][slot] = SHIFT(t156);
+  /* 25 */ lo[ 9][slot] = t156;
 
   t175 = (((MUL(t152 - t153, costab16) * 2) - t154) * 2) - t155;
 
   t165 = (t175 * 2) - t156;
 
-  /* 27 */ lo[11][slot] = SHIFT(t165);
+  /* 27 */ lo[11][slot] = t165;
 
   t176 = (((((MUL(t161 - t162, costab16) * 2) -
 	     t163) * 2) - t164) * 2) - t165;
 
-  /* 29 */ lo[13][slot] = SHIFT(t176);
+  /* 29 */ lo[13][slot] = t176;
   /* 31 */ lo[15][slot] =
-	     SHIFT((((((((MUL(t171 - t172, costab16) * 2) -
+	     (((((((MUL(t171 - t172, costab16) * 2 -
 			 t173) * 2) - t174) * 2) - t175) * 2) - t176);
 
   /*
@@ -464,20 +464,20 @@ void dct32(mad_fixed_t const in[32], unsigned int slot,
 #  define MLA(hi, lo, x, y)	((lo) += (x) * (y))
 #  define MLN(hi, lo)		((lo)  = -(lo))
 #  define MLZ(hi, lo)		((void) (hi), (mad_fixed_t) (lo))
-#  define SHIFT(x)		((x) >> 2)
-#  define PRESHIFT(x)		((MAD_F(x) + (1L << 13)) >> 14)
+#  define x)		((x) >> 2
+#  define PREx)		((MAD_F(x) + (1L << 13)) >> 14
 # else
 #  define ML0(hi, lo, x, y)	MAD_F_ML0((hi), (lo), (x), (y))
 #  define MLA(hi, lo, x, y)	MAD_F_MLA((hi), (lo), (x), (y))
 #  define MLN(hi, lo)		MAD_F_MLN((hi), (lo))
 #  define MLZ(hi, lo)		MAD_F_MLZ((hi), (lo))
-#  define SHIFT(x)		(x)
+#  define x)		(x
 #  if defined(MAD_F_SCALEBITS)
 #   undef  MAD_F_SCALEBITS
 #   define MAD_F_SCALEBITS	(MAD_F_FRACBITS - 12)
-#   define PRESHIFT(x)		(MAD_F(x) >> 12)
+#   define PREx)		(MAD_F(x) >> 12
 #  else
-#   define PRESHIFT(x)		MAD_F(x)
+#   define PREx)		MAD_F(x
 #  endif
 # endif
 
@@ -548,7 +548,7 @@ void synth_full(struct mad_synth *synth, struct mad_frame const *frame,
       MLA(hi, lo, (*fe)[6], ptr[ 4]);
       MLA(hi, lo, (*fe)[7], ptr[ 2]);
 
-      *pcm1++ = SHIFT(MLZ(hi, lo));
+      *pcm1++ = MLZ(hi, lo);
 
       pcm2 = pcm1 + 30;
 
@@ -579,7 +579,7 @@ void synth_full(struct mad_synth *synth, struct mad_frame const *frame,
 	MLA(hi, lo, (*fe)[1], ptr[14]);
 	MLA(hi, lo, (*fe)[0], ptr[ 0]);
 
-	*pcm1++ = SHIFT(MLZ(hi, lo));
+	*pcm1++ = MLZ(hi, lo);
 
 	ptr = *Dptr - pe;
 	ML0(hi, lo, (*fe)[0], ptr[31 - 16]);
@@ -601,7 +601,7 @@ void synth_full(struct mad_synth *synth, struct mad_frame const *frame,
 	MLA(hi, lo, (*fo)[1], ptr[31 - 14]);
 	MLA(hi, lo, (*fo)[0], ptr[31 - 16]);
 
-	*pcm2-- = SHIFT(MLZ(hi, lo));
+	*pcm2-- = MLZ(hi, lo);
 
 	++fo;
       }
@@ -618,7 +618,7 @@ void synth_full(struct mad_synth *synth, struct mad_frame const *frame,
       MLA(hi, lo, (*fo)[6], ptr[ 4]);
       MLA(hi, lo, (*fo)[7], ptr[ 2]);
 
-      *pcm1 = SHIFT(-MLZ(hi, lo));
+      *pcm1 = -MLZ(hi, lo);
       pcm1 += 16;
 
       phase = (phase + 1) % 16;
@@ -685,7 +685,7 @@ void synth_half(struct mad_synth *synth, struct mad_frame const *frame,
       MLA(hi, lo, (*fe)[6], ptr[ 4]);
       MLA(hi, lo, (*fe)[7], ptr[ 2]);
 
-      *pcm1++ = SHIFT(MLZ(hi, lo));
+      *pcm1++ = MLZ(hi, lo);
 
       pcm2 = pcm1 + 14;
 
@@ -717,7 +717,7 @@ void synth_half(struct mad_synth *synth, struct mad_frame const *frame,
 	  MLA(hi, lo, (*fe)[1], ptr[14]);
 	  MLA(hi, lo, (*fe)[0], ptr[ 0]);
 
-	  *pcm1++ = SHIFT(MLZ(hi, lo));
+	  *pcm1++ = MLZ(hi, lo);
 
 	  ptr = *Dptr - po;
 	  ML0(hi, lo, (*fo)[7], ptr[31 -  2]);
@@ -739,7 +739,7 @@ void synth_half(struct mad_synth *synth, struct mad_frame const *frame,
 	  MLA(hi, lo, (*fe)[6], ptr[31 -  4]);
 	  MLA(hi, lo, (*fe)[7], ptr[31 -  2]);
 
-	  *pcm2-- = SHIFT(MLZ(hi, lo));
+	  *pcm2-- = MLZ(hi, lo);
 	}
 
 	++fo;
@@ -757,7 +757,7 @@ void synth_half(struct mad_synth *synth, struct mad_frame const *frame,
       MLA(hi, lo, (*fo)[6], ptr[ 4]);
       MLA(hi, lo, (*fo)[7], ptr[ 2]);
 
-      *pcm1 = SHIFT(-MLZ(hi, lo));
+      *pcm1 = -MLZ(hi, lo);
       pcm1 += 8;
 
       phase = (phase + 1) % 16;
