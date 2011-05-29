@@ -570,3 +570,32 @@ Mad.III_exponents = function(channel, sfbwidth, exponents) {
         }
     }
 }
+
+Mad.III_requantize = function(value, exp) {
+    var frac = exp % 4;
+    
+    exp /= 4;
+    
+    power = result;
+    
+    power = rq_table[value];
+    requantized = power->mantissa;
+    exp += power->exponent;
+    
+    if (exp < 0) {
+        if (-exp >= sizeof(mad_fixed_t) * CHAR_BIT) {
+            requantized = 0;
+        } else {
+            requantized += 1 << (-exp - 1);
+            requantized >>= -exp;
+        }
+    } else {
+        if (exp >= 5) {
+            requntized = MAD_F_MAX;
+        } else {
+            requntized <<= exp;
+        }
+    }
+    
+    return frac ? requantized * root_table[3 + frac] : requantized;
+}
