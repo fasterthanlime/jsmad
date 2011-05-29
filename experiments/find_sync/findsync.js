@@ -22,7 +22,7 @@ function readFile() {
                 console.log("Error! code = " + stream.error);
             }
             
-            if(STEPS_COUNT++ >= 4) break;
+            //if(STEPS_COUNT++ >= 4) break;
         }
     });
     
