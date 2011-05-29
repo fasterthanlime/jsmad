@@ -944,3 +944,78 @@ Mad.layer_III = function (stream, frame) {
 
     return result;
 }
+
+Mad.III_exponents = function(channel, sfbwidth, exponents) {
+    var gain = channel.global_gain - 210;
+    var scalefac_multiplier = (channel.flags & scalefac_scale) ? 2 : 1;
+    
+    if (channel.block_type == 2) {
+        var sfbi = 0, l = 0;
+        
+        if (channel.flags & mixed_block_flag) {
+            var premask = (channel.flags & preflag) ? ~0 : 0;
+            
+            /* long block subbands 0-1 */
+            
+            while (l < 36) {
+                exponents[sfbi] = gain - ((channel.scalefac[sfbi] + (pretab[sfbi] & premask)) << scalefac_multiplier);
+                
+                l += sfbwidth[sfbi++]
+            }
+        }
+        
+        /* this is probably wrong for 8000 Hz short/mixed blocks */
+        
+        var gain0 = gain - 8 * channel.subblock_gain[0];
+        var gain1 = gain - 8 * channel.subblock_gain[1];
+        var gain2 = gain - 8 * channel.subblock_gain[2];
+        
+        while (l < 576) {
+            exponents[sfbi + 0] = gain0 - (channel.scalefac[sfbi + 0] << scalefac_multiplier);
+            exponents[sfbi + 1] = gain1 - (channel.scalefac[sfbi + 1] << scalefac_multiplier);
+            exponents[sfbi + 2] = gain2 - (channel.scalefac[sfbi + 2] << scalefac_multiplier);
+            
+            l    += 3 * sfbwidth[sfbi];
+            sfbi += 3;
+        }
+    } else { /* channel->block_type != 2 */
+        if (channel.flags & preflag) {
+            for (var sfbi = 0; sfbi < 22; ++sfbi) {
+                exponents[sfbi] = gain - ((channel.scalefac[sfbi] + pretab[sfbi]) << scalefac_multiplier
+            }
+        } else {
+            for (var sfbi = 0; sfbi < 22; ++sfbi) {
+                exponents[sfbi] = gain - (channel.scalefac[sfbi] << scalefac_multiplier
+            }
+        }
+    }
+}
+
+Mad.III_requantize = function(value, exp) {
+    var frac = exp % 4;
+    
+    exp /= 4;
+    
+    power = result;
+    
+    power = rq_table[value];
+    requantized = power->mantissa;
+    exp += power->exponent;
+    
+    if (exp < 0) {
+        if (-exp >= sizeof(mad_fixed_t) * CHAR_BIT) {
+            requantized = 0;
+        } else {
+            requantized += 1 << (-exp - 1);
+            requantized >>= -exp;
+        }
+    } else {
+        if (exp >= 5) {
+            requntized = MAD_F_MAX;
+        } else {
+            requntized <<= exp;
+        }
+    }
+    
+    return frac ? requantized * root_table[3 + frac] : requantized;
+}
