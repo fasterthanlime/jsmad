@@ -442,7 +442,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                     requantized = reqcache[value];
                 else {
                     reqhits |= (1 << value);
-                    requantized = reqcache[value] = III_requantize(value, exp);
+                    requantized = reqcache[value] = Mad.III_requantize(value, exp);
                 }
 
                 xr[xrptr + 1] = Mad.MASK1BIT(bitcache, cachesz--) ?
@@ -1278,11 +1278,7 @@ Mad.layer_III = function (stream, frame) {
 
     /* decode main_data */
     if (result == 0) {
-        var result = Mad.III_decode(ptr, frame, si, nch);
-        
-        ptr = result.ptr;
-        si = result.si;
-        error = result.error;
+        error = Mad.III_decode(ptr, frame, si, nch);
         
         if (error) {
           stream.error = error;
