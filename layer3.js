@@ -1140,7 +1140,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
 
                     if (sb & 1)
-                        sample = Mad.III_freqinver(sample, sb);
+                        Mad.III_freqinver(sample, sb);
                 }
             } else {
                 /* short blocks */
@@ -1402,15 +1402,15 @@ Mad.III_requantize = function(value, exp) {
     
     exp /= 4;
     
-    power = Mad.rq_table[value];
-    requantized = power[0];
+    var power = Mad.rq_table[value];
+    var requantized = power[0];
     exp += power[1];
     
     if (exp < 0) {
-        requantized += 1 << (-exp - 1);
-        requantized >>= -exp;
+        requantized += Math.pow(2, -exp - 1);
+        requantized / Math.pow(2, exp);
     } else {
-        requantized <<= exp;
+        requantized * Math.pow(2, exp);
     }
     
     return frac ? requantized * root_table[3 + frac] : requantized;
