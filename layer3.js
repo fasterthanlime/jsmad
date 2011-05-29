@@ -1033,3 +1033,23 @@ Mad.III_requantize = function(value, exp) {
     
     return frac ? requantized * root_table[3 + frac] : requantized;
 }
+
+Mad.III_aliasreduce = function(xr, lines) {
+    var xrPointer = 0;
+    
+    for (xrPointer += 18; xr < lines; xr += 18) {
+      for (i = 0; i < 8; ++i) {
+        var a = xr[xrPointer - i - 1];
+        var b = xr[xrPointer + i];
+        
+        /* TODO: Fix precision? */
+        
+        var lo =  a * cs[i] - b * ca[i];
+        
+        xr[xrPointer - i - 1] = lo;
+        
+        lo =  a * cs[i] + b * ca[i];
+        
+        xr[xrPointer + i] = lo
+    }
+}
