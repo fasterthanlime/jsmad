@@ -62,7 +62,7 @@ Mad.Bit.prototype.skip = function(len) {
  * DESCRIPTION:	read an arbitrary number of bits and return their UIMSBF value
  */
 Mad.Bit.prototype.read = function(len) {
-    if(len > 31) return this.readBig(len);
+    if(len > 16) return this.readBig(len);
     
     var value = 0;
 
