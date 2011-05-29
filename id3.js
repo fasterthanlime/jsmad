@@ -12,7 +12,7 @@ function ID3_skipHeader(stream) {
     stream.readChars(3);
     
     // skip flags
-    var flags = stream.readChars(2);
+    var flags = stream.readChars(3);
     
     // read header length
     var size = stream.readU8() << 21 | stream.readU8() << 14 | stream.readU8() << 7 | stream.readU8();
