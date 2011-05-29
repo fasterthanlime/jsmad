@@ -250,7 +250,6 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
     var sfbwidthptr = 0;
     
     bits_left = channel.part2_3_length - part2_length;
-    console.log("part2_3_length = " + channel.part2_3_length, ", part2_length " + part2_length, ", bits_left = " + bits_left)
     
     if (bits_left < 0)
         return Mad.Error.BADPART3LEN;
@@ -329,8 +328,8 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
             if (cachesz < 21) {
                 var bits       = ((32 - 1 - 21) + (21 - cachesz)) & ~7;
-                bitcache   = (bitcache << bits) | peek.read(bits);
-                //console.log("bits_left (before -= bits) = " + bits_left + ", bits = " + bits + ", cachesz = " + cachesz);
+                bitcache   = Mad.bitwiseOr(Mad.lshift(bitcache, bits), peek.read(bits));
+                console.log("bits_left (before -= bits) = " + bits_left + ", bits = " + bits + ", cachesz = " + cachesz);
                 cachesz   += bits;
                 bits_left -= bits;
             }
@@ -339,17 +338,18 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
             clumpsz = startbits;
             pair    = table[Mad.MASK(bitcache, cachesz, clumpsz)];
             
+            console.log("bitcache = " + bitcache + ", cachesz = " + cachesz + ", clumpsz = " + clumpsz);
             console.log("initial pair = " + (Mad.MASK(bitcache, cachesz, clumpsz)) + ", final? = " + pair.final);
 
             while (!pair.final) {
                 cachesz -= clumpsz;
 
                 clumpsz = pair.ptr.bits;
-                console.log("next pair = " + (pair.ptr.offset + Mad.MASK(bitcache, cachesz, clumpsz)) + ", final? = " + pair.final);
+                //console.log("next pair = " + (pair.ptr.offset + Mad.MASK(bitcache, cachesz, clumpsz)) + ", final? = " + pair.final);
                 pair    = table[pair.ptr.offset + Mad.MASK(bitcache, cachesz, clumpsz)];
             }
 
-            console.log("hlen = " + pair.value.hlen + ", linbits = " + linbits + ", x = " + pair.value.x + ", y = " + pair.value.y);
+            //console.log("hlen = " + pair.value.hlen + ", linbits = " + linbits + ", x = " + pair.value.x + ", y = " + pair.value.y);
             cachesz -= pair.value.hlen;
 
             if (linbits) {
@@ -364,7 +364,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
                     case 15:
                       if (cachesz < linbits + 2) {
-                        bitcache   = (bitcache << 16) | peek.read(16);
+                        bitcache   = Mad.bitwiseOr(Mad.lshift(bitcache, 16), peek.read(16));
                         cachesz   += 16;
                         bits_left -= 16;
                       }
@@ -387,7 +387,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                 }
                 
                 if(x_final) {
-                      console.log("doing x_final");
+                      //console.log("doing x_final");
                       xr[xrptr] = Mad.MASK1BIT(bitcache, cachesz--) ?
                         -requantized : requantized;
                 }
@@ -403,7 +403,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
                     case 15:
                         if (cachesz < linbits + 1) {
-                            bitcache   = (bitcache << 16) | peek.read(16);
+                            bitcache   = Mad.bitwiseOr(Mad.lshift(bitcache, 16), peek.read(16));
                             cachesz   += 16;
                             bits_left -= 16;
                         }
@@ -427,7 +427,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                 }
                 
                 if(y_final) {
-                  console.log("doing y_final");
+                  //console.log("doing y_final");
                   xr[xrptr + 1] = Mad.MASK1BIT(bitcache, cachesz--) ?
                     -requantized : requantized;
                 }
@@ -486,7 +486,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
     while (cachesz + bits_left > 0 && xrptr <= 572) {
         /* hcod (1..6) */
         if (cachesz < 10) {
-            bitcache   = (bitcache << 16) | peek.read(16);
+            bitcache   = Mad.bitwiseOr(Mad.lshift(bitcache, 16), peek.read(16));
             cachesz   += 16;
             bits_left -= 16;
         }
@@ -687,7 +687,7 @@ Mad.III_scalefactors = function (ptr, channel, gr0ch, scfsi) {
   var start; /* Mad.Bit */
   var slen1, slen2, sfbi;
 
-  var start = ptr;
+  var start = ptr.clone();
 
   var slen1 = sflen_table[channel.scalefac_compress].slen1;
   var slen2 = sflen_table[channel.scalefac_compress].slen2;
@@ -747,7 +747,7 @@ Mad.III_scalefactors = function (ptr, channel, gr0ch, scfsi) {
     channel.scalefac[21] = 0;
   }
 
-  return ptr.length(start);
+  return start.length(ptr);
 }
 
 var c0 = 2 * Math.cos( 1 * Math.PI / 18);

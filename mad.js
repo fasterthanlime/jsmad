@@ -20,6 +20,10 @@ Mad.memcpy = function (dst, dstOffset, src, srcOffset, length) {
     return dst.slice(0, dstOffset) + src.slice(srcOffset, srcOffset + length) + dst.slice(dstOffset + length);
 }
 
+Mad.rshift = function (num, bits) {
+    return num / Math.pow(2,bits);
+}
+
 Mad.lshift = function (num, bits) {
     return num * Math.pow(2,bits);
 }

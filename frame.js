@@ -252,7 +252,7 @@ Mad.Header.decode = function(stream) {
         header = Mad.Header.actually_decode(stream);
         if(header == null) return null; // well Duh^2
         
-        console.log("============= Decoding layer " + header.layer + " audio in mode " +
+        console.log("============= Decoding layer " + header.layer + " audio mode " +
             header.mode + " with " + header.bitrate +
             " bps and a samplerate of " + header.samplerate);
 

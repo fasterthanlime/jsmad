@@ -7,7 +7,7 @@ function readFile() {
     
     // Perform file ops
     Mad.Stream.fromFile(file, function(stream) {
-        console.log("Reading a " + Math.round(stream.bufend / 1024) + "KB file");
+        //console.log("Reading a " + Math.round(stream.bufend / 1024) + "KB file");
         ID3_skipHeader(stream);
         
         var STEPS_COUNT = 0;
