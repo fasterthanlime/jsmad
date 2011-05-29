@@ -153,7 +153,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
         sfbound = xrptr + sfbwidth[sfbwidthptr++];
         rcount  = channel.region0_count + 1;
 
-        var entry = mad_huff_pair_table[channel.table_select[region]];
+        var entry = Mad.huff_pair_table[channel.table_select[region]];
         var table     = entry.table;
         var linbits   = entry.linbits;
         var startbits = entry.startbits;
@@ -181,7 +181,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                     else
                         rcount = 0;  /* all remaining */
 
-                    entry     = mad_huff_pair_table[channel.table_select[++region]];
+                    entry     = Mad.huff_pair_table[channel.table_select[++region]];
                     table     = entry.table;
                     linbits   = entry.linbits;
                     startbits = entry.startbits;
@@ -339,7 +339,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
   /* count1 */
   {
-    var table = mad_huff_quad_table[channel.flags & count1table_select];
+    var table = Mad.huff_quad_table[channel.flags & count1table_select];
     var requantized = Mad.III_requantize(1, exp);
 
     while (cachesz + bits_left > 0 && xrptr <= 572) {

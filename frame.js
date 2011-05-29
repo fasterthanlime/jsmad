@@ -147,7 +147,7 @@ Mad.Header.actually_decode = function(stream) {
 
     /* private_bit */
     if (stream.ptr.read(1))
-        header.private_bits |= MAD_PRIVATE_HEADER;
+        header.private_bits |= Mad.Private.HEADER;
 
     /* mode */
     header.mode = 3 - stream.ptr.read(2);
