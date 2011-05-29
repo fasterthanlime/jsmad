@@ -984,6 +984,17 @@ Mad.III_imdct_l = function (X, z, block_type) {
   }
 }
 
+
+/*
+ * NAME:	III_freqinver()
+ * DESCRIPTION:	perform subband frequency inversion for odd sample lines
+ */
+Mad.III_freqinver = function (sample /* [18][32] */, sb)
+{
+  for (var i = 1; i < 18; i += 2)
+    sample[i][sb] = -sample[i][sb];
+}
+
 /*
  * NAME:	III_decode()
  * DESCRIPTION:	decode frame main_data
@@ -1413,14 +1424,14 @@ Mad.III_aliasreduce = function(xr, lines) {
     }
 }
 
-Mad.III_overlap(output /* [36] */, overlap /* [18] */, sample /* [18][32] */, sb) {
+Mad.III_overlap = function (output /* [36] */, overlap /* [18] */, sample /* [18][32] */, sb) {
     for (i = 0; i < 18; ++i) {
         sample[i][sb] = output[i +  0] + overlap[i];
         overlap[i]    = output[i + 18];
     }
 }
 
-Mad.III_overlap_z(output /* [36] */, overlap /* [18] */, sample /* [18][32] */, sb) {
+Mad.III_overlap_z = function (overlap /* [18] */, sample /* [18][32] */, sb) {
     for (i = 0; i < 18; ++i) {
       sample[i][sb] = overlap[i];
       overlap[i]    = 0;
