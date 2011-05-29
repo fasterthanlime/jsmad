@@ -22,39 +22,49 @@ function readFile() {
         }
         
         var channelCount = frame.header.nchannels();
-        var preBufferSize = 32768;
+        var preBufferSize = file.length;
         var sampleRate = frame.header.samplerate;
+
+        console.log("playing " + channelCount + " channels, samplerate = " + sampleRate + " audio.");
 
         synth.frame(frame);
         var offset = 0;
 
         // Create a device.
         var dev = audioLib.AudioDevice(function(sampleBuffer) {
-            console.log("sample buffer type = " + typeof(sampleBuffer) + ", length = " + sampleBuffer.length + ", samples length = " + synth.pcm.samples[0].length);
             var index = 0;
             
             while(index < sampleBuffer.length) {
                 //console.log("index = " + index);
                 for(var i = 0; i < channelCount; ++i) {
                     //console.log("i = " + i);
-                    sampleBuffer[index++] = synth.pcm.samples[i][offset];
+                    sampleBuffer[index++] = synth.pcm.samples[i][offset] / 8.0;
+                    console.log(synth.pcm.samples[i][offset] / 8.0);
                 }
                 
                 offset++;
                 
                 if(offset >= synth.pcm.samples[0].length) {
-                    console.log("Decoding another frame!");
+                    offset = 0;
+                    
+                    //if(STEPS_COUNT++ > 10) {
+                    //    console.log("STEPS_COUNT = " + STEPS_COUNT + ", killing");
+                    //    dev.kill();
+                    //}
+                
                     frame = Mad.Frame.decode(stream);
                     if(frame == null) {
                         if(stream.error == Mad.Error.BUFLEN) {
                             console.log("End of file!");
-                            break;
+                            dev.kill();
                         }
                         console.log("Error! code = " + stream.error);
+                    } else {
+                        synth.frame(frame);
                     }
-                    synth.frame(frame);
                 }
             }
+        
         }, channelCount, preBufferSize, sampleRate);
     });
     
