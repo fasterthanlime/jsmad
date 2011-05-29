@@ -170,7 +170,8 @@ var V = function (x, y, hlen) {
         final:  1,
         value: {
             x: x,
-            y: y
+            y: y,
+            hlen: hlen
         }
     };
 }
@@ -3022,7 +3023,7 @@ var hufftab24 = [
 Mad.Hufftable = function(table, linbits, startbits) {
     this.table = table;
     this.linbits = linbits;
-    this.startsbits = startbits;
+    this.startbits = startbits;
 };
 
 /* external tables */

@@ -239,7 +239,6 @@ Mad.MASK1BIT = function (cache, sz) {
 Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth, part2_length) {
     var exponents = new Int32Array(new ArrayBuffer(4 * 39));
     var expptr = 0;
-    var peek;
     var bits_left, cachesz;
     var xrptr;
     var sfbound;
@@ -247,17 +246,21 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
     var sfbwidthptr = 0;
     
     bits_left = channel.part2_3_length - part2_length;
+    console.log("part2_3_length = " + channel.part2_3_length, ", part2_length " + part2_length, ", bits_left = " + bits_left)
+    
     if (bits_left < 0)
         return Mad.Error.BADPART3LEN;
 
     Mad.III_exponents(channel, sfbwidth, exponents);
 
-    peek = ptr;
+    var peek = ptr.clone();
     ptr.skip(bits_left);
 
     /* align bit reads to byte boundaries */
     cachesz  = peek.left;
+    console.log("cachesz bitsleft = " + cachesz);
     cachesz += ((32 - 1 - 24) + (24 - cachesz)) & ~7;
+    console.log("cachesz bitswrangling = " + cachesz);
 
     bitcache   = peek.read(cachesz);
     bits_left -= cachesz;
@@ -317,10 +320,13 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
                 ++expptr;
             }
+            
+            console.log("cachesz = " + cachesz);
 
             if (cachesz < 21) {
                 var bits       = ((32 - 1 - 21) + (21 - cachesz)) & ~7;
                 bitcache   = (bitcache << bits) | peek.read(bits);
+                //console.log("bits_left (before -= bits) = " + bits_left + ", bits = " + bits + ", cachesz = " + cachesz);
                 cachesz   += bits;
                 bits_left -= bits;
             }
@@ -328,14 +334,18 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
             /* hcod (0..19) */
             clumpsz = startbits;
             pair    = table[Mad.MASK(bitcache, cachesz, clumpsz)];
+            
+            console.log("initial pair = " + (Mad.MASK(bitcache, cachesz, clumpsz)) + ", final? = " + pair.final);
 
             while (!pair.final) {
                 cachesz -= clumpsz;
 
                 clumpsz = pair.ptr.bits;
+                console.log("next pair = " + (pair.ptr.offset + Mad.MASK(bitcache, cachesz, clumpsz)) + ", final? = " + pair.final);
                 pair    = table[pair.ptr.offset + Mad.MASK(bitcache, cachesz, clumpsz)];
             }
 
+            console.log("hlen = " + pair.value.hlen + ", linbits = " + linbits + ", x = " + pair.value.x + ", y = " + pair.value.y);
             cachesz -= pair.value.hlen;
 
             if (linbits) {
@@ -373,12 +383,14 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                 }
                 
                 if(x_final) {
+                      console.log("doing x_final");
                       xr[xrptr] = Mad.MASK1BIT(bitcache, cachesz--) ?
                         -requantized : requantized;
                 }
 
                 /* y (0..14) */
                 value = pair.value.y;
+                var y_final = false;
 
                 switch (value) {
                     case 0:
@@ -411,6 +423,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                 }
                 
                 if(y_final) {
+                  console.log("doing y_final");
                   xr[xrptr + 1] = Mad.MASK1BIT(bitcache, cachesz--) ?
                     -requantized : requantized;
                 }
@@ -451,8 +464,12 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
       }
 
       xrptr += 2;
+       console.log("big_values = " + big_values + ", cachesz = " + cachesz +
+        ", bits_left = " + bits_left + ", xrptr = " + xrptr);
     }
   }
+
+  console.log("bits_left (before big_values overrun) = " + bits_left);
 
   if (cachesz + bits_left < 0)
     return Mad.Error.BADHUFFDATA;  /* big_values overrun */
@@ -545,6 +562,8 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
     console.log("read " + (-bits_left) + " bits too many");
   else if (cachesz + bits_left > 0)
     console.log((cachesz + bits_left) + " stuffing bits");
+  else
+    console.log("bits_left " + bits_left);
 //# endif
 
   /* rzero */

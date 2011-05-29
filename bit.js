@@ -17,6 +17,13 @@ Mad.Bit = function (data, offset) {
     this.left = CHAR_BIT;
 }
 
+Mad.Bit.prototype.clone = function() {
+    var c = new Mad.Bit(this.data, this.offset);
+    c.cache = this.cache;
+    c.left = this.left;
+    return c;
+}
+
 /*
  * NAME:	bit.length()
  * DESCRIPTION:	return number of bits between start and end points
