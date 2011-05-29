@@ -24,6 +24,10 @@ Mad.rshift = function (num, bits) {
     return Math.floor(num / Math.pow(2, bits));
 }
 
+Mad.lshiftU32 = function (num, bits) {
+    return Mad.bitwiseAnd(Mad.lshift(num, bits), 4294967295 /* 2^32 - 1 */);
+}
+
 Mad.lshift = function (num, bits) {
     return num * Math.pow(2, bits);
 }

@@ -328,7 +328,13 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
             if (cachesz < 21) {
                 var bits       = ((32 - 1 - 21) + (21 - cachesz)) & ~7;
-                bitcache   = Mad.bitwiseOr(Mad.lshift(bitcache, bits), peek.read(bits));
+                console.log("1) bitcache = " + bitcache + ", cachesz = " + cachesz + ", clumpsz = " + clumpsz);
+                var tls = Mad.lshiftU32(bitcache, bits);
+                var mbr = peek.read(bits);
+                console.log("tls = " + tls);
+                console.log("mbr = " + mbr);
+                bitcache   = Mad.bitwiseOr(tls, mbr);
+                console.log("2) bitcache = " + bitcache + ", cachesz = " + cachesz + ", clumpsz = " + clumpsz);
                 console.log("bits_left (before -= bits) = " + bits_left + ", bits = " + bits + ", cachesz = " + cachesz);
                 cachesz   += bits;
                 bits_left -= bits;
@@ -364,7 +370,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
                     case 15:
                       if (cachesz < linbits + 2) {
-                        bitcache   = Mad.bitwiseOr(Mad.lshift(bitcache, 16), peek.read(16));
+                        bitcache   = Mad.bitwiseOr(Mad.lshiftU32(bitcache, 16), peek.read(16));
                         cachesz   += 16;
                         bits_left -= 16;
                       }
@@ -403,7 +409,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
                     case 15:
                         if (cachesz < linbits + 1) {
-                            bitcache   = Mad.bitwiseOr(Mad.lshift(bitcache, 16), peek.read(16));
+                            bitcache   = Mad.bitwiseOr(Mad.lshiftU32(bitcache, 16), peek.read(16));
                             cachesz   += 16;
                             bits_left -= 16;
                         }
@@ -486,7 +492,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
     while (cachesz + bits_left > 0 && xrptr <= 572) {
         /* hcod (1..6) */
         if (cachesz < 10) {
-            bitcache   = Mad.bitwiseOr(Mad.lshift(bitcache, 16), peek.read(16));
+            bitcache   = Mad.bitwiseOr(Mad.lshiftU32(bitcache, 16), peek.read(16));
             cachesz   += 16;
             bits_left -= 16;
         }
