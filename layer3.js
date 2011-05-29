@@ -69,6 +69,14 @@ var sfbwidth_table = [
   { l:  sfb_8000_long, s:  sfb_8000_short, m:  sfb_8000_mixed }*/
 ];
 
+Mad.count1table_select = 0x01;
+Mad.scalefac_scale     = 0x02;
+Mad.preflag	           = 0x04;
+Mad.mixed_block_flag   = 0x08;
+
+Mad.I_STEREO  = 0x1;
+Mad.MS_STEREO = 0x2;
+
 Mad.SideInfo = function() {
     this.gr = []; // array of Mad.Granule
     this.scfsi = []; // array of ints
@@ -96,11 +104,11 @@ Mad.Channel = function() {
 
 
 /* we must take care that sz >= bits and sz < sizeof(long) lest bits == 0 */
-function Mad.MASK(cache, sz, bits) {
+Mad.MASK = function (cache, sz, bits) {
     return (((cache) >> ((sz) - (bits))) & ((1 << (bits)) - 1));
 }
     
-function Mad.MASK1BIT(cache, sz) {
+Mad.MASK1BIT = function (cache, sz) {
     return ((cache) & (1 << ((sz) - 1)));
 }
 
@@ -128,7 +136,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
     ptr.skip(bits_left);
 
     /* align bit reads to byte boundaries */
-    cachesz  = peek.bitsleft();
+    cachesz  = peek.left;
     cachesz += ((32 - 1 - 24) + (24 - cachesz)) & ~7;
 
     bitcache   = peek.read(cachesz);
@@ -947,13 +955,13 @@ Mad.layer_III = function (stream, frame) {
 
 Mad.III_exponents = function(channel, sfbwidth, exponents) {
     var gain = channel.global_gain - 210;
-    var scalefac_multiplier = (channel.flags & scalefac_scale) ? 2 : 1;
+    var scalefac_multiplier = (channel.flags & Mad.scalefac_scale) ? 2 : 1;
     
     if (channel.block_type == 2) {
         var sfbi = 0, l = 0;
         
         if (channel.flags & mixed_block_flag) {
-            var premask = (channel.flags & preflag) ? ~0 : 0;
+            var premask = (channel.flags & Mad.preflag) ? ~0 : 0;
             
             /* long block subbands 0-1 */
             
@@ -978,14 +986,14 @@ Mad.III_exponents = function(channel, sfbwidth, exponents) {
             l    += 3 * sfbwidth[sfbi];
             sfbi += 3;
         }
-    } else { /* channel->block_type != 2 */
-        if (channel.flags & preflag) {
+    } else { /* channel.block_type != 2 */
+        if (channel.flags & Mad.preflag) {
             for (var sfbi = 0; sfbi < 22; ++sfbi) {
-                exponents[sfbi] = gain - ((channel.scalefac[sfbi] + pretab[sfbi]) << scalefac_multiplier
+                exponents[sfbi] = gain - ((channel.scalefac[sfbi] + pretab[sfbi]) << scalefac_multiplier);
             }
         } else {
             for (var sfbi = 0; sfbi < 22; ++sfbi) {
-                exponents[sfbi] = gain - (channel.scalefac[sfbi] << scalefac_multiplier
+                exponents[sfbi] = gain - (channel.scalefac[sfbi] << scalefac_multiplier);
             }
         }
     }
@@ -999,8 +1007,8 @@ Mad.III_requantize = function(value, exp) {
     power = result;
     
     power = rq_table[value];
-    requantized = power->mantissa;
-    exp += power->exponent;
+    requantized = power.mantissa;
+    exp += power.exponent;
     
     if (exp < 0) {
         if (-exp >= sizeof(mad_fixed_t) * CHAR_BIT) {
