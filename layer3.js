@@ -1490,5 +1490,7 @@ Mad.III_reorder = function (xr /* [576] */, channel, sfbwidth /* [39] */) {
       }
     }
     
-    Mad.memcpy(xr, 18 * sb, tmp, sb, 8 * (576 - 18 * sb));
+    for (var i = 0; i < (576 - 18 * sb); i++) {
+        xr[18 * sb + i] = tmp[sb + i];
+    }
 }
