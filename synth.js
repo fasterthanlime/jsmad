@@ -17,20 +17,6 @@ Mad.Synth = function () {
             new Float64Array(new ArrayBuffer(8 * 1152))
         ]
     };
-    
-    this.pcm.clone = function() {
-        var copy = {};
-        copy.samplerate = this.samplerate;
-        copy.channels = this.channels;
-        copy.length = this.length;
-        copy.samples = [
-            new Float64Array(new ArrayBuffer(8 * 1152)),
-            new Float64Array(new ArrayBuffer(8 * 1152))
-        ];
-        copy.samples[0].set(this.samples[0]);
-        copy.samples[1].set(this.samples[1]);
-        return copy;
-    }; 
 }
 
 /*

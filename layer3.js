@@ -1403,8 +1403,8 @@ Mad.III_requantize = function(value, exp) {
     exp /= 4;
     
     power = Mad.rq_table[value];
-    requantized = power.mantissa;
-    exp += power.exponent;
+    requantized = power[0];
+    exp += power[1];
     
     if (exp < 0) {
         requantized += 1 << (-exp - 1);

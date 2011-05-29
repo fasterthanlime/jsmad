@@ -25,7 +25,7 @@ function readFile() {
         var preBufferSize = file.length;
         var sampleRate = frame.header.samplerate;
 
-        console.log("playing " + channelCount + " channels, samplerate = " + sampleRate + " audio.");
+        console.log("playing " + channelCount + " channels, samplerate = " + sampleRate + " audio, mode " + frame.header.mode);
 
         synth.frame(frame);
         var offset = 0;
