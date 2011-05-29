@@ -53,10 +53,26 @@ var decodeTextFrame = function(header, stream) {
     };
 }
 
+var decodeAttachedPictureFrame = function(header, stream) {
+    var encoding = stream.readU8();
+    
+    var data = stream.read(header['length'] - 1);
+    
+    var array = data.split("\0");
+    
+    return {
+        'header': header,
+        'mime': stringToEncoding(array[0], 0),
+        'type': array[1].charCodeAt(0),
+        'description': array[1].slice(1, array[1].length - 1),
+        'value': array.slice(2, array.length - 2).join("\0")
+    };
+}
+
 var decodeIdentifierFrame = function(header, stream) {
     var data = stream.read(header['length']);
     
-    var array = data.split("\0");
+    var array = data.split("\0", 2);
     
     return {
         'header': header,
@@ -72,7 +88,7 @@ var decodeCommentFrame = function(header, stream) {
     
     var data = stream.read(header['length'] - 4);
     
-    var array = data.split("\0");
+    var array = data.split("\0", 2);
     
     return {
         'header': header,
@@ -95,7 +111,7 @@ var decodeUserDefinedLinkFrame = function(header, stream) {
     var encoding = stream.readU8();
     var data = stream.read(header['length'] - 1);
     
-    var array = data.split("\0");
+    var array = data.split("\0", 2);
     
     return {
         'header': header,
@@ -106,6 +122,21 @@ var decodeUserDefinedLinkFrame = function(header, stream) {
 
 var extendWithValueFrame = function(tags, frame) {
     tags[frame['name']] = frame['value'];
+    
+    return tags;
+}
+
+var extendWithPictureFrame = function(tags, frame) {
+    if (!tags[frame['name']]) {
+        tags[frame['name']] = []
+    }
+    
+    tags[frame['name']].push({
+        'mime': frame['mime'],
+        'type': frame['type'],
+        'description': frame['description'],
+        'value': frame['value']
+    });
     
     return tags;
 }
@@ -214,6 +245,9 @@ Mad.ID3Stream = function(header, stream) {
         'TSOP': decodeTextFrame,
         'TSOT': decodeTextFrame,
         
+        /* Attached Picture Frame */
+        'APIC': decodeAttachedPictureFrame,
+        
         /* Unique Identifier Frame */
         'UFID': decodeIdentifierFrame,
         
@@ -294,11 +328,14 @@ Mad.ID3Stream = function(header, stream) {
         'TSOP': 'Performer sort order',
         'TSOT': 'Title sort order',
         
+        /* Attached Picture Frame */
+        'APIC': 'Attached picture',
+        
         /* Unique Identifier Frame */
-        'UFID': 'Unique Identifier',
+        'UFID': 'Unique identifier',
         
         /* Music CD Identifier Frame */
-        'MCDI': 'Music CD Identifier',
+        'MCDI': 'Music CD identifier',
         
         /* Comment Frame */
         'COMM': 'Comment',
@@ -373,6 +410,9 @@ Mad.ID3Stream = function(header, stream) {
         'TSOA': extendWithValueFrame,
         'TSOP': extendWithValueFrame,
         'TSOT': extendWithValueFrame,
+        
+        /* Attached Picture Frame */
+        'APIC': extendWithPictureFrame,
         
         /* Unique Identifier Frame */
         'UFID': extendWithIdentifierFrame,
