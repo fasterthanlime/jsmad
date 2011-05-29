@@ -875,6 +875,83 @@ var imdct36 = function (x /* [18] */, y /* [36] */) {
   }
 }
 
+var imdct_s_y = new Float64Array(new ArrayBuffer(8 * 36));
+
+/*
+ * NAME:	III_imdct_s()
+ * DESCRIPTION:	perform IMDCT and windowing for short blocks
+ */
+Mad.III_imdct_s = function (X /* [18] */, z /* [36] */)
+{
+  var yptr = 0;
+  var wptr;
+  var Xptr = 0;
+  
+  var y = imdct_s_y;
+  var w, i;
+  var hi, lo;
+
+  /* IMDCT */
+  for (w = 0; w < 3; ++w) {
+    var s = Mad.imdct_s;
+    var sptr = 0;
+
+    for (i = 0; i < 3; ++i) {
+      lo =  X[Xptr + 0] * s[sptr + 0] +
+            X[Xptr + 1] * s[sptr + 1] +
+            X[Xptr + 2] * s[sptr + 2] +
+            X[Xptr + 3] * s[sptr + 3] +
+            X[Xptr + 4] * s[sptr + 4] +
+            X[Xptr + 5] * s[sptr + 5];
+
+      y[yptr + i + 0] = lo;
+      y[yptr + 5 - i] = -y[yptr + i + 0];
+
+      ++sptr;
+
+      lo =  X[Xptr + 0] * s[sptr + 0] +
+            X[Xptr + 1] * s[sptr + 1] +
+            X[Xptr + 2] * s[sptr + 2] +
+            X[Xptr + 3] * s[sptr + 3] +
+            X[Xptr + 4] * s[sptr + 4] +
+            X[Xptr + 5] * s[sptr + 5];
+
+      y[yptr +  i + 6] = lo;
+      y[yptr + 11 - i] = y[yptr + i + 6];
+
+      ++sptr;
+    }
+
+    yptr += 12;
+    Xptr += 6;
+  }
+
+  /* windowing, overlapping and concatenation */
+
+  yptr = 0;
+  var wptr = 0;
+
+  for (i = 0; i < 6; ++i) {
+    z[i +  0] = 0;
+    z[i +  6] = y[yptr +  0 + 0] * window_s[wptr + 0];
+
+    lo = y[yptr +  0 + 6] * window_s[wptr + 6] +
+         y[yptr + 12 + 0] * window_s[wptr + 0];
+
+    z[i + 12] = lo;
+
+    lo = y[yptr + 12 + 6] * window_s[wptr + 6] +
+         y[yptr + 24 + 0] * window_s[wptr + 0];
+
+    z[i + 18] = lo;
+
+    z[i + 24] = y[yptr + 24 + 6] * window_s[wptr + 6];
+    z[i + 30] = 0;
+
+    ++yptr;
+    ++wptr;
+  }
+}
 
 /*
  * NAME:	III_imdct_l()
