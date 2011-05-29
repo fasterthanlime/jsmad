@@ -75,7 +75,7 @@ var sfbwidth_table = [
  *
  * root_table[3 + x] = 2^(x/4)
  */
-var root_table /* 7 */ = {
+var root_table /* 7 */ = [
   /* 2^(-3/4) */ 0.59460355750136,
   /* 2^(-2/4) */ 0.70710678118655,
   /* 2^(-1/4) */ 0.84089641525371,
@@ -83,7 +83,7 @@ var root_table /* 7 */ = {
   /* 2^(+1/4) */ 1.18920711500272,
   /* 2^(+2/4) */ 1.41421356237310,
   /* 2^(+3/4) */ 1.68179283050743
-};
+];
 
 Mad.count1table_select = 0x01;
 Mad.scalefac_scale     = 0x02;
@@ -432,8 +432,8 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
     }
   }
 
-  if (!(-bits_left <= MAD_BUFFER_GUARD * CHAR_BIT)) {
-      throw new Error("assertion failed: (-bits_left <= MAD_BUFFER_GUARD * CHAR_BIT)");
+  if (!(-bits_left <= Mad.BUFFER_GUARD * CHAR_BIT)) {
+      throw new Error("assertion failed: (-bits_left <= Mad.BUFFER_GUARD * CHAR_BIT)");
   }
 
 //# if 0 && defined(DEBUG)
@@ -662,7 +662,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
         var granule = si.gr[gr];
         var sfbwidth = [];
         /* unsigned char const *sfbwidth[2]; */
-        var xr = [ new Float64Array(new ArrayBuffer(576)), new Float64Array(new ArrayBuffer(576)) ];
+        var xr = [ new Float64Array(new ArrayBuffer(8 * 576)), new Float64Array(new ArrayBuffer(8 * 576)) ];
         
         var error;
 
@@ -691,7 +691,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
         }
 
         /* joint stereo processing */
-        if (header.mode == MAD_MODE_JOINT_STEREO && header.mode_extension) {
+        if (header.mode == Mad.Mode.JOINT_STEREO && header.mode_extension) {
             error = Mad.III_stereo(xr, granule, header, sfbwidth[0]);
             
             if (error)
@@ -704,7 +704,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
             var sample = frame.sbsample[ch][18 * gr];
         
             var sb, l = 0, i, sblimit;
-            var output = new Float64Array(new ArrayBuffer(36));
+            var output = new Float64Array(new ArrayBuffer(8 * 36));
 
             if (channel.block_type == 2) {
                 Mad.III_reorder(xr[ch], channel, sfbwidth[ch]);
