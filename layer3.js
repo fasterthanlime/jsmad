@@ -229,11 +229,11 @@ Mad.Channel = function() {
 
 /* we must take care that sz >= bits and sz < sizeof(long) lest bits == 0 */
 Mad.MASK = function (cache, sz, bits) {
-    return (((cache) >> ((sz) - (bits))) & ((1 << (bits)) - 1));
+    return Mad.bitwiseAnd(Mad.rshift(cache, sz - bits), Mad.lshift(1, bits) - 1);
 }
-    
+
 Mad.MASK1BIT = function (cache, sz) {
-    return ((cache) & (1 << ((sz) - 1)));
+    return Mad.bitwiseAnd(cache, Mad.lshift(1, sz - 1));
 }
 
 /*
