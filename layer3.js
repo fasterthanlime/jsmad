@@ -93,6 +93,110 @@ Mad.mixed_block_flag   = 0x08;
 Mad.I_STEREO  = 0x1;
 Mad.MS_STEREO = 0x2;
 
+/*
+ * windowing coefficients for long blocks
+ * derived from section 2.4.3.4.10.3 of ISO/IEC 11172-3
+ *
+ * window_l[i] = sin((PI / 36) * (i + 1/2))
+ */
+var window_l /* [36] */ = [
+  0.043619387, 0.130526192,
+  0.216439614, 0.300705800,
+  0.382683432, 0.461748613,
+  0.537299608, 0.608761429,
+  0.675590208, 0.737277337,
+  0.793353340, 0.843391446,
+
+  0.887010833, 0.923879533,
+  0.953716951, 0.976296007,
+  0.991444861, 0.999048222,
+  0.999048222, 0.991444861,
+  0.976296007, 0.953716951,
+  0.923879533, 0.887010833,
+
+  0.843391446, 0.793353340,
+  0.737277337, 0.675590208,
+  0.608761429, 0.537299608,
+  0.461748613, 0.382683432,
+  0.300705800, 0.216439614,
+  0.130526192, 0.043619387
+];
+
+/*
+ * windowing coefficients for short blocks
+ * derived from section 2.4.3.4.10.3 of ISO/IEC 11172-3
+ *
+ * window_s[i] = sin((PI / 12) * (i + 1/2))
+ */
+var window_s /* [12] */ = [
+  0.130526192, 0.382683432,
+  0.608761429, 0.793353340,
+  0.923879533, 0.991444861,
+  0.991444861, 0.923879533,
+  0.793353340, 0.608761429,
+  0.382683432, 0.130526192
+];
+
+/*
+ * coefficients for intensity stereo processing
+ * derived from section 2.4.3.4.9.3 of ISO/IEC 11172-3
+ *
+ * is_ratio[i] = tan(i * (PI / 12))
+ * is_table[i] = is_ratio[i] / (1 + is_ratio[i])
+ */
+var is_table /* [7] */ = [
+  0.000000000,
+  0.211324865,
+  0.366025404,
+  0.500000000,
+  0.633974596,
+  0.788675135,
+  1.000000000
+];
+
+/*
+ * coefficients for LSF intensity stereo processing
+ * derived from section 2.4.3.2 of ISO/IEC 13818-3
+ *
+ * is_lsf_table[0][i] = (1 / sqrt(sqrt(2)))^(i + 1)
+ * is_lsf_table[1][i] = (1 /      sqrt(2)) ^(i + 1)
+ */
+var is_lsf_table /* [2][15] */ = [
+  [
+    0.840896415,
+    0.707106781,
+    0.594603558,
+    0.500000000,
+    0.420448208,
+    0.353553391,
+    0.297301779,
+    0.250000000,
+    0.210224104,
+    0.176776695,
+    0.148650889,
+    0.125000000,
+    0.105112052,
+    0.088388348,
+    0.074325445
+  ], [
+    0.707106781,
+    0.500000000,
+    0.353553391,
+    0.250000000,
+    0.176776695,
+    0.125000000,
+    0.088388348,
+    0.062500000,
+    0.044194174,
+    0.031250000,
+    0.022097087,
+    0.015625000,
+    0.011048543,
+    0.007812500,
+    0.005524272
+  ]
+];
+
 Mad.SideInfo = function() {
     this.gr = []; // array of Mad.Granule
     this.scfsi = []; // array of ints
@@ -732,10 +836,8 @@ var dctIV = function (y /* [18] */, X /* [18] */) {
 
   /* scaling */
 
-  for (i = 0; i < 18; i += 3) {
-    dctIV_tmp[i + 0] = mad_f_mul(y[i + 0], scale[i + 0]);
-    dctIV_tmp[i + 1] = mad_f_mul(y[i + 1], scale[i + 1]);
-    dctIV_tmp[i + 2] = mad_f_mul(y[i + 2], scale[i + 2]);
+  for (var i = 0; i < 18; ++i) {
+    dctIV_tmp[i] = y[i] * dctIV_scale[i];
   }
 
   /* SDCT-II */
@@ -745,13 +847,9 @@ var dctIV = function (y /* [18] */, X /* [18] */) {
   /* scale reduction and output accumulation */
 
   X[0] /= 2;
-  for (i = 1; i < 17; i += 4) {
-    X[i + 0] = X[i + 0] / 2 - X[(i + 0) - 1];
-    X[i + 1] = X[i + 1] / 2 - X[(i + 1) - 1];
-    X[i + 2] = X[i + 2] / 2 - X[(i + 2) - 1];
-    X[i + 3] = X[i + 3] / 2 - X[(i + 3) - 1];
+  for (var i = 1; i < 18; ++i) {
+    X[i] = X[i] / 2 - X[i - 1];
   }
-  X[17] = X[17] / 2 - X[16];
 }
 
 var imdct36_tmp = new Float64Array(new ArrayBuffer(8 * 18));
@@ -909,7 +1007,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
             /* subbands 0-1 */
             if (channel.block_type != 2 || (channel.flags & mixed_block_flag)) {
                 var block_type = channel.block_type;
-                if (channel.flags & mixed_block_flag)
+                if (channel.flags & Mad.mixed_block_flag)
                     block_type = 0;
 
                 /* long blocks */
@@ -1222,18 +1320,18 @@ Mad.III_aliasreduce = function(xr, lines) {
     var xrPointer = 0;
     
     for (xrPointer += 18; xr < lines; xr += 18) {
-      for (i = 0; i < 8; ++i) {
-        var a = xr[xrPointer - i - 1];
-        var b = xr[xrPointer + i];
-        
-        /* TODO: Fix precision? */
-        
-        var lo =  a * cs[i] - b * ca[i];
-        
-        xr[xrPointer - i - 1] = lo;
-        
-        lo =  a * cs[i] + b * ca[i];
-        
-        xr[xrPointer + i] = lo
+        for (i = 0; i < 8; ++i) {
+            var a = xr[xrPointer - i - 1];
+            var b = xr[xrPointer + i];
+
+            /* TODO: Fix precision? */
+            var lo =  a * cs[i] - b * ca[i];
+
+            xr[xrPointer - i - 1] = lo;
+
+            lo =  a * cs[i] + b * ca[i];
+
+            xr[xrPointer + i] = lo
+        }
     }
 }
