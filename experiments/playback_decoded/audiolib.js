@@ -1,1 +1,1 @@
-../../../audiolib.js/
+../find_sync/audiolib.js
