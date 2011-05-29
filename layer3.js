@@ -69,6 +69,10 @@ var sfbwidth_table = [
   { l:  sfb_8000_long, s:  sfb_8000_short, m:  sfb_8000_mixed }*/
 ];
 
+var pretab /* [22] */ = [
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 3, 2, 0
+];
+
 /*
  * fractional powers of two
  * used for requantization and joint stereo decoding
