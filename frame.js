@@ -251,7 +251,7 @@ Mad.Header.decode = function(stream) {
         
         header = Mad.Header.actually_decode(stream);
         if(header == null) return null; // well Duh^2
-        
+
         console.log("============= Decoding layer " + header.layer + " audio mode " +
             header.mode + " with " + header.bitrate +
             " bps and a samplerate of " + header.samplerate);
@@ -336,7 +336,7 @@ Mad.Frame = function () {
     for(var ch = 0; ch < 2; ch++) {
         this.overlap[ch] = [];
         for(var sb = 0; sb < 32; sb++) {
-            this.overlap[ch][sb] = new Float64Array(new ArrayBuffer(8 * 16));
+            this.overlap[ch][sb] = new Float64Array(new ArrayBuffer(8 * 18));
         }
     }
 };
