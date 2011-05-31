@@ -91,7 +91,7 @@ var root_table /* 7 */ = [
 
 Mad.count1table_select = 0x01;
 Mad.scalefac_scale     = 0x02;
-Mad.preflag	           = 0x04;
+Mad.preflag            = 0x04;
 Mad.mixed_block_flag   = 0x08;
 
 Mad.I_STEREO  = 0x1;
@@ -238,10 +238,10 @@ Mad.MASK1BIT = function (cache, sz) {
 }
 
 /*
- * NAME:	III_huffdecode()
- * DESCRIPTION:	decode Huffman code words of one channel of one granule
+ * NAME:    III_huffdecode()
+ * DESCRIPTION: decode Huffman code words of one channel of one granule
  */
-Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth, part2_length) {
+Mad.III_huffdecode = function(ptr, xr /* Float32Array(576) */, channel, sfbwidth, part2_length) {
     var exponents = new Int32Array(new ArrayBuffer(4 * 39));
     var expptr = 0;
     var bits_left, cachesz;
@@ -274,7 +274,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
     {
         var region = 0, rcount;
         
-        var reqcache = new Float64Array(new ArrayBuffer(8 * 16));
+        var reqcache = new Float32Array(new ArrayBuffer(8 * 16));
 
         sfbound = xrptr + sfbwidth[sfbwidthptr++];
         rcount  = channel.region0_count + 1;
@@ -490,7 +490,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
             cachesz -= 4;
 
             quad = table[quad.ptr.offset +
-		      Mad.MASK(bitcache, cachesz, quad.ptr.bits)];
+              Mad.MASK(bitcache, cachesz, quad.ptr.bits)];
         }
 
         cachesz -= quad.value.hlen;
@@ -498,21 +498,21 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
         if (xrptr == sfbound) {
             sfbound += sfbwidth[sfbwidthptr++];
 
-	if (exp != exponents[expptr]) {
-	  exp = exponents[expptr];
-	  requantized = Mad.III_requantize(1, exp);
-	}
+    if (exp != exponents[expptr]) {
+      exp = exponents[expptr];
+      requantized = Mad.III_requantize(1, exp);
+    }
 
-	++expptr;
+    ++expptr;
       }
 
       /* v (0..1) */
       xr[xrptr] = quad.value.v ?
-	(Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
+    (Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
 
       /* w (0..1) */
       xr[xrptr + 1] = quad.value.w ?
-	(Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
+    (Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
 
       xrptr += 2;
 
@@ -529,11 +529,11 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
       /* x (0..1) */
       xr[xrptr] = quad.value.x ?
-	(Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
+    (Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
 
       /* y (0..1) */
       xr[xrptr + 1] = quad.value.y ?
-	(Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
+    (Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
 
       xrptr += 2;
     }
@@ -544,7 +544,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 //# endif
 
       /* technically the bitstream is misformatted, but apparently
-	 some encoders are just a bit sloppy with stuffing bits */
+     some encoders are just a bit sloppy with stuffing bits */
       xrptr -= 4;
     }
   }
@@ -576,8 +576,8 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 }
 
 /*
- * NAME:	III_sideinfo()
- * DESCRIPTION:	decode frame side information from a bitstream
+ * NAME:    III_sideinfo()
+ * DESCRIPTION: decode frame side information from a bitstream
  * 
  * Since several values are passed by reference to this function, instead
  * we're just returning a hash containing:
@@ -674,8 +674,8 @@ Mad.III_sideinfo = function (ptr, nch, lsf) {
 }
 
 /*
- * NAME:	III_scalefactors()
- * DESCRIPTION:	decode channel scalefactors of one granule from a bitstream
+ * NAME:    III_scalefactors()
+ * DESCRIPTION: decode channel scalefactors of one granule from a bitstream
  */
 Mad.III_scalefactors = function (ptr, channel, gr0ch, scfsi) {
   var start; /* Mad.Bit */
@@ -704,38 +704,38 @@ Mad.III_scalefactors = function (ptr, channel, gr0ch, scfsi) {
   else {  /* channel.block_type != 2 */
     if (scfsi & 0x8) {
       for (sfbi = 0; sfbi < 6; ++sfbi)
-	channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
+    channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
     }
     else {
       for (sfbi = 0; sfbi < 6; ++sfbi)
-	channel.scalefac[sfbi] = ptr.read(slen1);
+    channel.scalefac[sfbi] = ptr.read(slen1);
     }
 
     if (scfsi & 0x4) {
       for (sfbi = 6; sfbi < 11; ++sfbi)
-	channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
+    channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
     }
     else {
       for (sfbi = 6; sfbi < 11; ++sfbi)
-	channel.scalefac[sfbi] = ptr.read(slen1);
+    channel.scalefac[sfbi] = ptr.read(slen1);
     }
 
     if (scfsi & 0x2) {
       for (sfbi = 11; sfbi < 16; ++sfbi)
-	channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
+    channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
     }
     else {
       for (sfbi = 11; sfbi < 16; ++sfbi)
-	channel.scalefac[sfbi] = ptr.read(slen2);
+    channel.scalefac[sfbi] = ptr.read(slen2);
     }
 
     if (scfsi & 0x1) {
       for (sfbi = 16; sfbi < 21; ++sfbi)
-	channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
+    channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
     }
     else {
       for (sfbi = 16; sfbi < 21; ++sfbi)
-	channel.scalefac[sfbi] = ptr.read(slen2);
+    channel.scalefac[sfbi] = ptr.read(slen2);
     }
 
     channel.scalefac[21] = 0;
@@ -813,7 +813,7 @@ for(var i = 0; i < 9; ++i) {
     sdctII_scale[i] = 2 * Math.cos(Math.PI * (2 * i + 1) / (2 * 18));
 }
 
-var sdctII_tmp = new Float64Array(new ArrayBuffer(8 * 9));
+var sdctII_tmp = new Float32Array(new ArrayBuffer(8 * 9));
 
 var sdctII = function (x /* [18] */, X /* [18] */) {
   /* divide the 18-point SDCT-II into two 9-point SDCT-IIs */
@@ -832,7 +832,13 @@ var sdctII = function (x /* [18] */, X /* [18] */) {
     sdctII_tmp[i] = (x[i] - x[18 - i - 1]) * sdctII_scale[i];
   }
 
-  fastsdct(sdctII_tmp, X.subarray(1));
+  var X1 = new Float32Array(new ArrayBuffer(X.length - 4));
+  
+  for (var i = 0; i < X1.length; i++) {
+    X1[i] - X[i + 1];
+  }
+
+  fastsdct(sdctII_tmp, X1);
 
   /* output accumulation */
   
@@ -847,7 +853,7 @@ for(i = 0; i < 18; i++) {
     dctIV_scale[i] = 2 * Math.cos(Math.PI * (2 * i + 1) / (4 * 18));
 }
 
-var dctIV_tmp = new Float64Array(new ArrayBuffer(8 * 18));
+var dctIV_tmp = new Float32Array(new ArrayBuffer(8 * 18));
 
 var dctIV = function (y /* [18] */, X /* [18] */) {
 
@@ -869,11 +875,11 @@ var dctIV = function (y /* [18] */, X /* [18] */) {
   }
 }
 
-var imdct36_tmp = new Float64Array(new ArrayBuffer(8 * 18));
+var imdct36_tmp = new Float32Array(new ArrayBuffer(8 * 18));
 
 /*
- * NAME:	imdct36
- * DESCRIPTION:	perform X[18]->x[36] IMDCT using Szu-Wei Lee's fast algorithm
+ * NAME:    imdct36
+ * DESCRIPTION: perform X[18]->x[36] IMDCT using Szu-Wei Lee's fast algorithm
  */
 var imdct36 = function (x /* [18] */, y /* [36] */) {
   /* DCT-IV */
@@ -892,11 +898,11 @@ var imdct36 = function (x /* [18] */, y /* [36] */) {
   }
 }
 
-var imdct_s_y = new Float64Array(new ArrayBuffer(8 * 36));
+var imdct_s_y = new Float32Array(new ArrayBuffer(8 * 36));
 
 /*
- * NAME:	III_imdct_s()
- * DESCRIPTION:	perform IMDCT and windowing for short blocks
+ * NAME:    III_imdct_s()
+ * DESCRIPTION: perform IMDCT and windowing for short blocks
  */
 Mad.III_imdct_s = function (X /* [18] */, z /* [36] */)
 {
@@ -971,8 +977,8 @@ Mad.III_imdct_s = function (X /* [18] */, z /* [36] */)
 }
 
 /*
- * NAME:	III_imdct_l()
- * DESCRIPTION:	perform IMDCT and windowing for long blocks
+ * NAME:    III_imdct_l()
+ * DESCRIPTION: perform IMDCT and windowing for long blocks
  */
 Mad.III_imdct_l = function (X, z, block_type) {
   /* IMDCT */
@@ -1003,8 +1009,8 @@ Mad.III_imdct_l = function (X, z, block_type) {
 
 
 /*
- * NAME:	III_freqinver()
- * DESCRIPTION:	perform subband frequency inversion for odd sample lines
+ * NAME:    III_freqinver()
+ * DESCRIPTION: perform subband frequency inversion for odd sample lines
  */
 Mad.III_freqinver = function (sample /* [18][32] */, sb)
 {
@@ -1013,8 +1019,8 @@ Mad.III_freqinver = function (sample /* [18][32] */, sb)
 }
 
 /*
- * NAME:	III_decode()
- * DESCRIPTION:	decode frame main_data
+ * NAME:    III_decode()
+ * DESCRIPTION: decode frame main_data
  * 
  * result struct:
  */
@@ -1044,7 +1050,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
         var granule = si.gr[gr];
         var sfbwidth = [];
         /* unsigned char const *sfbwidth[2]; */
-        var xr = [ new Float64Array(new ArrayBuffer(8 * 576)), new Float64Array(new ArrayBuffer(8 * 576)) ];
+        var xr = [ new Float32Array(new ArrayBuffer(8 * 576)), new Float32Array(new ArrayBuffer(8 * 576)) ];
         
         var error;
 
@@ -1061,10 +1067,10 @@ Mad.III_decode = function (ptr, frame, si, nch) {
 
             if (header.flags & Mad.Flag.LSF_EXT) {
                 part2_length = Mad.III_scalefactors_lsf(ptr, channel,
-					    ch == 0 ? 0 : si.gr[1].ch[1], header.mode_extension);
+                        ch == 0 ? 0 : si.gr[1].ch[1], header.mode_extension);
             } else {
                 part2_length = Mad.III_scalefactors(ptr, channel, si.gr[0].ch[ch],
-					gr == 0 ? 0 : si.scfsi[ch]);
+                    gr == 0 ? 0 : si.scfsi[ch]);
             }
 
             error = Mad.III_huffdecode(ptr, xr[ch], channel, sfbwidth[ch], part2_length);
@@ -1087,7 +1093,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
             var sample = frame.sbsample[ch][18 * gr];
         
             var sb, l = 0, i, sblimit;
-            var output = new Float64Array(new ArrayBuffer(8 * 36));
+            var output = new Float32Array(new ArrayBuffer(8 * 36));
 
             if (channel.block_type == 2) {
                 Mad.III_reorder(xr[ch], channel, sfbwidth[ch]);
@@ -1168,8 +1174,8 @@ Mad.III_decode = function (ptr, frame, si, nch) {
 
 
 /*
- * NAME:	layer.III()
- * DESCRIPTION:	decode a single Layer III frame
+ * NAME:    layer.III()
+ * DESCRIPTION: decode a single Layer III frame
  */
 Mad.layer_III = function (stream, frame) {
     var header = frame.header;
@@ -1451,9 +1457,9 @@ Mad.III_overlap_z = function (overlap /* [18] */, sample /* [18][32] */, sb) {
 }
 
 Mad.III_reorder = function (xr /* [576] */, channel, sfbwidth /* [39] */) {
-    var tmp = new Float64Array(new ArrayBuffer(8 * 32 * 3 * 6));
-    var sbw = new Float64Array(new ArrayBuffer(8 * 3));
-    var sw  = new Float64Array(new ArrayBuffer(8 * 3));
+    var tmp = new Float32Array(new ArrayBuffer(8 * 32 * 3 * 6));
+    var sbw = new Float32Array(new ArrayBuffer(8 * 3));
+    var sw  = new Float32Array(new ArrayBuffer(8 * 3));
     
     var sfbwidthPointer = 0;
     

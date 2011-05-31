@@ -1,7 +1,7 @@
 
 /*
- * NAME:	synth.init()
- * DESCRIPTION:	initialize synth struct
+ * NAME:    synth.init()
+ * DESCRIPTION: initialize synth struct
  */
 Mad.Synth = function () {
     this.filter = [];
@@ -13,8 +13,8 @@ Mad.Synth = function () {
         channels: 0,
         length: 0,
         samples: [
-            new Float64Array(new ArrayBuffer(8 * 1152)),
-            new Float64Array(new ArrayBuffer(8 * 1152))
+            new Float32Array(new ArrayBuffer(8 * 1152)),
+            new Float32Array(new ArrayBuffer(8 * 1152))
         ]
     };
     
@@ -24,8 +24,8 @@ Mad.Synth = function () {
         copy.channels = this.channels;
         copy.length = this.length;
         copy.samples = [
-            new Float64Array(new ArrayBuffer(8 * 1152)),
-            new Float64Array(new ArrayBuffer(8 * 1152))
+            new Float32Array(new ArrayBuffer(8 * 1152)),
+            new Float32Array(new ArrayBuffer(8 * 1152))
         ];
         copy.samples[0].set(this.samples[0]);
         copy.samples[1].set(this.samples[1]);
@@ -34,8 +34,8 @@ Mad.Synth = function () {
 }
 
 /*
- * NAME:	synth.mute()
- * DESCRIPTION:	zero all polyphase filterbank values, resetting synthesis
+ * NAME:    synth.mute()
+ * DESCRIPTION: zero all polyphase filterbank values, resetting synthesis
  */
 Mad.Synth.prototype.mute = function () {
     for (var ch = 0; ch < 2; ++ch) {
@@ -59,8 +59,8 @@ Mad.Synth.prototype.mute = function () {
 
 
 /*
- * NAME:	dct32()
- * DESCRIPTION:	perform fast in[32].out[32] DCT
+ * NAME:    dct32()
+ * DESCRIPTION: perform fast in[32].out[32] DCT
  */
 Mad.Synth.dct32 = function (_in /* [32] */, slot, lo /* [16][8] */, hi /* [16][8] */) {
   var t0,   t1,   t2,   t3,   t4,   t5,   t6,   t7;
@@ -274,7 +274,7 @@ Mad.Synth.dct32 = function (_in /* [32] */, slot, lo /* [16][8] */, hi /* [16][8
 
   /*  8 */ hi[ 7][slot] = t143;
   /* 24 */ lo[ 8][slot] =
-	     (((t141 - t142) * (costab16) * 2)) - t143;
+         (((t141 - t142) * (costab16) * 2)) - t143;
 
   t144 = ((t73 - t74) * (costab8));
   t145 = ((t75 - t76) * (costab24));
@@ -314,7 +314,7 @@ Mad.Synth.dct32 = function (_in /* [32] */, slot, lo /* [16][8] */, hi /* [16][8
 
   /* 20 */ lo[ 4][slot] = t160;
   /* 28 */ lo[12][slot] =
-	     (((((t157 - t158) * (costab16) * 2) - t159) * 2)) - t160;
+         (((((t157 - t158) * (costab16) * 2) - t159) * 2)) - t160;
 
   t161 = ((t94 - t95) * (costab8));
   t162 = ((t96 - t97) * (costab24));
@@ -352,8 +352,8 @@ Mad.Synth.dct32 = function (_in /* [32] */, slot, lo /* [16][8] */, hi /* [16][8
 
   /* 26 */ lo[10][slot] = t170;
   /* 30 */ lo[14][slot] =
-	     (((((((t166 - t167) * (costab16)) * 2 -
-		       t168) * 2) - t169) * 2) - t170);
+         (((((((t166 - t167) * (costab16)) * 2 -
+               t168) * 2) - t169) * 2) - t170);
 
   t171 = ((t106 - t107) * (costab8));
   t172 = ((t108 - t109) * (costab24));
@@ -400,12 +400,12 @@ Mad.Synth.dct32 = function (_in /* [32] */, slot, lo /* [16][8] */, hi /* [16][8
   /* 27 */ lo[11][slot] = t165;
 
   t176 = (((((((t161 - t162) * (costab16) * 2)) -
-	     t163) * 2) - t164) * 2) - t165;
+         t163) * 2) - t164) * 2) - t165;
 
   /* 29 */ lo[13][slot] = t176;
   /* 31 */ lo[15][slot] =
-	     (((((((((t171 - t172) * (costab16)) * 2 -
-			 t173) * 2) - t174) * 2) - t175) * 2) - t176);
+         (((((((((t171 - t172) * (costab16)) * 2 -
+             t173) * 2) - t174) * 2) - t175) * 2) - t176);
 
   /*
    * Totals:
@@ -421,7 +421,7 @@ var D /* [17][32] */ = [
  * These are the coefficients for the subband synthesis window. This is a
  * reordered version of Table B.3 from ISO/IEC 11172-3.
  */
-  [  0.000000000,	/*  0 */
+  [  0.000000000,   /*  0 */
     -0.000442505,
      0.003250122,
     -0.007003784,
@@ -455,7 +455,7 @@ var D /* [17][32] */ = [
      0.003250122,
      0.000442505 ],
 
-  [ -0.000015259,	/*  1 */
+  [ -0.000015259,   /*  1 */
     -0.000473022,
      0.003326416,
     -0.007919312,
@@ -489,7 +489,7 @@ var D /* [17][32] */ = [
      0.003173828,
      0.000396729 ],
 
-  [ -0.000015259,	/*  2 */
+  [ -0.000015259,   /*  2 */
     -0.000534058,
      0.003387451,
     -0.008865356,
@@ -523,7 +523,7 @@ var D /* [17][32] */ = [
      0.003082275,
      0.000366211 ],
 
-  [ -0.000015259,	/*  3 */
+  [ -0.000015259,   /*  3 */
     -0.000579834,
      0.003433228,
     -0.009841919,
@@ -557,7 +557,7 @@ var D /* [17][32] */ = [
      0.002990723,
      0.000320435 ],
 
-  [ -0.000015259,	/*  4 */
+  [ -0.000015259,   /*  4 */
     -0.000625610,
      0.003463745,
     -0.010848999,
@@ -591,7 +591,7 @@ var D /* [17][32] */ = [
      0.002899170,
      0.000289917 ],
 
-  [ -0.000015259,	/*  5 */
+  [ -0.000015259,   /*  5 */
     -0.000686646,
      0.003479004,
     -0.011886597,
@@ -625,7 +625,7 @@ var D /* [17][32] */ = [
      0.002792358,
      0.000259399 ],
 
-  [ -0.000015259,	/*  6 */
+  [ -0.000015259,   /*  6 */
     -0.000747681,
      0.003479004,
     -0.012939453,
@@ -659,7 +659,7 @@ var D /* [17][32] */ = [
      0.002685547,
      0.000244141 ],
 
-  [ -0.000030518,	/*  7 */
+  [ -0.000030518,   /*  7 */
     -0.000808716,
      0.003463745,
     -0.014022827,
@@ -693,7 +693,7 @@ var D /* [17][32] */ = [
      0.002578735,
      0.000213623 ],
 
-  [ -0.000030518,	/*  8 */
+  [ -0.000030518,   /*  8 */
     -0.000885010,
      0.003417969,
     -0.015121460,
@@ -727,7 +727,7 @@ var D /* [17][32] */ = [
      0.002456665,
      0.000198364 ],
 
-  [ -0.000030518,	/*  9 */
+  [ -0.000030518,   /*  9 */
     -0.000961304,
      0.003372192,
     -0.016235352,
@@ -761,7 +761,7 @@ var D /* [17][32] */ = [
      0.002349854,
      0.000167847 ],
 
-  [ -0.000030518,	/* 10 */
+  [ -0.000030518,   /* 10 */
     -0.001037598,
      0.003280640,
     -0.017349243,
@@ -795,7 +795,7 @@ var D /* [17][32] */ = [
      0.002243042,
      0.000152588 ],
 
-  [ -0.000045776,	/* 11 */
+  [ -0.000045776,   /* 11 */
     -0.001113892,
      0.003173828,
     -0.018463135,
@@ -829,7 +829,7 @@ var D /* [17][32] */ = [
      0.002120972,
      0.000137329 ],
 
-  [ -0.000045776,	/* 12 */
+  [ -0.000045776,   /* 12 */
     -0.001205444,
      0.003051758,
     -0.019577026,
@@ -863,7 +863,7 @@ var D /* [17][32] */ = [
      0.002014160,
      0.000122070 ],
 
-  [ -0.000061035,	/* 13 */
+  [ -0.000061035,   /* 13 */
     -0.001296997,
      0.002883911,
     -0.020690918,
@@ -897,7 +897,7 @@ var D /* [17][32] */ = [
      0.001907349,
      0.000106812 ],
 
-  [ -0.000061035,	/* 14 */
+  [ -0.000061035,   /* 14 */
     -0.001388550,
      0.002700806,
     -0.021789551,
@@ -931,7 +931,7 @@ var D /* [17][32] */ = [
      0.001785278,
      0.000106812 ],
 
-  [ -0.000076294,	/* 15 */
+  [ -0.000076294,   /* 15 */
     -0.001480103,
      0.002487183,
     -0.022857666,
@@ -965,7 +965,7 @@ var D /* [17][32] */ = [
      0.001693726,
      0.000091553 ],
 
-  [ -0.000076294,	/* 16 */
+  [ -0.000076294,   /* 16 */
     -0.001586914,
      0.002227783,
     -0.023910522,
@@ -1001,8 +1001,8 @@ var D /* [17][32] */ = [
 ];
 
 /*
- * NAME:	synth.full()
- * DESCRIPTION:	perform full frequency PCM synthesis
+ * NAME:    synth.full()
+ * DESCRIPTION: perform full frequency PCM synthesis
  */
 Mad.Synth.prototype.full = function(frame, nch, ns) {
     var phase, pe, po;
@@ -1124,15 +1124,15 @@ Mad.Synth.prototype.full = function(frame, nch, ns) {
 }
 
 /*
- * NAME:	synth.half()
- * DESCRIPTION:	perform half frequency PCM synthesis
+ * NAME:    synth.half()
+ * DESCRIPTION: perform half frequency PCM synthesis
  */
  
 // Yeah, I don't think so
 
 //static
 //void synth_half(struct mad_synth *synth, struct mad_frame const *frame,
-//		unsigned int nch, unsigned int ns)
+//      unsigned int nch, unsigned int ns)
 //{
 //  unsigned int phase, ch, s, sb, pe, po;
 //  mad_fixed_t *pcm1, *pcm2, filter[2][2][16][8];
@@ -1150,7 +1150,7 @@ Mad.Synth.prototype.full = function(frame, nch, ns) {
 //
 //    for (s = 0; s < ns; ++s) {
 //      dct32((*sbsample)[s], phase >> 1,
-//	    filter[0][phase & 1], filter[1][phase & 1]);
+//      filter[0][phase & 1], filter[1][phase & 1]);
 //
 //      pe = phase & ~1;
 //      po = ((phase - 1) & 0xf) | 1;
@@ -1189,59 +1189,59 @@ Mad.Synth.prototype.full = function(frame, nch, ns) {
 //      pcm2 = pcm1 + 14;
 //
 //      for (sb = 1; sb < 16; ++sb) {
-//	++fe;
-//	++Dptr;
+//  ++fe;
+//  ++Dptr;
 //
-//	/* D[32 - sb][i] == -D[sb][31 - i] */
+//  /* D[32 - sb][i] == -D[sb][31 - i] */
 //
-//	if (!(sb & 1)) {
-//	  ptr = *Dptr + po;
-//	  ML0(hi, lo, (*fo)[0], ptr[ 0]);
-//	  MLA(hi, lo, (*fo)[1], ptr[14]);
-//	  MLA(hi, lo, (*fo)[2], ptr[12]);
-//	  MLA(hi, lo, (*fo)[3], ptr[10]);
-//	  MLA(hi, lo, (*fo)[4], ptr[ 8]);
-//	  MLA(hi, lo, (*fo)[5], ptr[ 6]);
-//	  MLA(hi, lo, (*fo)[6], ptr[ 4]);
-//	  MLA(hi, lo, (*fo)[7], ptr[ 2]);
-//	  MLN(hi, lo);
+//  if (!(sb & 1)) {
+//    ptr = *Dptr + po;
+//    ML0(hi, lo, (*fo)[0], ptr[ 0]);
+//    MLA(hi, lo, (*fo)[1], ptr[14]);
+//    MLA(hi, lo, (*fo)[2], ptr[12]);
+//    MLA(hi, lo, (*fo)[3], ptr[10]);
+//    MLA(hi, lo, (*fo)[4], ptr[ 8]);
+//    MLA(hi, lo, (*fo)[5], ptr[ 6]);
+//    MLA(hi, lo, (*fo)[6], ptr[ 4]);
+//    MLA(hi, lo, (*fo)[7], ptr[ 2]);
+//    MLN(hi, lo);
 //
-//	  ptr = *Dptr + pe;
-//	  MLA(hi, lo, (*fe)[7], ptr[ 2]);
-//	  MLA(hi, lo, (*fe)[6], ptr[ 4]);
-//	  MLA(hi, lo, (*fe)[5], ptr[ 6]);
-//	  MLA(hi, lo, (*fe)[4], ptr[ 8]);
-//	  MLA(hi, lo, (*fe)[3], ptr[10]);
-//	  MLA(hi, lo, (*fe)[2], ptr[12]);
-//	  MLA(hi, lo, (*fe)[1], ptr[14]);
-//	  MLA(hi, lo, (*fe)[0], ptr[ 0]);
+//    ptr = *Dptr + pe;
+//    MLA(hi, lo, (*fe)[7], ptr[ 2]);
+//    MLA(hi, lo, (*fe)[6], ptr[ 4]);
+//    MLA(hi, lo, (*fe)[5], ptr[ 6]);
+//    MLA(hi, lo, (*fe)[4], ptr[ 8]);
+//    MLA(hi, lo, (*fe)[3], ptr[10]);
+//    MLA(hi, lo, (*fe)[2], ptr[12]);
+//    MLA(hi, lo, (*fe)[1], ptr[14]);
+//    MLA(hi, lo, (*fe)[0], ptr[ 0]);
 //
-//	  *pcm1++ = MLZ(hi, lo);
+//    *pcm1++ = MLZ(hi, lo);
 //
-//	  ptr = *Dptr - po;
-//	  ML0(hi, lo, (*fo)[7], ptr[31 -  2]);
-//	  MLA(hi, lo, (*fo)[6], ptr[31 -  4]);
-//	  MLA(hi, lo, (*fo)[5], ptr[31 -  6]);
-//	  MLA(hi, lo, (*fo)[4], ptr[31 -  8]);
-//	  MLA(hi, lo, (*fo)[3], ptr[31 - 10]);
-//	  MLA(hi, lo, (*fo)[2], ptr[31 - 12]);
-//	  MLA(hi, lo, (*fo)[1], ptr[31 - 14]);
-//	  MLA(hi, lo, (*fo)[0], ptr[31 - 16]);
+//    ptr = *Dptr - po;
+//    ML0(hi, lo, (*fo)[7], ptr[31 -  2]);
+//    MLA(hi, lo, (*fo)[6], ptr[31 -  4]);
+//    MLA(hi, lo, (*fo)[5], ptr[31 -  6]);
+//    MLA(hi, lo, (*fo)[4], ptr[31 -  8]);
+//    MLA(hi, lo, (*fo)[3], ptr[31 - 10]);
+//    MLA(hi, lo, (*fo)[2], ptr[31 - 12]);
+//    MLA(hi, lo, (*fo)[1], ptr[31 - 14]);
+//    MLA(hi, lo, (*fo)[0], ptr[31 - 16]);
 //
-//	  ptr = *Dptr - pe;
-//	  MLA(hi, lo, (*fe)[0], ptr[31 - 16]);
-//	  MLA(hi, lo, (*fe)[1], ptr[31 - 14]);
-//	  MLA(hi, lo, (*fe)[2], ptr[31 - 12]);
-//	  MLA(hi, lo, (*fe)[3], ptr[31 - 10]);
-//	  MLA(hi, lo, (*fe)[4], ptr[31 -  8]);
-//	  MLA(hi, lo, (*fe)[5], ptr[31 -  6]);
-//	  MLA(hi, lo, (*fe)[6], ptr[31 -  4]);
-//	  MLA(hi, lo, (*fe)[7], ptr[31 -  2]);
+//    ptr = *Dptr - pe;
+//    MLA(hi, lo, (*fe)[0], ptr[31 - 16]);
+//    MLA(hi, lo, (*fe)[1], ptr[31 - 14]);
+//    MLA(hi, lo, (*fe)[2], ptr[31 - 12]);
+//    MLA(hi, lo, (*fe)[3], ptr[31 - 10]);
+//    MLA(hi, lo, (*fe)[4], ptr[31 -  8]);
+//    MLA(hi, lo, (*fe)[5], ptr[31 -  6]);
+//    MLA(hi, lo, (*fe)[6], ptr[31 -  4]);
+//    MLA(hi, lo, (*fe)[7], ptr[31 -  2]);
 //
-//	  *pcm2-- = MLZ(hi, lo);
-//	}
+//    *pcm2-- = MLZ(hi, lo);
+//  }
 //
-//	++fo;
+//  ++fo;
 //      }
 //
 //      ++Dptr;
@@ -1265,8 +1265,8 @@ Mad.Synth.prototype.full = function(frame, nch, ns) {
 //}
 
 /*
- * NAME:	synth.frame()
- * DESCRIPTION:	perform PCM synthesis of frame subband samples
+ * NAME:    synth.frame()
+ * DESCRIPTION: perform PCM synthesis of frame subband samples
  */
 Mad.Synth.prototype.frame = function (frame) {
     var nch = frame.header.nchannels();
