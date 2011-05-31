@@ -23,10 +23,6 @@ Array.prototype.subarray = function(start) {
     return new Float32Array(this.slice(start));
 };
 
-Array.prototype.subarray = function(start) {
-    return new Float32Array(this.slice(start));
-};
-
 require('../../mad.js');
 require('../../id3.js');
 require('../../layer3.js');
