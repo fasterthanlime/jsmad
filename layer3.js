@@ -241,7 +241,7 @@ Mad.MASK1BIT = function (cache, sz) {
  * NAME:    III_huffdecode()
  * DESCRIPTION: decode Huffman code words of one channel of one granule
  */
-Mad.III_huffdecode = function(ptr, xr /* Float32Array(576) */, channel, sfbwidth, part2_length) {
+Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth, part2_length) {
     var exponents = new Int32Array(new ArrayBuffer(4 * 39));
     var expptr = 0;
     var bits_left, cachesz;
@@ -274,7 +274,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float32Array(576) */, channel, sfbwidth
     {
         var region = 0, rcount;
         
-        var reqcache = new Float32Array(new ArrayBuffer(8 * 16));
+        var reqcache = new Float64Array(new ArrayBuffer(8 * 16));
 
         sfbound = xrptr + sfbwidth[sfbwidthptr++];
         rcount  = channel.region0_count + 1;
@@ -813,7 +813,7 @@ for(var i = 0; i < 9; ++i) {
     sdctII_scale[i] = 2 * Math.cos(Math.PI * (2 * i + 1) / (2 * 18));
 }
 
-var sdctII_tmp = new Float32Array(new ArrayBuffer(8 * 9));
+var sdctII_tmp = new Float64Array(new ArrayBuffer(8 * 9));
 
 var sdctII = function (x /* [18] */, X /* [18] */) {
   /* divide the 18-point SDCT-II into two 9-point SDCT-IIs */
@@ -847,7 +847,7 @@ for(i = 0; i < 18; i++) {
     dctIV_scale[i] = 2 * Math.cos(Math.PI * (2 * i + 1) / (4 * 18));
 }
 
-var dctIV_tmp = new Float32Array(new ArrayBuffer(8 * 18));
+var dctIV_tmp = new Float64Array(new ArrayBuffer(8 * 18));
 
 var dctIV = function (y /* [18] */, X /* [18] */) {
 
@@ -869,7 +869,7 @@ var dctIV = function (y /* [18] */, X /* [18] */) {
   }
 }
 
-var imdct36_tmp = new Float32Array(new ArrayBuffer(8 * 18));
+var imdct36_tmp = new Float64Array(new ArrayBuffer(8 * 18));
 
 /*
  * NAME:    imdct36
@@ -892,7 +892,7 @@ var imdct36 = function (x /* [18] */, y /* [36] */) {
   }
 }
 
-var imdct_s_y = new Float32Array(new ArrayBuffer(8 * 36));
+var imdct_s_y = new Float64Array(new ArrayBuffer(8 * 36));
 
 /*
  * NAME:    III_imdct_s()
@@ -1044,7 +1044,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
         var sfbwidth = [];
         /* unsigned char const *sfbwidth[2]; */
         var l = 0;
-        var xr = [ new Float32Array(new ArrayBuffer(8 * 576)), new Float32Array(new ArrayBuffer(8 * 576)) ];
+        var xr = [ new Float64Array(new ArrayBuffer(8 * 576)), new Float64Array(new ArrayBuffer(8 * 576)) ];
         
         var error;
 
@@ -1087,7 +1087,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
             var sample = frame.sbsample[ch].slice(18 * gr);
         
             var sb, l = 0, i, sblimit;
-            var output = new Float32Array(new ArrayBuffer(8 * 36));
+            var output = new Float64Array(new ArrayBuffer(8 * 36));
 
             if (channel.block_type == 2) {
                 Mad.III_reorder(xr[ch], channel, sfbwidth[ch]);
@@ -1453,9 +1453,9 @@ Mad.III_overlap_z = function (overlap /* [18] */, sample /* [18][32] */, sb) {
 }
 
 // allocating typed arrays once and for all, outside the function
-var reorder_tmp = new Float32Array(new ArrayBuffer(8 * 32 * 3 * 6));    
-var reorder_sbw = new Float32Array(new ArrayBuffer(8 * 3));
-var reorder_sw  = new Float32Array(new ArrayBuffer(8 * 3));
+var reorder_tmp = new Float64Array(new ArrayBuffer(8 * 32 * 3 * 6));    
+var reorder_sbw = new Float64Array(new ArrayBuffer(8 * 3));
+var reorder_sw  = new Float64Array(new ArrayBuffer(8 * 3));
 
 Mad.III_reorder = function (xr /* [576] */, channel, sfbwidth /* [39] */) {
     var sfbwidthPointer = 0;
