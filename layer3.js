@@ -832,13 +832,7 @@ var sdctII = function (x /* [18] */, X /* [18] */) {
     sdctII_tmp[i] = (x[i] - x[18 - i - 1]) * sdctII_scale[i];
   }
 
-  var X1 = new Float32Array(new ArrayBuffer(X.length - 4));
-  
-  for (var i = 0; i < X1.length; i++) {
-    X1[i] - X[i + 1];
-  }
-
-  fastsdct(sdctII_tmp, X1);
+  fastsdct(sdctII_tmp, X.subarray(1));
 
   /* output accumulation */
   
@@ -1411,7 +1405,7 @@ Mad.III_requantize = function(value, exp) {
     exp = (exp / 4) >> 0;
 
     var requantized = Math.pow(value, 4.0 / 3.0);
-    requantized *= pow(2.0, (exp / 4.0));
+    requantized *= Math.pow(2.0, (exp / 4.0));
    
     if(frac) {
         requantized *= Math.pow(2.0, (frac / 4.0));
