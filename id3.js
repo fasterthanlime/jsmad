@@ -1,5 +1,5 @@
 
-function ID3_skipHeader(stream) {
+ID3_skipHeader = function (stream) {
     // read magic, should be ID3
     var magic = stream.peekChars(3);
     

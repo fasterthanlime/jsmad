@@ -1,10 +1,10 @@
 
 // Well duh.
-var CHAR_BIT = 8;
+CHAR_BIT = 8;
 
 /*
- * NAME:	bit.init()
- * DESCRIPTION:	initialize bit pointer struct
+ * NAME:    bit.init()
+ * DESCRIPTION: initialize bit pointer struct
  */
 Mad.Bit = function (data, offset) {
     if(typeof(data) != "string") {
@@ -25,24 +25,24 @@ Mad.Bit.prototype.clone = function() {
 }
 
 /*
- * NAME:	bit.length()
- * DESCRIPTION:	return number of bits between start and end points
+ * NAME:    bit.length()
+ * DESCRIPTION: return number of bits between start and end points
  */
 Mad.Bit.prototype.length = function(end) {
     return this.left + CHAR_BIT * (end.offset - (this.offset + 1)) + (CHAR_BIT - end.left);
 }
 
 /*
- * NAME:	bit.nextbyte()
- * DESCRIPTION:	return pointer to next unprocessed byte
+ * NAME:    bit.nextbyte()
+ * DESCRIPTION: return pointer to next unprocessed byte
  */
 Mad.Bit.prototype.nextbyte = function() {
     return this.left == CHAR_BIT ? this.offset : this.offset + 1;
 }
 
 /*
- * NAME:	bit.skip()
- * DESCRIPTION:	advance bit pointer
+ * NAME:    bit.skip()
+ * DESCRIPTION: advance bit pointer
  */
 Mad.Bit.prototype.skip = function(len) {
     this.offset += (len / CHAR_BIT) >> 0; // javascript trick to get integer divison
@@ -58,8 +58,8 @@ Mad.Bit.prototype.skip = function(len) {
 }
 
 /*
- * NAME:	bit.read()
- * DESCRIPTION:	read an arbitrary number of bits and return their UIMSBF value
+ * NAME:    bit.read()
+ * DESCRIPTION: read an arbitrary number of bits and return their UIMSBF value
  */
 Mad.Bit.prototype.read = function(len) {
     if(len > 16) return this.readBig(len);
