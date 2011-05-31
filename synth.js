@@ -7,17 +7,7 @@ Mad.Synth = function () {
     this.filter = [];
     this.mute();
     this.phase = 0;
-    
-    this.pcm = {
-        samplerate: 0,
-        channels: 0,
-        length: 0,
-        samples: [
-            new Float32Array(new ArrayBuffer(8 * 1152)),
-            new Float32Array(new ArrayBuffer(8 * 1152))
-        ]
-    };
-    
+
     this.pcm.clone = function() {
         var copy = {};
         copy.samplerate = this.samplerate;
@@ -1005,14 +995,12 @@ var D /* [17][32] */ = [
  * DESCRIPTION: perform full frequency PCM synthesis
  */
 Mad.Synth.prototype.full = function(frame, nch, ns) {
-    var phase, pe, po;
-    var pcm1, pcm2, filter /* [2][2][16][8] */;
     var Dptr, hi, lo, ptr;
     var fePtr = 0, fxPtr = 0, foPtr = 0;
 
     for (var ch = 0; ch < nch; ++ch) {
         var sbsample /* [36][32] */ = frame.sbsample[ch];
-        var filter = this.filter[ch];
+        var filter = this.filter[ch]  /* [2][2][16][8] */;
         var phase    = this.phase;
         var pcm      = this.pcm.samples[ch];
         var pcm1Ptr  = 0;
@@ -1021,106 +1009,110 @@ Mad.Synth.prototype.full = function(frame, nch, ns) {
         for (var s = 0; s < ns; ++s) {
             Mad.Synth.dct32(sbsample[s], phase >> 1, filter[0][phase & 1], filter[1][phase & 1]);
 
-            pe = phase & ~1;
-            po = ((phase - 1) & 0xf) | 1;
+            var pe = phase & ~1;
+            var po = ((phase - 1) & 0xf) | 1;
 
             /* calculate 32 samples */
-            fe = filter[0][ phase & 1];
-            fx = filter[0][~phase & 1];
-            fo = filter[1][~phase & 1];
+            var fe = filter[0][ phase & 1];
+            var fx = filter[0][~phase & 1];
+            var fo = filter[1][~phase & 1];
 
+            var fePtr = 0;
+            var fxPtr = 0;
+            var foPtr = 0;
+            
             Dptr = 0;
 
             ptr = D[Dptr];
-            lo = fx[fxPtr + 0] * ptr[po +  0] +
-                 fx[fxPtr + 1] * ptr[po + 14] +
-                 fx[fxPtr + 2] * ptr[po + 12] +
-                 fx[fxPtr + 3] * ptr[po + 10] +
-                 fx[fxPtr + 4] * ptr[po +  8] +
-                 fx[fxPtr + 5] * ptr[po +  6] +
-                 fx[fxPtr + 6] * ptr[po +  4] +
-                 fx[fxPtr + 7] * ptr[po +  2];
+            lo =  fx[fxPtr][0] * ptr[po +  0];
+            lo += fx[fxPtr][1] * ptr[po + 14];
+            lo += fx[fxPtr][2] * ptr[po + 12];
+            lo += fx[fxPtr][3] * ptr[po + 10];
+            lo += fx[fxPtr][4] * ptr[po +  8];
+            lo += fx[fxPtr][5] * ptr[po +  6];
+            lo += fx[fxPtr][6] * ptr[po +  4];
+            lo += fx[fxPtr][7] * ptr[po +  2];
             lo = -lo;                      
                                                
-            lo += fe[fePtr + 0] * ptr[pe +  0] +
-                  fe[fePtr + 1] * ptr[pe + 14] +
-                  fe[fePtr + 2] * ptr[pe + 12] +
-                  fe[fePtr + 3] * ptr[pe + 10] +
-                  fe[fePtr + 4] * ptr[pe +  8] +
-                  fe[fePtr + 5] * ptr[pe +  6] +
-                  fe[fePtr + 6] * ptr[pe +  4] +
-                  fe[fePtr + 7] * ptr[pe +  2];
+            lo += fe[fePtr][0] * ptr[pe +  0];
+            lo += fe[fePtr][1] * ptr[pe + 14];
+            lo += fe[fePtr][2] * ptr[pe + 12];
+            lo += fe[fePtr][3] * ptr[pe + 10];
+            lo += fe[fePtr][4] * ptr[pe +  8];
+            lo += fe[fePtr][5] * ptr[pe +  6];
+            lo += fe[fePtr][6] * ptr[pe +  4];
+            lo += fe[fePtr][7] * ptr[pe +  2];
 
             pcm[pcm1Ptr++] = lo;
             pcm2Ptr = pcm1Ptr + 30;
 
             for (var sb = 1; sb < 16; ++sb) {
-                ++fe;
+                ++fePtr;
                 ++Dptr;
 
                 /* D[32 - sb][i] == -D[sb][31 - i] */
 
                 ptr = D[Dptr];
-                lo = fo[foPtr + 0], ptr[po +  0] +
-                     fo[foPtr + 1], ptr[po + 14] +
-                     fo[foPtr + 2], ptr[po + 12] +
-                     fo[foPtr + 3], ptr[po + 10] +
-                     fo[foPtr + 4], ptr[po +  8] +
-                     fo[foPtr + 5], ptr[po +  6] +
-                     fo[foPtr + 6], ptr[po +  4] +
-                     fo[foPtr + 7], ptr[po +  2];
+                lo  = fo[foPtr][0] * ptr[po +  0];
+                lo += fo[foPtr][1] * ptr[po + 14];
+                lo += fo[foPtr][2] * ptr[po + 12];
+                lo += fo[foPtr][3] * ptr[po + 10];
+                lo += fo[foPtr][4] * ptr[po +  8];
+                lo += fo[foPtr][5] * ptr[po +  6];
+                lo += fo[foPtr][6] * ptr[po +  4];
+                lo += fo[foPtr][7] * ptr[po +  2];
                 lo = -lo;
 
-                lo += fe[fePtr + 7], ptr[pe +  2] +
-                      fe[fePtr + 6], ptr[pe +  4] +
-                      fe[fePtr + 5], ptr[pe +  6] +
-                      fe[fePtr + 4], ptr[pe +  8] +
-                      fe[fePtr + 3], ptr[pe + 10] +
-                      fe[fePtr + 2], ptr[pe + 12] +
-                      fe[fePtr + 1], ptr[pe + 14] +
-                      fe[fePtr + 0], ptr[pe +  0];
+                lo += fe[fePtr][7] * ptr[pe +  2];
+                lo += fe[fePtr][6] * ptr[pe +  4];
+                lo += fe[fePtr][5] * ptr[pe +  6];
+                lo += fe[fePtr][4] * ptr[pe +  8];
+                lo += fe[fePtr][3] * ptr[pe + 10];
+                lo += fe[fePtr][2] * ptr[pe + 12];
+                lo += fe[fePtr][1] * ptr[pe + 14];
+                lo += fe[fePtr][0] * ptr[pe +  0];
 
                 pcm[pcm1Ptr++] = lo;
 
-                lo = fe[fePtr + 0], ptr[-pe + 31 - 16] +
-                     fe[fePtr + 1], ptr[-pe + 31 - 14] +
-                     fe[fePtr + 2], ptr[-pe + 31 - 12] +
-                     fe[fePtr + 3], ptr[-pe + 31 - 10] +
-                     fe[fePtr + 4], ptr[-pe + 31 -  8] +
-                     fe[fePtr + 5], ptr[-pe + 31 -  6] +
-                     fe[fePtr + 6], ptr[-pe + 31 -  4] +
-                     fe[fePtr + 7], ptr[-pe + 31 -  2];
+                lo =  fe[fePtr][0] * ptr[-pe + 31 - 16];
+                lo += fe[fePtr][1] * ptr[-pe + 31 - 14];
+                lo += fe[fePtr][2] * ptr[-pe + 31 - 12];
+                lo += fe[fePtr][3] * ptr[-pe + 31 - 10];
+                lo += fe[fePtr][4] * ptr[-pe + 31 -  8];
+                lo += fe[fePtr][5] * ptr[-pe + 31 -  6];
+                lo += fe[fePtr][6] * ptr[-pe + 31 -  4];
+                lo += fe[fePtr][7] * ptr[-pe + 31 -  2];
 
-                lo += fo[foPtr + 7], ptr[-po + 31 -  2] +
-                      fo[foPtr + 6], ptr[-po + 31 -  4] +
-                      fo[foPtr + 5], ptr[-po + 31 -  6] +
-                      fo[foPtr + 4], ptr[-po + 31 -  8] +
-                      fo[foPtr + 3], ptr[-po + 31 - 10] +
-                      fo[foPtr + 2], ptr[-po + 31 - 12] +
-                      fo[foPtr + 1], ptr[-po + 31 - 14] +
-                      fo[foPtr + 0], ptr[-po + 31 - 16];
+                lo += fo[foPtr][7] * ptr[-po + 31 -  2];
+                lo += fo[foPtr][6] * ptr[-po + 31 -  4];
+                lo += fo[foPtr][5] * ptr[-po + 31 -  6];
+                lo += fo[foPtr][4] * ptr[-po + 31 -  8];
+                lo += fo[foPtr][3] * ptr[-po + 31 - 10];
+                lo += fo[foPtr][2] * ptr[-po + 31 - 12];
+                lo += fo[foPtr][1] * ptr[-po + 31 - 14];
+                lo += fo[foPtr][0] * ptr[-po + 31 - 16];
 
                 pcm[pcm2Ptr--] = lo;
                 ++foPtr;
-      }
+            }
 
-      ++Dptr;
+            ++Dptr;
 
-      ptr = D[Dptr];
-      lo = fo[foPtr + 0], ptr[po +  0] +
-           fo[foPtr + 1], ptr[po + 14] +
-           fo[foPtr + 2], ptr[po + 12] +
-           fo[foPtr + 3], ptr[po + 10] +
-           fo[foPtr + 4], ptr[po +  8] +
-           fo[foPtr + 5], ptr[po +  6] +
-           fo[foPtr + 6], ptr[po +  4] +
-           fo[foPtr + 7], ptr[po +  2];
+            ptr = D[Dptr];
+            lo  = fo[foPtr][0] * ptr[po +  0];
+            lo += fo[foPtr][1] * ptr[po + 14];
+            lo += fo[foPtr][2] * ptr[po + 12];
+            lo += fo[foPtr][3] * ptr[po + 10];
+            lo += fo[foPtr][4] * ptr[po +  8];
+            lo += fo[foPtr][5] * ptr[po +  6];
+            lo += fo[foPtr][6] * ptr[po +  4];
+            lo += fo[foPtr][7] * ptr[po +  2];
 
-      pcm[pcm1Ptr] = lo;
-      pcm1Ptr += 16;
-      phase = (phase + 1) % 16;
+            pcm[pcm1Ptr] = lo;
+            pcm1Ptr += 16;
+            phase = (phase + 1) % 16;
+        }
     }
-  }
 }
 
 /*

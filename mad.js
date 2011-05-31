@@ -3,7 +3,7 @@
 Mad = {};
 
 Mad.recoverable = function (error) {
-    return ((error) & 0xff00) != 0;
+    return (error & 0xff00) != 0;
 }
 
 // credit: http://blog.stevenlevithan.com/archives/fast-string-multiply

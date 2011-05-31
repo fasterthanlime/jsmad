@@ -265,7 +265,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float32Array(576) */, channel, sfbwidth
     cachesz += ((32 - 1 - 24) + (24 - cachesz)) & ~7;
     
     bitcache   = peek.read(cachesz);
-    console.log("bitcache peek.read = " + bitcache);
+    //console.log("bitcache peek.read = " + bitcache);
     bits_left -= cachesz;
 
     xrptr = 0;
@@ -540,7 +540,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float32Array(576) */, channel, sfbwidth
 
     if (cachesz + bits_left < 0) {
 //# if 0 && defined(DEBUG)
-      console.log("huffman count1 overrun (" + (-(cachesz + bits_left)) + " bits)");
+      //console.log("huffman count1 overrun (" + (-(cachesz + bits_left)) + " bits)");
 //# endif
 
       /* technically the bitstream is misformatted, but apparently
@@ -603,15 +603,15 @@ Mad.III_sideinfo = function (ptr, nch, lsf) {
     if (!lsf) {
         ngr = 2;
 
-        for (ch = 0; ch < nch; ++ch)
+        for (var ch = 0; ch < nch; ++ch)
             si.scfsi[ch] = ptr.read(4);
     }
 
-    for (gr = 0; gr < ngr; ++gr) {
+    for (var gr = 0; gr < ngr; ++gr) {
         var granule = new Mad.Granule();
         si.gr[gr] = granule;
         
-        for (ch = 0; ch < nch; ++ch) {
+        for (var ch = 0; ch < nch; ++ch) {
             var channel = new Mad.Channel();
             granule.ch[ch] = channel;
             
@@ -645,15 +645,15 @@ Mad.III_sideinfo = function (ptr, nch, lsf) {
                 else if (channel.block_type == 2)
                   channel.region0_count = 8;
 
-                for (i = 0; i < 2; ++i)
+                for (var i = 0; i < 2; ++i)
                   channel.table_select[i] = ptr.read(5);
 
-                for (i = 0; i < 3; ++i)
+                for (var i = 0; i < 3; ++i)
                   channel.subblock_gain[i] = ptr.read(3);
             } else {
                 channel.block_type = 0;
 
-                for (i = 0; i < 3; ++i)
+                for (var i = 0; i < 3; ++i)
                     channel.table_select[i] = ptr.read(5);
 
                 channel.region0_count = ptr.read(4);
@@ -703,6 +703,7 @@ Mad.III_scalefactors = function (ptr, channel, gr0ch, scfsi) {
   }
   else {  /* channel.block_type != 2 */
     if (scfsi & 0x8) {
+<<<<<<< HEAD:layer3.js
       for (sfbi = 0; sfbi < 6; ++sfbi)
     channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
     }
@@ -736,6 +737,41 @@ Mad.III_scalefactors = function (ptr, channel, gr0ch, scfsi) {
     else {
       for (sfbi = 16; sfbi < 21; ++sfbi)
     channel.scalefac[sfbi] = ptr.read(slen2);
+=======
+      for (var sfbi = 0; sfbi < 6; ++sfbi)
+    channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
+    }
+    else {
+      for (var sfbi = 0; sfbi < 6; ++sfbi)
+    channel.scalefac[sfbi] = ptr.read(slen1);
+    }
+
+    if (scfsi & 0x4) {
+      for (var sfbi = 6; sfbi < 11; ++sfbi)
+    channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
+    }
+    else {
+      for (var sfbi = 6; sfbi < 11; ++sfbi)
+    channel.scalefac[sfbi] = ptr.read(slen1);
+    }
+
+    if (scfsi & 0x2) {
+      for (var sfbi = 11; sfbi < 16; ++sfbi)
+    channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
+    }
+    else {
+      for (var sfbi = 11; sfbi < 16; ++sfbi)
+    channel.scalefac[sfbi] = ptr.read(slen2);
+    }
+
+    if (scfsi & 0x1) {
+      for (var sfbi = 16; sfbi < 21; ++sfbi)
+    channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
+    }
+    else {
+      for (var sfbi = 16; sfbi < 21; ++sfbi)
+    channel.scalefac[sfbi] = ptr.read(slen2);
+>>>>>>> 66527757ba1ad3413a123218246405089587e786:layer3.js
     }
 
     channel.scalefac[21] = 0;
@@ -820,7 +856,7 @@ var sdctII = function (x /* [18] */, X /* [18] */) {
 
   /* even input butterfly */
 
-  for (i = 0; i < 9; ++i) {
+  for (var i = 0; i < 9; ++i) {
     sdctII_tmp[i] = x[i] + x[18 - i - 1];
   }
 
@@ -828,7 +864,7 @@ var sdctII = function (x /* [18] */, X /* [18] */) {
 
   /* odd input butterfly and scaling */
 
-  for (i = 0; i < 9; ++i) {
+  for (var i = 0; i < 9; ++i) {
     sdctII_tmp[i] = (x[i] - x[18 - i - 1]) * sdctII_scale[i];
   }
 
@@ -842,7 +878,7 @@ var sdctII = function (x /* [18] */, X /* [18] */) {
 
   /* output accumulation */
   
-  for (i = 3; i < 18; i += 2) {
+  for (var i = 3; i < 18; i += 2) {
     X[i] -= X[i - 2];
   }
 }
@@ -911,15 +947,14 @@ Mad.III_imdct_s = function (X /* [18] */, z /* [36] */)
   var Xptr = 0;
   
   var y = imdct_s_y;
-  var w, i;
   var hi, lo;
 
   /* IMDCT */
-  for (w = 0; w < 3; ++w) {
+  for (var w = 0; w < 3; ++w) {
     var s = Mad.imdct_s;
     var sptr = 0;
 
-    for (i = 0; i < 3; ++i) {
+    for (var i = 0; i < 3; ++i) {
       lo =  X[Xptr + 0] * s[sptr + 0] +
             X[Xptr + 1] * s[sptr + 1] +
             X[Xptr + 2] * s[sptr + 2] +
@@ -954,7 +989,7 @@ Mad.III_imdct_s = function (X /* [18] */, z /* [36] */)
   yptr = 0;
   var wptr = 0;
 
-  for (i = 0; i < 6; ++i) {
+  for (var i = 0; i < 6; ++i) {
     z[i +  0] = 0;
     z[i +  6] = y[yptr +  0 + 0] * window_s[wptr + 0];
 
@@ -980,7 +1015,7 @@ Mad.III_imdct_s = function (X /* [18] */, z /* [36] */)
  * NAME:    III_imdct_l()
  * DESCRIPTION: perform IMDCT and windowing for long blocks
  */
-Mad.III_imdct_l = function (X, z, block_type) {
+Mad.III_imdct_l = function (X /* 18 */, z /* 36 */, block_type) {
   /* IMDCT */
   imdct36(X, z);
 
@@ -1050,6 +1085,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
         var granule = si.gr[gr];
         var sfbwidth = [];
         /* unsigned char const *sfbwidth[2]; */
+        var l = 0;
         var xr = [ new Float32Array(new ArrayBuffer(8 * 576)), new Float32Array(new ArrayBuffer(8 * 576)) ];
         
         var error;
@@ -1090,7 +1126,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
         /* reordering, alias reduction, IMDCT, overlap-add, frequency inversion */
         for (var ch = 0; ch < nch; ++ch) {
             var channel = granule.ch[ch];
-            var sample = frame.sbsample[ch][18 * gr];
+            var sample = frame.sbsample[ch].slice(18 * gr);
         
             var sb, l = 0, i, sblimit;
             var output = new Float32Array(new ArrayBuffer(8 * 36));
@@ -1119,13 +1155,13 @@ Mad.III_decode = function (ptr, frame, si, nch) {
 
                 /* long blocks */
                 for (var sb = 0; sb < 2; ++sb, l += 18) {
-                    Mad.III_imdct_l(xr[ch][l], output, block_type);
+                    Mad.III_imdct_l(xr[ch].subarray(l), output, block_type);
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
                 }
             } else {
                 /* short blocks */
                 for (var sb = 0; sb < 2; ++sb, l += 18) {
-                    Mad.III_imdct_s(xr[ch][l], output);
+                    Mad.III_imdct_s(xr[ch].subarray(l), output);
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
                 }
             }
@@ -1142,16 +1178,16 @@ Mad.III_decode = function (ptr, frame, si, nch) {
             if (channel.block_type != 2) {
                 /* long blocks */
                 for (var sb = 2; sb < sblimit; ++sb, l += 18) {
-                    Mad.III_imdct_l(xr[ch][l], output, channel.block_type);
+                    Mad.III_imdct_l(xr[ch].subarray(l, l + 18), output, channel.block_type);
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
 
                     if (sb & 1)
-                        sample = Mad.III_freqinver(sample, sb);
+                        Mad.III_freqinver(sample, sb);
                 }
             } else {
                 /* short blocks */
                 for (var sb = 2; sb < sblimit; ++sb, l += 18) {
-                    Mad.III_imdct_s(xr[ch][l], output);
+                    Mad.III_imdct_s(xr[ch].subarray(l, l + 18), output);
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
 
                     if (sb & 1)
@@ -1217,7 +1253,7 @@ Mad.layer_III = function (stream, frame) {
     var data_bitlen = sideinfoResult.data_bitlen;
     var priv_bitlen = sideinfoResult.priv_bitlen;
     
-    console.log("We're at " + stream.ptr.offset + ", data_bitlen = " + data_bitlen + ", priv_bitlen = " + priv_bitlen);
+    //console.log("We're at " + stream.ptr.offset + ", data_bitlen = " + data_bitlen + ", priv_bitlen = " + priv_bitlen);
     
     if (error && result == 0) {
         stream.error = error;
@@ -1313,12 +1349,14 @@ Mad.layer_III = function (stream, frame) {
     }
   
     // DEBUG
+    /*
     console.log(
       "main_data_begin:" + si.main_data_begin +
       ", md_len:" + md_len +
       ", frame_free:" + frame_free +
       ", data_bitlen:" + data_bitlen +
       ", anc_bitlen: " + stream.anc_bitlen);
+      */
 
     /* preload main_data buffer with up to 511 bytes for next frame(s) */
     if (frame_free >= next_md_begin) {
@@ -1404,29 +1442,29 @@ Mad.III_exponents = function(channel, sfbwidth, exponents) {
 }
 
 Mad.III_requantize = function(value, exp) {
-    var frac = exp % 4;
-    
-    exp /= 4;
-    
-    power = Mad.rq_table[value];
-    requantized = power.mantissa;
-    exp += power.exponent;
-    
-    if (exp < 0) {
-        requantized += 1 << (-exp - 1);
-        requantized >>= -exp;
-    } else {
-        requantized <<= exp;
+    // usual (x >> 0) tricks to make sure frac and exp stay integers
+    var frac = (exp % 4) >> 0;  /* assumes sign(frac) == sign(exp) */
+    exp = (exp / 4) >> 0;
+
+    var requantized = Math.pow(value, 4.0 / 3.0);
+    requantized *= pow(2.0, (exp / 4.0));
+   
+    if(frac) {
+        requantized *= Math.pow(2.0, (frac / 4.0));
     }
-    
-    return frac ? requantized * root_table[3 + frac] : requantized;
+   
+    if(exp < 0) {
+        requantized /= Math.pow(2.0, -exp * (3.0 / 4.0));
+    }
+
+    return requantized;
 }
 
 Mad.III_aliasreduce = function(xr, lines) {
     var xrPointer = 0;
     
     for (xrPointer += 18; xr < lines; xr += 18) {
-        for (i = 0; i < 8; ++i) {
+        for (var i = 0; i < 8; ++i) {
             var a = xr[xrPointer - i - 1];
             var b = xr[xrPointer + i];
 
@@ -1443,24 +1481,32 @@ Mad.III_aliasreduce = function(xr, lines) {
 }
 
 Mad.III_overlap = function (output /* [36] */, overlap /* [18] */, sample /* [18][32] */, sb) {
-    for (i = 0; i < 18; ++i) {
+    for (var i = 0; i < 18; ++i) {
         sample[i][sb] = output[i +  0] + overlap[i];
         overlap[i]    = output[i + 18];
     }
 }
 
 Mad.III_overlap_z = function (overlap /* [18] */, sample /* [18][32] */, sb) {
-    for (i = 0; i < 18; ++i) {
+    for (var i = 0; i < 18; ++i) {
       sample[i][sb] = overlap[i];
       overlap[i]    = 0;
     }
 }
 
+// allocating typed arrays once and for all, outside the function
+var reorder_tmp = new Float64Array(new ArrayBuffer(8 * 32 * 3 * 6));    
+var reorder_sbw = new Float64Array(new ArrayBuffer(8 * 3));
+var reorder_sw  = new Float64Array(new ArrayBuffer(8 * 3));
+
 Mad.III_reorder = function (xr /* [576] */, channel, sfbwidth /* [39] */) {
+<<<<<<< HEAD:layer3.js
     var tmp = new Float32Array(new ArrayBuffer(8 * 32 * 3 * 6));
     var sbw = new Float32Array(new ArrayBuffer(8 * 3));
     var sw  = new Float32Array(new ArrayBuffer(8 * 3));
     
+=======
+>>>>>>> 66527757ba1ad3413a123218246405089587e786:layer3.js
     var sfbwidthPointer = 0;
     
     /* this is probably wrong for 8000 Hz mixed blocks */
@@ -1475,8 +1521,8 @@ Mad.III_reorder = function (xr /* [576] */, channel, sfbwidth /* [39] */) {
     }
 
     for (var w = 0; w < 3; ++w) {
-      sbw[w] = sb;
-      sw[w]  = 0;
+      reorder_sbw[w] = sb;
+      reorder_sw[w]  = 0;
     }
 
     f = sfbwidth[sfbwidthPointer++];
@@ -1488,15 +1534,15 @@ Mad.III_reorder = function (xr /* [576] */, channel, sfbwidth /* [39] */) {
             w = (w + 1) % 3;
         }
         
-      tmp[sbw[w]* 32 * 3 + 32 * w + sw[w]++] = xr[l];
+      reorder_tmp[reorder_sbw[w]* 32 * 3 + 32 * w + sw[w]++] = xr[l];
 
-      if (sw[w] == 6) {
-        sw[w] = 0;
-        ++sbw[w];
+      if (reorder_sw[w] == 6) {
+        reorder_sw[w] = 0;
+        ++reorder_sbw[w];
       }
     }
     
     for (var i = 0; i < (576 - 18 * sb); i++) {
-        xr[18 * sb + i] = tmp[sb + i];
+        xr[18 * sb + i] = reorder_tmp[sb + i];
     }
 }
