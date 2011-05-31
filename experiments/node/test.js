@@ -1,32 +1,7 @@
 var fs = require('fs');
 var sys = require('sys');
 
-ArrayBuffer = function(size) {  
-    var array = new Array(size / 4);
-
-    for (var i = 0; i < array.length; i++) {
-        array[i] = 0;
-    } 
-
-    return array;
-};
-
-Int32Array = function(buffer) {
-    return buffer;
-};
-
-Float32Array = function(buffer) {
-    return buffer;
-};
-
-Float64Array = function(buffer) {
-    return buffer;
-};
-
-Array.prototype.subarray = function(start) {
-    return new Float32Array(this.slice(start));
-};
-
+require('./typed-array.js');
 require('../../mad.js');
 require('../../id3.js');
 require('../../layer3.js');
@@ -43,6 +18,7 @@ require("../../frame.js");
 require("../../synth.js");
 
 var data = fs.readFileSync("one_second_of_silence.mp3", "binary");
+// var data = fs.readFileSync("soul-2.mp3", "binary");
 
 console.log("Reading a " + Math.round(data.length / 1024) + "KB file");
 
@@ -64,3 +40,5 @@ while (frame = Mad.Frame.decode(stream)) {
         sys.print(samples[i] + ',');
     }
 }
+
+console.log("error code: " + stream.error);
