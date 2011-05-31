@@ -336,11 +336,7 @@ Mad.Frame = function () {
     for(var ch = 0; ch < 2; ch++) {
         this.overlap[ch] = [];
         for(var sb = 0; sb < 32; sb++) {
-<<<<<<< HEAD:frame.js
             this.overlap[ch][sb] = new Float32Array(new ArrayBuffer(8 * 16));
-=======
-            this.overlap[ch][sb] = new Float64Array(new ArrayBuffer(8 * 18));
->>>>>>> 66527757ba1ad3413a123218246405089587e786:frame.js
         }
     }
 };

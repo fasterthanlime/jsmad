@@ -7,7 +7,17 @@ Mad.Synth = function () {
     this.filter = [];
     this.mute();
     this.phase = 0;
-
+    
+    this.pcm = {
+        samplerate: 0,
+        channels: 0,
+        length: 0,
+        samples: [
+            new Float32Array(new ArrayBuffer(8 * 1152)),
+            new Float32Array(new ArrayBuffer(8 * 1152))
+        ]
+    };
+    
     this.pcm.clone = function() {
         var copy = {};
         copy.samplerate = this.samplerate;
