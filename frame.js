@@ -327,7 +327,7 @@ Mad.Frame = function () {
     for(var ch = 0; ch < 2; ch++) {
         this.sbsample[ch] = [];
         for(var grp = 0; grp < 36; grp++) {
-            this.sbsample[ch][grp] = new Float32Array(new ArrayBuffer(8 * 32))
+            this.sbsample[ch][grp] = new Float64Array(new ArrayBuffer(8 * 32))
         }
     }
     
@@ -336,7 +336,7 @@ Mad.Frame = function () {
     for(var ch = 0; ch < 2; ch++) {
         this.overlap[ch] = [];
         for(var sb = 0; sb < 32; sb++) {
-            this.overlap[ch][sb] = new Float32Array(new ArrayBuffer(8 * 16));
+            this.overlap[ch][sb] = new Float64Array(new ArrayBuffer(8 * 18));
         }
     }
 };

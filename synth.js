@@ -13,8 +13,8 @@ Mad.Synth = function () {
         channels: 0,
         length: 0,
         samples: [
-            new Float32Array(new ArrayBuffer(8 * 1152)),
-            new Float32Array(new ArrayBuffer(8 * 1152))
+            new Float64Array(new ArrayBuffer(8 * 1152)),
+            new Float64Array(new ArrayBuffer(8 * 1152))
         ]
     };
     
@@ -24,8 +24,8 @@ Mad.Synth = function () {
         copy.channels = this.channels;
         copy.length = this.length;
         copy.samples = [
-            new Float32Array(new ArrayBuffer(8 * 1152)),
-            new Float32Array(new ArrayBuffer(8 * 1152))
+            new Float64Array(new ArrayBuffer(8 * 1152)),
+            new Float64Array(new ArrayBuffer(8 * 1152))
         ];
         copy.samples[0].set(this.samples[0]);
         copy.samples[1].set(this.samples[1]);
