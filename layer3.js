@@ -703,41 +703,6 @@ Mad.III_scalefactors = function (ptr, channel, gr0ch, scfsi) {
   }
   else {  /* channel.block_type != 2 */
     if (scfsi & 0x8) {
-<<<<<<< HEAD:layer3.js
-      for (sfbi = 0; sfbi < 6; ++sfbi)
-    channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
-    }
-    else {
-      for (sfbi = 0; sfbi < 6; ++sfbi)
-    channel.scalefac[sfbi] = ptr.read(slen1);
-    }
-
-    if (scfsi & 0x4) {
-      for (sfbi = 6; sfbi < 11; ++sfbi)
-    channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
-    }
-    else {
-      for (sfbi = 6; sfbi < 11; ++sfbi)
-    channel.scalefac[sfbi] = ptr.read(slen1);
-    }
-
-    if (scfsi & 0x2) {
-      for (sfbi = 11; sfbi < 16; ++sfbi)
-    channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
-    }
-    else {
-      for (sfbi = 11; sfbi < 16; ++sfbi)
-    channel.scalefac[sfbi] = ptr.read(slen2);
-    }
-
-    if (scfsi & 0x1) {
-      for (sfbi = 16; sfbi < 21; ++sfbi)
-    channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
-    }
-    else {
-      for (sfbi = 16; sfbi < 21; ++sfbi)
-    channel.scalefac[sfbi] = ptr.read(slen2);
-=======
       for (var sfbi = 0; sfbi < 6; ++sfbi)
     channel.scalefac[sfbi] = gr0ch.scalefac[sfbi];
     }
@@ -771,7 +736,6 @@ Mad.III_scalefactors = function (ptr, channel, gr0ch, scfsi) {
     else {
       for (var sfbi = 16; sfbi < 21; ++sfbi)
     channel.scalefac[sfbi] = ptr.read(slen2);
->>>>>>> 66527757ba1ad3413a123218246405089587e786:layer3.js
     }
 
     channel.scalefac[21] = 0;
@@ -1495,18 +1459,11 @@ Mad.III_overlap_z = function (overlap /* [18] */, sample /* [18][32] */, sb) {
 }
 
 // allocating typed arrays once and for all, outside the function
-var reorder_tmp = new Float64Array(new ArrayBuffer(8 * 32 * 3 * 6));    
-var reorder_sbw = new Float64Array(new ArrayBuffer(8 * 3));
-var reorder_sw  = new Float64Array(new ArrayBuffer(8 * 3));
+var reorder_tmp = new Float32Array(new ArrayBuffer(8 * 32 * 3 * 6));    
+var reorder_sbw = new Float32Array(new ArrayBuffer(8 * 3));
+var reorder_sw  = new Float32Array(new ArrayBuffer(8 * 3));
 
 Mad.III_reorder = function (xr /* [576] */, channel, sfbwidth /* [39] */) {
-<<<<<<< HEAD:layer3.js
-    var tmp = new Float32Array(new ArrayBuffer(8 * 32 * 3 * 6));
-    var sbw = new Float32Array(new ArrayBuffer(8 * 3));
-    var sw  = new Float32Array(new ArrayBuffer(8 * 3));
-    
-=======
->>>>>>> 66527757ba1ad3413a123218246405089587e786:layer3.js
     var sfbwidthPointer = 0;
     
     /* this is probably wrong for 8000 Hz mixed blocks */
