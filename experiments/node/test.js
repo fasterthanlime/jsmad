@@ -1,32 +1,31 @@
 var fs = require('fs');
+var sys = require('sys');
 
-var array = require('typed-array');
+ArrayBuffer = function(size) {  
+    var array = new Array(size / 4);
 
-ArrayBuffer     = array.ArrayBuffer;
-Int32Array      = array.Int32Array;
-Float32Array    = array.Float32Array;
+    for (var i = 0; i < array.length; i++) {
+        array[i] = 0;
+    } 
 
-
-Float32Array.prototype.subarray = function(start) {
-    var copy = new Float32Array(new ArrayBuffer(this.length - 4 * start));
-    
-    for (var i = 0; i < copy.length; i++) {
-        copy[i] = this[i + start];
-    }
-
-    return copy
+    return array;
 };
 
-Int32Array.prototype.subarray = function(start) {
-    var copy = new Int32Array(new ArrayBuffer(this.length - 4 * start));
-    
-    for (var i = 0; i < copy.length; i++) {
-        copy[i] = this[i + start];
-    }
-
-    return copy;
+Int32Array = function(buffer) {
+    return buffer;
 };
 
+Float32Array = function(buffer) {
+    return buffer;
+};
+
+Array.prototype.subarray = function(start) {
+    return new Float32Array(this.slice(start));
+};
+
+Array.prototype.subarray = function(start) {
+    return new Float32Array(this.slice(start));
+};
 
 require('../../mad.js');
 require('../../id3.js');
@@ -53,14 +52,15 @@ ID3_skipHeader(stream);
 
 var STEPS_COUNT = 0;
 
-var synth = new Mad.Synth();
-var frame = Mad.Frame.decode(stream);
+var frame = null;
 
-if(frame == null) {
-    if(stream.error == Mad.Error.BUFLEN) {
-        console.log("End of file!");
+while (frame = Mad.Frame.decode(stream)) {
+    var synth = new Mad.Synth();
+    synth.frame(frame);
+
+    var samples = synth.pcm.samples[0];
+
+    for (var i in samples) {
+        sys.print(samples[i] + ',');
     }
-    console.log("Error! code = " + stream.error);
 }
-
-synth.frame(frame);
