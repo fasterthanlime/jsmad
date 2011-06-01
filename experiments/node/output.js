@@ -32,6 +32,9 @@ var STEPS_COUNT = 0;
 
 var frame = null;
 
+var allmin = 0;
+var allmax = 0;
+
 while (frame = Mad.Frame.decode(stream)) {
     var synth = new Mad.Synth();
     synth.frame(frame);
@@ -42,14 +45,18 @@ while (frame = Mad.Frame.decode(stream)) {
     var max = 0.0;
     var mean = 0.0;
     
-    for (var i in samples) {
+    for (var i = 0; i < samples.length; i++) {
         var sample = samples[i];
-        mean = (mean + sample) / 2.0;
+        mean += (sample / samples.length);
         if(min > sample) min = sample;
         if(max < sample) max = sample;
     }
 
     console.log("min = " + min + ", max = " + max + ", mean = " + mean);
+    if(allmin > min) allmin = min;
+    if(allmax < max) allmax = max;
 }
+
+console.log("allmin = " + allmin + ", allmax = " + allmax);
 
 console.log("error code: " + stream.error);
