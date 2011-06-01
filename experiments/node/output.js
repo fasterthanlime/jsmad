@@ -19,7 +19,7 @@ require("../../synth.js");
 
 // var data = fs.readFileSync("one_second_of_silence.mp3", "binary");
 // var data = fs.readFileSync("one_second_beep.mp3", "binary");
-var data = fs.readFileSync("output.mp3", "binary");
+ var data = fs.readFileSync("output.mp3", "binary");
 // var data = fs.readFileSync("soul-2.mp3", "binary");
 
 console.log("Reading a " + Math.round(data.length / 1024) + "KB file");
