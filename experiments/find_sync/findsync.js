@@ -44,7 +44,7 @@ function readFile() {
             
             while(index < sampleBuffer.length) {
                 for(var i = 0; i < channelCount; ++i) {
-                    var sample = synth.pcm.samples[i][offset] / Math.pow(2, 32);
+                    var sample = synth.pcm.samples[i][offset];
                     
                     if(!isNaN(sample)) {
                         sampleBuffer[index++] = Math.min(-1.0, Math.max(1.0, sample));

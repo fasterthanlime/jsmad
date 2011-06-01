@@ -297,6 +297,8 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
             var clumpsz, value;
             var requantized;
 
+            //console.log("big_values = " + big_values + ", cachesz = " + cachesz + ", bits_left = " + bits_left);
+
             if (xrptr == sfbound) {
                 sfbound += sfbwidth[sfbwidthptr++];
 
@@ -1485,7 +1487,7 @@ Mad.III_reorder = function (xr /* [576] */, channel, sfbwidth /* [39] */) {
             w = (w + 1) % 3;
         }
         
-      reorder_tmp[reorder_sbw[w]* 32 * 3 + 32 * w + sw[w]++] = xr[l];
+      reorder_tmp[reorder_sbw[w]* 32 * 3 + 32 * w + reorder_sw[w]++] = xr[l];
 
       if (reorder_sw[w] == 6) {
         reorder_sw[w] = 0;
