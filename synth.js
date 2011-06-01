@@ -1,3 +1,4 @@
+var sys = require('sys');
 
 /*
  * NAME:    synth.init()
@@ -1007,7 +1008,7 @@ var D /* [17][32] */ = [
 Mad.Synth.prototype.full = function(frame, nch, ns) {
     var Dptr, hi, lo, ptr;
     var fePtr = 0, fxPtr = 0, foPtr = 0;
-
+    
     for (var ch = 0; ch < nch; ++ch) {
         var sbsample /* [36][32] */ = frame.sbsample[ch];
         var filter = this.filter[ch]  /* [2][2][16][8] */;
