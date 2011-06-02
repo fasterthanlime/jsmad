@@ -20,7 +20,3 @@ Float32Array = function(buffer) {
 Float64Array = function(buffer) {
     return buffer;
 };
-
-Array.prototype.subarray = function(start) {
-    return new Float32Array(this.slice(start));
-};
