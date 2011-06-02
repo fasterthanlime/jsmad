@@ -1,5 +1,3 @@
-var sys = require('sys');
-
 /*
  * NAME:    synth.init()
  * DESCRIPTION: initialize synth struct
