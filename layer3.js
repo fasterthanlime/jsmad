@@ -754,7 +754,7 @@ var c4 = 2 * Math.cos( 7 * Math.PI / 18);
 var c5 = 2 * Math.cos( 8 * Math.PI / 18);
 var c6 = 2 * Math.cos(16 * Math.PI / 18);
 
-var fastsdct = function (x /* [9] */, y /* [18] */) {
+var fastsdct = function (x /* [9] */, y /* [18] */, offset) {
   var a0,  a1,  a2,  a3,  a4,  a5,  a6,  a7,  a8,  a9,  a10, a11, a12;
   var a13, a14, a15, a16, a17, a18, a19, a20, a21, a22, a23, a24, a25;
   var m0,  m1,  m2,  m3,  m4,  m5,  m6,  m7;
@@ -798,15 +798,15 @@ var fastsdct = function (x /* [9] */, y /* [18] */) {
   a25 = m4  + m1;
 
   /* output to every other slot for convenience */
-  y[ 0] = a18 + a12;
-  y[ 2] = m0  - a25;
-  y[ 4] = m7  - a20;
-  y[ 6] = m3;
-  y[ 8] = a21 - m6;
-  y[10] = a24 - m1;
-  y[12] = a12 - 2 * a18;
-  y[14] = a23 + m0;
-  y[16] = a22 + m7;
+  y[offset +  0] = a18 + a12;
+  y[offset +  2] = m0  - a25;
+  y[offset +  4] = m7  - a20;
+  y[offset +  6] = m3;
+  y[offset +  8] = a21 - m6;
+  y[offset + 10] = a24 - m1;
+  y[offset + 12] = a12 - 2 * a18;
+  y[offset + 14] = a23 + m0;
+  y[offset + 16] = a22 + m7;
 }
 
 /* sdctII_scale[i] = 2 * cos(PI * (2 * i + 1) / (2 * 18)) */
@@ -817,7 +817,7 @@ for(var i = 0; i < 9; ++i) {
 
 var sdctII_tmp = new Float64Array(new ArrayBuffer(8 * 9));
 
-var sdctII = function (x /* [18] */, X /* [18] */) {
+sdctII = function (x /* [18] */, X /* [18] */) {
   /* divide the 18-point SDCT-II into two 9-point SDCT-IIs */
 
   /* even input butterfly */
@@ -826,7 +826,7 @@ var sdctII = function (x /* [18] */, X /* [18] */) {
     sdctII_tmp[i] = x[i] + x[18 - i - 1];
   }
 
-  fastsdct(sdctII_tmp, X);
+  fastsdct(sdctII_tmp, X, 0);
 
   /* odd input butterfly and scaling */
 
@@ -834,7 +834,7 @@ var sdctII = function (x /* [18] */, X /* [18] */) {
     sdctII_tmp[i] = (x[i] - x[18 - i - 1]) * sdctII_scale[i];
   }
 
-  fastsdct(sdctII_tmp, X.subarray(1));
+  fastsdct(sdctII_tmp, X, 1);
 
   /* output accumulation */
   
@@ -851,12 +851,12 @@ for(i = 0; i < 18; i++) {
 
 var dctIV_tmp = new Float64Array(new ArrayBuffer(8 * 18));
 
-var dctIV = function (y /* [18] */, X /* [18] */) {
+var dctIV = function (y /* [18] */, yoffset, X /* [18] */) {
 
   /* scaling */
 
   for (var i = 0; i < 18; ++i) {
-    dctIV_tmp[i] = y[i] * dctIV_scale[i];
+    dctIV_tmp[i] = y[i + yoffset] * dctIV_scale[i];
   }
 
   /* SDCT-II */
@@ -877,9 +877,9 @@ var imdct36_tmp = new Float64Array(new ArrayBuffer(8 * 18));
  * NAME:    imdct36
  * DESCRIPTION: perform X[18]->x[36] IMDCT using Szu-Wei Lee's fast algorithm
  */
-var imdct36 = function (x /* [18] */, y /* [36] */) {
+var imdct36 = function (x /* [18] */, xoffset, y /* [36] */) {
   /* DCT-IV */
-  dctIV(x, imdct36_tmp);
+  dctIV(x, xoffset, imdct36_tmp);
 
   /* convert 18-point DCT-IV to 36-point IMDCT */
 
@@ -900,11 +900,11 @@ var imdct_s_y = new Float64Array(new ArrayBuffer(8 * 36));
  * NAME:    III_imdct_s()
  * DESCRIPTION: perform IMDCT and windowing for short blocks
  */
-Mad.III_imdct_s = function (X /* [18] */, z /* [36] */)
+Mad.III_imdct_s = function (X /* [18] */, offset, z /* [36] */)
 {
   var yptr = 0;
   var wptr;
-  var Xptr = 0;
+  var Xptr = offset;
   
   var y = imdct_s_y;
   var hi, lo;
@@ -915,24 +915,25 @@ Mad.III_imdct_s = function (X /* [18] */, z /* [36] */)
     var sptr = 0;
 
     for (var i = 0; i < 3; ++i) {
-      lo =  X[Xptr + 0] * s[sptr + 0] +
-            X[Xptr + 1] * s[sptr + 1] +
-            X[Xptr + 2] * s[sptr + 2] +
-            X[Xptr + 3] * s[sptr + 3] +
-            X[Xptr + 4] * s[sptr + 4] +
-            X[Xptr + 5] * s[sptr + 5];
+      lo =  X[Xptr + 0] * s[sptr][0] +
+            X[Xptr + 1] * s[sptr][1] +
+            X[Xptr + 2] * s[sptr][2] +
+            X[Xptr + 3] * s[sptr][3] +
+            X[Xptr + 4] * s[sptr][4] +
+            X[Xptr + 5] * s[sptr][5];
+
 
       y[yptr + i + 0] = lo;
       y[yptr + 5 - i] = -y[yptr + i + 0];
 
       ++sptr;
 
-      lo =  X[Xptr + 0] * s[sptr + 0] +
-            X[Xptr + 1] * s[sptr + 1] +
-            X[Xptr + 2] * s[sptr + 2] +
-            X[Xptr + 3] * s[sptr + 3] +
-            X[Xptr + 4] * s[sptr + 4] +
-            X[Xptr + 5] * s[sptr + 5];
+      lo =  X[Xptr + 0] * s[sptr][0] +
+            X[Xptr + 1] * s[sptr][1] +
+            X[Xptr + 2] * s[sptr][2] +
+            X[Xptr + 3] * s[sptr][3] +
+            X[Xptr + 4] * s[sptr][4] +
+            X[Xptr + 5] * s[sptr][5];
 
       y[yptr +  i + 6] = lo;
       y[yptr + 11 - i] = y[yptr + i + 6];
@@ -975,9 +976,9 @@ Mad.III_imdct_s = function (X /* [18] */, z /* [36] */)
  * NAME:    III_imdct_l()
  * DESCRIPTION: perform IMDCT and windowing for long blocks
  */
-Mad.III_imdct_l = function (X /* 18 */, z /* 36 */, block_type) {
+Mad.III_imdct_l = function (X /* 18 */, Xoffset, z /* 36 */, block_type) {
   /* IMDCT */
-  imdct36(X, z);
+  imdct36(X, Xoffset, z);
 
   /* windowing */
 
@@ -1115,13 +1116,13 @@ Mad.III_decode = function (ptr, frame, si, nch) {
 
                 /* long blocks */
                 for (var sb = 0; sb < 2; ++sb, l += 18) {
-                    Mad.III_imdct_l(xr[ch].subarray(l), output, block_type);
+                    Mad.III_imdct_l(xr[ch], l, output, block_type);
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
                 }
             } else {
                 /* short blocks */
                 for (var sb = 0; sb < 2; ++sb, l += 18) {
-                    Mad.III_imdct_s(xr[ch].subarray(l), output);
+                    Mad.III_imdct_s(xr[ch], l, output);
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
                 }
             }
@@ -1138,7 +1139,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
             if (channel.block_type != 2) {
                 /* long blocks */
                 for (var sb = 2; sb < sblimit; ++sb, l += 18) {
-                    Mad.III_imdct_l(xr[ch].subarray(l, l + 18), output, channel.block_type);
+                    Mad.III_imdct_l(xr[ch], l, output, channel.block_type);
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
 
                     if (sb & 1)
@@ -1147,7 +1148,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
             } else {
                 /* short blocks */
                 for (var sb = 2; sb < sblimit; ++sb, l += 18) {
-                    Mad.III_imdct_s(xr[ch].subarray(l, l + 18), output);
+                    Mad.III_imdct_s(xr[ch], l, output);
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
 
                     if (sb & 1)
