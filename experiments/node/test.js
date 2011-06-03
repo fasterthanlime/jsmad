@@ -29,29 +29,35 @@ ID3_skipHeader(stream);
 var STEPS_COUNT = 0;
 
 var frame = null;
-var synth = new Mad.Synth();
 var pcm = [];
 
-while (frame = Mad.Frame.decode(stream)) {
+while (true) {
+    var synth = new Mad.Synth();
+    frame = Mad.Frame.decode(stream);
+
+    if (!frame) {
+        break;
+    }
+
     synth.frame(frame);
 
     var samples = synth.pcm.samples[0];
 
-    for (var i = 0; i < samples.length; i++) {
+    for (var i = 0; i < synth.pcm.length; i++) {
         pcm.push(samples[i]);
     }
 }
 
 var buf = new Buffer(pcm.length * 4);
-var len = pcm.length / 4;
-var max = Math.pow(2, 32) / 10;
+var len = pcm.length;
+var max = Math.pow(2, 12);
 
 for (var i = 0; i < len; i++) {
-    var sample = pcm[i * 4] * max;
-    buf[i + 0] = (sample & 0xff000000) >> 24;
-    buf[i + 1] = (sample & 0x00ff0000) >> 16;
-    buf[i + 2] = (sample & 0x0000ff00) >> 8;
-    buf[i + 3] = (sample & 0x000000ff) >> 0;
+    var sample = (pcm[i] / 32 + 1) * max;
+    buf[(i * 4) + 0] = (sample & 0xff000000) >> 24;
+    buf[(i * 4) + 1] = (sample & 0x00ff0000) >> 16;
+    buf[(i * 4) + 2] = (sample & 0x0000ff00) >> 8;
+    buf[(i * 4) + 3] = (sample & 0x000000ff) >> 0;
 }
 
 fs.writeFileSync("out.raw", buf, 'binary');
