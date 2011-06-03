@@ -4,7 +4,7 @@ ID3_skipHeader = function (stream) {
     var magic = stream.peekChars(3);
     
     if(magic != "ID3") {
-        console.log("No ID3 tag in this file!");
+        // console.log("No ID3 tag in this file!");
         return;
     }
     

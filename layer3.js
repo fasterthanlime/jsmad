@@ -1091,6 +1091,12 @@ Mad.III_decode = function (ptr, frame, si, nch) {
                 return error;
         }
 
+        // var sys = require('sys');
+        // for (var i = 0; i < 576; i++) {
+        //     sys.print(xr[0][i].toFixed(8) + "\t");
+        //     if (i % 8 == 7) sys.print("\n");
+        // }
+
         /* joint stereo processing */
         if (header.mode == Mad.Mode.JOINT_STEREO && header.mode_extension) {
             error = Mad.III_stereo(xr, granule, header, sfbwidth[0]);
@@ -1142,7 +1148,19 @@ Mad.III_decode = function (ptr, frame, si, nch) {
                 }
             }
 
+            // var sys = require('sys');
+            // for (var i = 0; i < 576; i++) {
+            //     sys.print(xr[0][i].toFixed(8) + "\t");
+            //     if (i % 8 == 7) sys.print("\n");
+            // }
+
             Mad.III_freqinver(sample, 1);
+
+            // var sys = require('sys');
+            // for (var i = 0; i < 576; i++) {
+            //     sys.print(xr[0][i].toFixed(8) + "\t");
+            //     if (i % 8 == 7) sys.print("\n");
+            // }
 
             /* (nonzero) subbands 2-31 */
             i = 576;
@@ -1178,6 +1196,13 @@ Mad.III_decode = function (ptr, frame, si, nch) {
                 if (sb & 1)
                     Mad.III_freqinver(sample, sb);
             }
+
+            // var sys = require('sys');
+            // for (var i = 0; i < 576; i++) {
+            //     sys.print(xr[0][i].toFixed(8) + "\t");
+            //     if (i % 8 == 7) sys.print("\n");
+            // }
+
         }
     }
 

@@ -20,9 +20,10 @@ require("../../synth.js");
 var data = fs.readFileSync("one_second_beep.mp3", "binary");
 // var data = fs.readFileSync("one_second_of_silence.mp3", "binary");
 
-console.log("Reading a " + Math.round(data.length / 1024) + "KB file");
+// console.log("Reading a " + Math.round(data.length / 1024) + "KB file");
 
 var stream = new Mad.Stream(data);
+var synth = new Mad.Synth();
 
 ID3_skipHeader(stream);
 
@@ -30,7 +31,6 @@ var frame = null;
 var pcm = [];
 
 while (true) {
-    var synth = new Mad.Synth();
     frame = Mad.Frame.decode(stream);
 
     if (!frame) {
@@ -43,6 +43,8 @@ while (true) {
 
     for (var i = 0; i < synth.pcm.length; i++) {
         pcm.push(samples[i]);
+        sys.print(samples[i].toFixed(8) + "\t");
+        if (i % 8 == 7) sys.print("\n");
     }
 }
 
