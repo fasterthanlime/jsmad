@@ -89,6 +89,21 @@ var root_table /* 7 */ = [
     /* 2^(+3/4) */ 1.68179283050743
 ];
 
+var cs = [
+  +0.857492926 , +0.881741997,
+  +0.949628649 , +0.983314592,
+  +0.995517816 , +0.999160558,
+  +0.999899195 , +0.999993155
+];
+
+var ca = [
+  -0.514495755, -0.471731969,
+  -0.313377454, -0.181913200,
+  -0.094574193, -0.040965583,
+  -0.014198569, -0.003699975
+];
+
+
 Mad.count1table_select = 0x01;
 Mad.scalefac_scale     = 0x02;
 Mad.preflag            = 0x04;
@@ -1424,7 +1439,7 @@ Mad.III_requantize = function(value, exp) {
 Mad.III_aliasreduce = function(xr, lines) {
     var xrPointer = 0;
     
-    for (xrPointer += 18; xr < lines; xr += 18) {
+    for (xrPointer += 18; xrPointer < lines; xrPointer += 18) {
         for (var i = 0; i < 8; ++i) {
             var a = xr[xrPointer - i - 1];
             var b = xr[xrPointer + i];
