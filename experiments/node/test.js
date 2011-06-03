@@ -48,16 +48,14 @@ while (true) {
     }
 }
 
-var buf = new Buffer(pcm.length * 4);
+var buf = new Buffer(pcm.length * 2);
 var len = pcm.length;
-var max = Math.pow(2, 12);
+var max = Math.pow(2, 6);
 
 for (var i = 0; i < len; i++) {
-    var sample = (pcm[i] / 32 + 1) * max;
-    buf[(i * 4) + 0] = (sample & 0xff000000) >> 24;
-    buf[(i * 4) + 1] = (sample & 0x00ff0000) >> 16;
-    buf[(i * 4) + 2] = (sample & 0x0000ff00) >> 8;
-    buf[(i * 4) + 3] = (sample & 0x000000ff) >> 0;
+    var sample = pcm[i] * max;
+    buf[(i * 2) + 0] = (sample & 0xff00) >> 8;
+    buf[(i * 2) + 1] = sample & 0xff;
 }
 
 fs.writeFileSync("out.raw", buf, 'binary');
