@@ -43,8 +43,8 @@ while (true) {
 
     for (var i = 0; i < synth.pcm.length; i++) {
         pcm.push(samples[i]);
-        sys.print(samples[i].toFixed(8) + "\t");
-        if (i % 8 == 7) sys.print("\n");
+        // sys.print(samples[i].toFixed(8) + "\t");
+        // if (i % 8 == 7) sys.print("\n");
     }
 }
 
