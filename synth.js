@@ -1282,6 +1282,8 @@ Mad.Synth.prototype.frame = function (frame) {
     this.pcm.channels   = nch;
     this.pcm.length     = 32 * ns;
 
+    console.log("\n\n\nnch: " + nch + " ns: " + ns + "\n");
+
     /*
      if (frame.options & Mad.Option.HALFSAMPLERATE) {
      this.pcm.samplerate /= 2;

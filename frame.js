@@ -67,7 +67,7 @@ Mad.Header.prototype.nchannels = function () {
 
 Mad.Header.prototype.nbsamples = function() {
     return (this.layer == Mad.Layer.I ? 12 : 
-        ((this.layer == Mad.Layer.III && (this.flags & Mad.Flag.LSF_EXT)) ? 18 : 16));
+        ((this.layer == Mad.Layer.III && (this.flags & Mad.Flag.LSF_EXT)) ? 18 : 36));
 }
 
 /* libmad's decode_header */
@@ -327,7 +327,7 @@ Mad.Frame = function () {
     for(var ch = 0; ch < 2; ch++) {
         this.sbsample[ch] = [];
         for(var grp = 0; grp < 36; grp++) {
-            this.sbsample[ch][grp] = new Float64Array(new ArrayBuffer(8 * 32))
+            this.sbsample[ch][grp] = new Float64Array(new ArrayBuffer(8 * 32));
         }
     }
     
