@@ -26,8 +26,6 @@ var stream = new Mad.Stream(data);
 
 ID3_skipHeader(stream);
 
-var STEPS_COUNT = 0;
-
 var frame = null;
 var pcm = [];
 
