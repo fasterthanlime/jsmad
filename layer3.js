@@ -1456,12 +1456,26 @@ Mad.III_overlap_z = function (overlap /* [18] */, sample /* [18][32] */, sb) {
 }
 
 // allocating typed arrays once and for all, outside the function
-var reorder_tmp = new Float64Array(new ArrayBuffer(8 * 32 * 3 * 6));    
-var reorder_sbw = new Float64Array(new ArrayBuffer(8 * 3));
-var reorder_sw  = new Float64Array(new ArrayBuffer(8 * 3));
+// var reorder_tmp = new Float64Array(new ArrayBuffer(8 * 32 * 3 * 6));
+// var reorder_sbw = new Float64Array(new ArrayBuffer(8 * 3));
+// var reorder_sw  = new Float64Array(new ArrayBuffer(8 * 3));
 
 Mad.III_reorder = function (xr /* [576] */, channel, sfbwidth /* [39] */) {
     var sfbwidthPointer = 0;
+    var tmp = [];
+
+    for (var i = 0; i < 32; i++) {
+        tmp[i] = [];
+        for (var j = 0; j < 3; j++) {
+            tmp[i][j] = [];
+            for (var k = 0; k < 6; k++) {
+                tmp[i][j][k] = 0;
+            }
+        }
+    }
+
+    var sbw = [];
+    var sw  = [];
     
     /* this is probably wrong for 8000 Hz mixed blocks */
 
@@ -1475,8 +1489,8 @@ Mad.III_reorder = function (xr /* [576] */, channel, sfbwidth /* [39] */) {
     }
 
     for (var w = 0; w < 3; ++w) {
-        reorder_sbw[w] = sb;
-        reorder_sw[w]  = 0;
+        sbw[w] = sb;
+        sw[w]  = 0;
     }
 
     f = sfbwidth[sfbwidthPointer++];
@@ -1488,15 +1502,26 @@ Mad.III_reorder = function (xr /* [576] */, channel, sfbwidth /* [39] */) {
             w = (w + 1) % 3;
         }
         
-        reorder_tmp[reorder_sbw[w]* 32 * 3 + 32 * w + reorder_sw[w]++] = xr[l];
+        tmp[sbw[w]][w][sw[w]++] = xr[l];
 
-        if (reorder_sw[w] == 6) {
-            reorder_sw[w] = 0;
-            ++reorder_sbw[w];
+        if (sw[w] == 6) {
+            sw[w] = 0;
+            ++sbw[w];
+        }
+    }
+
+    var tmp2 = [];
+    var ptr = 0;
+
+    for (var i = 0; i < 32; i++) {
+        for (var j = 0; j < 3; j++) {
+            for (var k = 0; k < 6; k++) {
+                tmp2[ptr++] = tmp[i][j][k];
+            }
         }
     }
     
     for (var i = 0; i < (576 - 18 * sb); i++) {
-        xr[18 * sb + i] = reorder_tmp[sb + i];
+        xr[18 * sb + i] = tmp2[sb + i];
     }
 }
