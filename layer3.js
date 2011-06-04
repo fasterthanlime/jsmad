@@ -1156,6 +1156,14 @@ Mad.III_decode = function (ptr, frame, si, nch) {
 
             Mad.III_freqinver(sample, 1);
 
+            var sys = require('sys');
+            for (var i = 0; i < 18; i++) {
+                for (var j = 0; j < 32; j++) {
+                    sys.print(sample[i][j].toFixed(8) + "\t");
+                    if (j % 8 == 7) sys.print("\n");
+                }
+            }
+
             // var sys = require('sys');
             // for (var i = 0; i < 576; i++) {
             //     sys.print(xr[0][i].toFixed(8) + "\t");
@@ -1483,6 +1491,10 @@ Mad.III_aliasreduce = function(xr, lines) {
 
 Mad.III_overlap = function (output /* [36] */, overlap /* [18] */, sample /* [18][32] */, sb) {
     for (var i = 0; i < 18; ++i) {
+        // var sys = require('sys');
+        // sys.print(overlap[i].toFixed(8) + "\t");
+        // if (i % 4 == 3) sys.print("\n");
+
         sample[i][sb] = output[i +  0] + overlap[i];
         overlap[i]    = output[i + 18];
     }
