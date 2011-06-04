@@ -1,4 +1,4 @@
-"use strict";
+// "use strict";
 
 var fs = require('fs');
 var sys = require('sys');
@@ -26,6 +26,12 @@ var data = fs.readFileSync("one_second_beep.mp3", "binary");
 
 var stream = new Mad.Stream(data);
 var synth = new Mad.Synth();
+
+Debug = {
+    huffdecode: fs.createWriteStream('huffdecode-js.txt'),
+    sample: fs.createWriteStream('sample-js.txt'),
+    pcm: fs.createWriteStream('pcm-js.txt')
+};
 
 ID3_skipHeader(stream);
 
@@ -58,8 +64,11 @@ for (var i = 0; i < len; i++) {
     var sample = pcm[i] * max;
     buf[(i * 2) + 0] = (sample & 0xff00) >> 8;
     buf[(i * 2) + 1] = sample & 0xff;
+    Debug.pcm.write(pcm[i].toFixed(8) + "\n");
 }
 
 fs.writeFileSync("out.raw", buf, 'binary');
 
-console.log("error code: " + stream.error);
+Debug.huffdecode.end();
+Debug.sample.end();
+Debug.pcm.end();
