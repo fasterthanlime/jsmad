@@ -119,11 +119,11 @@ Mad.Synth.dct32 = function (_in /* [32] */, slot, lo /* [16][8] */, hi /* [16][8
     var costab30 =  0.098017140;
     var costab31 =  0.049067674;
 
-    var sys = require('sys');
-    for (i = 0; i < 32; i++) {
-        sys.print(_in[i].toFixed(8) + "\t");
-        if (i % 8 == 7) sys.print("\n");
-    }
+    // var sys = require('sys');
+    // for (i = 0; i < 32; i++) {
+    //     sys.print(_in[i].toFixed(8) + "\t");
+    //     if (i % 8 == 7) sys.print("\n");
+    // }
 
     t0   = _in[0]  + _in[31];  t16  = ((_in[0]  - _in[31]) * (costab1));
     t1   = _in[15] + _in[16];  t17  = ((_in[15] - _in[16]) * (costab31));
@@ -1282,7 +1282,7 @@ Mad.Synth.prototype.frame = function (frame) {
     this.pcm.channels   = nch;
     this.pcm.length     = 32 * ns;
 
-    console.log("\n\n\nnch: " + nch + " ns: " + ns + "\n");
+    // console.log("\n\n\nnch: " + nch + " ns: " + ns + "\n");
 
     /*
      if (frame.options & Mad.Option.HALFSAMPLERATE) {
