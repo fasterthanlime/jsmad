@@ -28,6 +28,7 @@ var stream = new Mad.Stream(data);
 var synth = new Mad.Synth();
 
 Debug = {
+    iteration: 1,
     huffdecode: fs.createWriteStream('huffdecode-js.txt'),
     sample: fs.createWriteStream('sample-js.txt'),
     pcm: fs.createWriteStream('pcm-js.txt')
