@@ -329,6 +329,9 @@ Mad.Frame = function () {
         for(var grp = 0; grp < 36; grp++) {
             // this.sbsample[ch][grp] = new Float64Array(new ArrayBuffer(8 * 32));
             this.sbsample[ch][grp] = [];
+            for(var i = 0; i < 32; i++) {
+                this.sbsample[ch][grp][i] = 0;
+            }
         }
     }
     
@@ -339,6 +342,9 @@ Mad.Frame = function () {
         for(var sb = 0; sb < 32; sb++) {
             // this.overlap[ch][sb] = new Float64Array(new ArrayBuffer(8 * 18));
             this.overlap[ch][sb] = [];
+            for(var i = 0; i < 18; i++) {
+                this.overlap[ch][sb][i] = 0;
+            }
         }
     }
 };
