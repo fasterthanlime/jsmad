@@ -20,13 +20,13 @@ var samplerate_table /* [3] */ = [ 44100, 48000, 32000 ];
 var decoder_table = [
     function() { console.log("Layer I decoding is not implemented!"); },
     function() { console.log("Layer II decoding is not implemented!"); },
-    Mad.layer_III,
+    Mad.layer_III
 ];
 
 Mad.Layer = {
     I: 1,
     II: 2,
-    III: 3,
+    III: 3
 };
 
 Mad.Mode = {
@@ -67,7 +67,7 @@ Mad.Header.prototype.nchannels = function () {
 
 Mad.Header.prototype.nbsamples = function() {
     return (this.layer == Mad.Layer.I ? 12 : 
-        ((this.layer == Mad.Layer.III && (this.flags & Mad.Flag.LSF_EXT)) ? 18 : 16));
+        ((this.layer == Mad.Layer.III && (this.flags & Mad.Flag.LSF_EXT)) ? 18 : 36));
 }
 
 /* libmad's decode_header */
@@ -252,9 +252,9 @@ Mad.Header.decode = function(stream) {
         header = Mad.Header.actually_decode(stream);
         if(header == null) return null; // well Duh^2
 
-        console.log("============= Decoding layer " + header.layer + " audio mode " +
-            header.mode + " with " + header.bitrate +
-            " bps and a samplerate of " + header.samplerate);
+        // console.log("============= Decoding layer " + header.layer + " audio mode " +
+        //     header.mode + " with " + header.bitrate +
+        //     " bps and a samplerate of " + header.samplerate);
 
         /* calculate frame duration */
         //mad_timer_set(&header.duration, 0, 32 * MAD_NSBSAMPLES(header), header.samplerate);
@@ -297,7 +297,7 @@ Mad.Header.decode = function(stream) {
 
         stream.next_frame = stream.this_frame + N;
 
-        console.log("N = " + N + ", pad_slot = " + pad_slot + ", next_frame = " + stream.next_frame);
+        // console.log("N = " + N + ", pad_slot = " + pad_slot + ", next_frame = " + stream.next_frame);
 
         if (!stream.sync) {
             /* check that a valid frame header follows this frame */
@@ -327,7 +327,11 @@ Mad.Frame = function () {
     for(var ch = 0; ch < 2; ch++) {
         this.sbsample[ch] = [];
         for(var grp = 0; grp < 36; grp++) {
-            this.sbsample[ch][grp] = new Float64Array(new ArrayBuffer(8 * 32))
+            // this.sbsample[ch][grp] = new Float64Array(new ArrayBuffer(8 * 32));
+            this.sbsample[ch][grp] = [];
+            for(var i = 0; i < 32; i++) {
+                this.sbsample[ch][grp][i] = 0;
+            }
         }
     }
     
@@ -336,7 +340,11 @@ Mad.Frame = function () {
     for(var ch = 0; ch < 2; ch++) {
         this.overlap[ch] = [];
         for(var sb = 0; sb < 32; sb++) {
-            this.overlap[ch][sb] = new Float64Array(new ArrayBuffer(8 * 18));
+            // this.overlap[ch][sb] = new Float64Array(new ArrayBuffer(8 * 18));
+            this.overlap[ch][sb] = [];
+            for(var i = 0; i < 18; i++) {
+                this.overlap[ch][sb][i] = 0;
+            }
         }
     }
 };
@@ -364,21 +372,21 @@ Mad.Frame.decode = function(stream) {
     // TODO: actually decode the data :)
     if (decoder_table[frame.header.layer - 1](stream, frame) == -1) {
     
-    if (!Mad.recoverable(stream.error))
-        stream.next_frame = stream.this_frame;
+        if (!Mad.recoverable(stream.error))
+            stream.next_frame = stream.this_frame;
         return null;
     }
     
     return frame;
-}
+};
 
 Mad.sbsampleIndex = function (i, j, k) {
     return i * 36 * 32 + j * 32 + k;
-}
+};
 
 Mad.overlapIndex = function (i, j, k) {
     return i * 32 * 18 + j * 18 + k;
-}
+};
 
 Mad.Flag = {
     NPRIVATE_III   : 0x0007,   /* number of Layer III private bits */
