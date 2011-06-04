@@ -28,7 +28,7 @@ var stream = new Mad.Stream(data);
 var synth = new Mad.Synth();
 
 Debug = {
-    iteration: 1,
+    iteration: 0,
     huffdecode: fs.createWriteStream('huffdecode-js.txt'),
     sample: fs.createWriteStream('sample-js.txt'),
     pcm: fs.createWriteStream('pcm-js.txt')
@@ -36,11 +36,11 @@ Debug = {
 
 ID3_skipHeader(stream);
 
-var frame = null;
+var frame = new Mad.Frame();
 var pcm = [];
 
 while (true) {
-    frame = Mad.Frame.decode(stream);
+    frame = Mad.Frame.decode(frame, stream);
 
     if (!frame) {
         break;
