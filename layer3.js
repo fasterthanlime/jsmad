@@ -1204,9 +1204,9 @@ Mad.III_decode = function (ptr, frame, si, nch) {
                     for (var j = 0; j < 32; j++) {
                         Debug.sample.write(sample[i][j].toFixed(8) + "\t");
                     }
+                    Debug.sample.write("\n");
                 }
             }
-            Debug.sample.write("\n");
         }
     }
 
