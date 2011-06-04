@@ -36,11 +36,11 @@ Debug = {
 
 ID3_skipHeader(stream);
 
-var frame = null;
+var frame = new Mad.Frame();
 var pcm = [];
 
 while (true) {
-    frame = Mad.Frame.decode(stream);
+    frame = Mad.Frame.decode(frame, stream);
 
     if (!frame) {
         break;
