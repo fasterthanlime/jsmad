@@ -830,26 +830,29 @@ for(var i = 0; i < 9; ++i) {
     sdctII_scale[i] = 2 * Math.cos(Math.PI * (2 * i + 1) / (2 * 18));
 }
 
-var sdctII_tmp = new Float64Array(new ArrayBuffer(8 * 9));
 
 sdctII = function (x /* [18] */, X /* [18] */) {
     /* divide the 18-point SDCT-II into two 9-point SDCT-IIs */
 
+    // var tmp = new Float64Array(new ArrayBuffer(8 * 9));
+
+    var tmp = [];
+
     /* even input butterfly */
 
     for (var i = 0; i < 9; ++i) {
-        sdctII_tmp[i] = x[i] + x[18 - i - 1];
+        tmp[i] = x[i] + x[18 - i - 1];
     }
 
-    fastsdct(sdctII_tmp, X, 0);
+    fastsdct(tmp, X, 0);
 
     /* odd input butterfly and scaling */
 
     for (var i = 0; i < 9; ++i) {
-        sdctII_tmp[i] = (x[i] - x[18 - i - 1]) * sdctII_scale[i];
+        tmp[i] = (x[i] - x[18 - i - 1]) * sdctII_scale[i];
     }
 
-    fastsdct(sdctII_tmp, X, 1);
+    fastsdct(tmp, X, 1);
 
     /* output accumulation */
     
@@ -864,19 +867,19 @@ for(i = 0; i < 18; i++) {
     dctIV_scale[i] = 2 * Math.cos(Math.PI * (2 * i + 1) / (4 * 18));
 }
 
-var dctIV_tmp = new Float64Array(new ArrayBuffer(8 * 18));
-
-var dctIV = function (y /* [18] */, yoffset, X /* [18] */) {
+var dctIV = function (y /* [18] */, X /* [18] */) {
+    // var tmp = new Float64Array(new ArrayBuffer(8 * 18));
+    var tmp = [];
 
     /* scaling */
 
     for (var i = 0; i < 18; ++i) {
-        dctIV_tmp[i] = y[i + yoffset] * dctIV_scale[i];
+        tmp[i] = y[i] * dctIV_scale[i];
     }
 
     /* SDCT-II */
 
-    sdctII(dctIV_tmp, X);
+    sdctII(tmp, X);
 
     /* scale reduction and output accumulation */
 
@@ -886,42 +889,42 @@ var dctIV = function (y /* [18] */, yoffset, X /* [18] */) {
     }
 }
 
-var imdct36_tmp = new Float64Array(new ArrayBuffer(8 * 18));
-
 /*
  * NAME:    imdct36
  * DESCRIPTION: perform X[18]->x[36] IMDCT using Szu-Wei Lee's fast algorithm
  */
-var imdct36 = function (x /* [18] */, xoffset, y /* [36] */) {
+var imdct36 = function (x /* [18] */, y /* [36] */) {
+    // var tmp = new Float64Array(new ArrayBuffer(8 * 18));
+    var tmp = new Array(18);
+
     /* DCT-IV */
-    dctIV(x, xoffset, imdct36_tmp);
+    dctIV(x, tmp);
 
     /* convert 18-point DCT-IV to 36-point IMDCT */
 
     for (var i =  0; i <  9; ++i) {
-        y[i] =  imdct36_tmp[9 + i];
+        y[i] =  tmp[9 + i];
     }
     for (var i =  9; i < 27; ++i) {
-        y[i] = -imdct36_tmp[36 - (9 + i) - 1];
+        y[i] = -tmp[36 - (9 + i) - 1];
     }
     for (var i = 27; i < 36; ++i) {
-        y[i] = -imdct36_tmp[i - 27];
+        y[i] = -tmp[i - 27];
     }
 }
-
-var imdct_s_y = new Float64Array(new ArrayBuffer(8 * 36));
 
 /*
  * NAME:    III_imdct_s()
  * DESCRIPTION: perform IMDCT and windowing for short blocks
  */
-Mad.III_imdct_s = function (X /* [18] */, offset, z /* [36] */)
+Mad.III_imdct_s = function (X /* [18] */, z /* [36] */)
 {
     var yptr = 0;
     var wptr;
-    var Xptr = offset;
+    var Xptr = 0;
     
-    var y = imdct_s_y;
+    // var imdct_s_y = new Float64Array(new ArrayBuffer(8 * 36));
+    var y = [];
     var hi, lo;
 
     /* IMDCT */
@@ -991,9 +994,9 @@ Mad.III_imdct_s = function (X /* [18] */, offset, z /* [36] */)
  * NAME:    III_imdct_l()
  * DESCRIPTION: perform IMDCT and windowing for long blocks
  */
-Mad.III_imdct_l = function (X /* 18 */, Xoffset, z /* 36 */, block_type) {
+Mad.III_imdct_l = function (X /* 18 */, z /* 36 */, block_type) {
     /* IMDCT */
-    imdct36(X, Xoffset, z);
+    imdct36(X, z);
 
     /* windowing */
 
@@ -1062,8 +1065,8 @@ Mad.III_decode = function (ptr, frame, si, nch) {
         var sfbwidth = [];
         /* unsigned char const *sfbwidth[2]; */
         var l = 0;
-        var xr = [ new Float64Array(new ArrayBuffer(8 * 576)), new Float64Array(new ArrayBuffer(8 * 576)) ];
-        
+        // var xr = [ new Float64Array(new ArrayBuffer(8 * 576)), new Float64Array(new ArrayBuffer(8 * 576)) ];
+        var xr = [[], []];
         var error;
 
         for (var ch = 0; ch < nch; ++ch) {
@@ -1091,12 +1094,6 @@ Mad.III_decode = function (ptr, frame, si, nch) {
                 return error;
         }
 
-        // var sys = require('sys');
-        // for (var i = 0; i < 576; i++) {
-        //     sys.print(xr[0][i].toFixed(8) + "\t");
-        //     if (i % 8 == 7) sys.print("\n");
-        // }
-
         /* joint stereo processing */
         if (header.mode == Mad.Mode.JOINT_STEREO && header.mode_extension) {
             error = Mad.III_stereo(xr, granule, header, sfbwidth[0]);
@@ -1111,7 +1108,8 @@ Mad.III_decode = function (ptr, frame, si, nch) {
             var sample = frame.sbsample[ch].slice(18 * gr);
             
             var sb, l = 0, i, sblimit;
-            var output = new Float64Array(new ArrayBuffer(8 * 36));
+            // var output = new Float64Array(new ArrayBuffer(8 * 36));
+            var output = [];
 
             if (channel.block_type == 2) {
                 Mad.III_reorder(xr[ch], channel, sfbwidth[ch]);
@@ -1129,6 +1127,12 @@ Mad.III_decode = function (ptr, frame, si, nch) {
                 Mad.III_aliasreduce(xr[ch], 576);
             }
 
+            var sys = require('sys');
+            for (var i = 0; i < 576; i++) {
+                sys.print(xr[0][i].toFixed(8) + "\t");
+                if (i % 8 == 7) sys.print("\n");
+            }
+
             /* subbands 0-1 */
             if (channel.block_type != 2 || (channel.flags & Mad.mixed_block_flag)) {
                 var block_type = channel.block_type;
@@ -1137,50 +1141,46 @@ Mad.III_decode = function (ptr, frame, si, nch) {
 
                 /* long blocks */
                 for (var sb = 0; sb < 2; ++sb, l += 18) {
-                    Mad.III_imdct_l(xr[ch], l, output, block_type);
+                    Mad.III_imdct_l(xr[ch].slice(l, l + 18), output, block_type);
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
+
+                    // var sys = require('sys');
+                    // for (var i = 0; i < 36; i++) {
+                    //     sys.print(output[i].toFixed(8) + "\t");
+                    //     if (i % 8 == 7) sys.print("\n");
+                    // }
                 }
             } else {
                 /* short blocks */
                 for (var sb = 0; sb < 2; ++sb, l += 18) {
-                    Mad.III_imdct_s(xr[ch], l, output);
+                    Mad.III_imdct_s(xr[ch].slice(l, l + 18), output);
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
                 }
             }
 
-            // var sys = require('sys');
-            // for (var i = 0; i < 576; i++) {
-            //     sys.print(xr[0][i].toFixed(8) + "\t");
-            //     if (i % 8 == 7) sys.print("\n");
-            // }
-
             Mad.III_freqinver(sample, 1);
 
-            var sys = require('sys');
-            for (var i = 0; i < 18; i++) {
-                for (var j = 0; j < 32; j++) {
-                    sys.print(sample[i][j].toFixed(8) + "\t");
-                    if (j % 8 == 7) sys.print("\n");
-                }
-            }
-
             // var sys = require('sys');
-            // for (var i = 0; i < 576; i++) {
-            //     sys.print(xr[0][i].toFixed(8) + "\t");
-            //     if (i % 8 == 7) sys.print("\n");
+            // for (var i = 0; i < 18; i++) {
+            //     for (var j = 0; j < 32; j++) {
+            //         sys.print(sample[i][j].toFixed(8) + "\t");
+            //         if (j % 8 == 7) sys.print("\n");
+            //     }
             // }
 
             /* (nonzero) subbands 2-31 */
-            i = 576;
-            while (i > 36 && xr[ch][i - 1] == 0)
-                --i;
+            // i = 576;
+            // while (i > 36 && xr[ch][i - 1] == 0)
+            //     --i;
 
-            sblimit = 32 - (((576 - i) / 18) << 0);
+            // sblimit = 32 - (((576 - i) / 18) << 0);
+
+            sblimit = 32;
 
             if (channel.block_type != 2) {
                 /* long blocks */
                 for (var sb = 2; sb < sblimit; ++sb, l += 18) {
-                    Mad.III_imdct_l(xr[ch], l, output, channel.block_type);
+                    Mad.III_imdct_l(xr[ch].slice(l, l + 18), output, channel.block_type);
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
 
                     if (sb & 1)
@@ -1189,7 +1189,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
             } else {
                 /* short blocks */
                 for (var sb = 2; sb < sblimit; ++sb, l += 18) {
-                    Mad.III_imdct_s(xr[ch], l, output);
+                    Mad.III_imdct_s(xr[ch].slice(l, l + 18), output);
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
 
                     if (sb & 1)
@@ -1477,12 +1477,11 @@ Mad.III_aliasreduce = function(xr, lines) {
             var a = xr[xrPointer - i - 1];
             var b = xr[xrPointer + i];
 
-            /* TODO: Fix precision? */
             var lo =  a * cs[i] - b * ca[i];
 
             xr[xrPointer - i - 1] = lo;
 
-            lo =  a * cs[i] + b * ca[i];
+            lo =  b * cs[i] + a * ca[i];
 
             xr[xrPointer + i] = lo
         }
@@ -1573,7 +1572,9 @@ Mad.III_reorder = function (xr /* [576] */, channel, sfbwidth /* [39] */) {
         }
     }
     
-    for (var i = 0; i < (576 - 18 * sb); i++) {
+    var len = (576 - 18 * sb);
+
+    for (var i = 0; i < len; i++) {
         xr[18 * sb + i] = tmp2[sb + i];
     }
 }

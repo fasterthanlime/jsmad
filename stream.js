@@ -58,7 +58,7 @@ Mad.Stream = function (data) {
 
     var options = 0;                            /* decoding options (see below) */
     var error = Mad.Error.NONE;                 /* error code (see above) */
-}
+};
 
 Mad.Stream.fromFile = function(file, callback) {
     var reader = new FileReader();
