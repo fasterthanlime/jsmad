@@ -1096,6 +1096,8 @@ Mad.III_decode = function (ptr, frame, si, nch) {
         }
 
         if (Debug) {
+            Debug.huffdecode.write(Debug.iteration + "\t");
+
             for (var i = 0; i < 576; i++) {
                 Debug.huffdecode.write(xr[0][i].toFixed(8) + "\t");
             }
@@ -1201,14 +1203,15 @@ Mad.III_decode = function (ptr, frame, si, nch) {
 
             if (Debug) {                
                 for (var i = 0; i < 18; i++) {
-                    Debug.sample.write(Debug.iteration + "\t");
+                    Debug.sample.write(Debug.iteration * 18 + i + "\t");
                     for (var j = 0; j < 32; j++) {
                         Debug.sample.write(sample[i][j].toFixed(8) + "\t");
                     }
-                    Debug.iteration += 1;
                     Debug.sample.write("\n");
                 }
             }       
+
+            Debug.iteration += 1;
         }
     }
 
