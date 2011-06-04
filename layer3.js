@@ -289,7 +289,8 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
     {
         var region = 0, rcount;
         
-        var reqcache = new Float64Array(new ArrayBuffer(8 * 16));
+        // var reqcache = new Float64Array(new ArrayBuffer(8 * 16));
+        var reqcache = [];
 
         sfbound = xrptr + sfbwidth[sfbwidthptr++];
         rcount  = channel.region0_count + 1;
@@ -1111,6 +1112,12 @@ Mad.III_decode = function (ptr, frame, si, nch) {
             // var output = new Float64Array(new ArrayBuffer(8 * 36));
             var output = [];
 
+            // var sys = require('sys');
+            // for (var i = 0; i < 576; i++) {
+            //     sys.print(xr[0][i].toFixed(8) + "\t");
+            //     if (i % 8 == 7) sys.print("\n");
+            // }
+
             if (channel.block_type == 2) {
                 Mad.III_reorder(xr[ch], channel, sfbwidth[ch]);
 
@@ -1126,12 +1133,6 @@ Mad.III_decode = function (ptr, frame, si, nch) {
             } else {
                 Mad.III_aliasreduce(xr[ch], 576);
             }
-
-            // var sys = require('sys');
-            // for (var i = 0; i < 576; i++) {
-            //     sys.print(xr[0][i].toFixed(8) + "\t");
-            //     if (i % 8 == 7) sys.print("\n");
-            // }
 
             /* subbands 0-1 */
             if (channel.block_type != 2 || (channel.flags & Mad.mixed_block_flag)) {
