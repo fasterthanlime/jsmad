@@ -895,7 +895,7 @@ var dctIV = function (y /* [18] */, X /* [18] */) {
  */
 var imdct36 = function (x /* [18] */, y /* [36] */) {
     // var tmp = new Float64Array(new ArrayBuffer(8 * 18));
-    var tmp = new Array(18);
+    var tmp = [];
 
     /* DCT-IV */
     dctIV(x, tmp);
@@ -1127,11 +1127,11 @@ Mad.III_decode = function (ptr, frame, si, nch) {
                 Mad.III_aliasreduce(xr[ch], 576);
             }
 
-            var sys = require('sys');
-            for (var i = 0; i < 576; i++) {
-                sys.print(xr[0][i].toFixed(8) + "\t");
-                if (i % 8 == 7) sys.print("\n");
-            }
+            // var sys = require('sys');
+            // for (var i = 0; i < 576; i++) {
+            //     sys.print(xr[0][i].toFixed(8) + "\t");
+            //     if (i % 8 == 7) sys.print("\n");
+            // }
 
             /* subbands 0-1 */
             if (channel.block_type != 2 || (channel.flags & Mad.mixed_block_flag)) {
@@ -1145,10 +1145,12 @@ Mad.III_decode = function (ptr, frame, si, nch) {
                     Mad.III_overlap(output, frame.overlap[ch][sb], sample, sb);
 
                     // var sys = require('sys');
-                    // for (var i = 0; i < 36; i++) {
+                    // sys.print("\nblocktype: " + block_type + " sb: " + sb + "\n");
+                    // for (var i = 0; i < 18; i++) {
                     //     sys.print(output[i].toFixed(8) + "\t");
                     //     if (i % 8 == 7) sys.print("\n");
                     // }
+
                 }
             } else {
                 /* short blocks */
@@ -1160,22 +1162,12 @@ Mad.III_decode = function (ptr, frame, si, nch) {
 
             Mad.III_freqinver(sample, 1);
 
-            // var sys = require('sys');
-            // for (var i = 0; i < 18; i++) {
-            //     for (var j = 0; j < 32; j++) {
-            //         sys.print(sample[i][j].toFixed(8) + "\t");
-            //         if (j % 8 == 7) sys.print("\n");
-            //     }
-            // }
-
             /* (nonzero) subbands 2-31 */
-            // i = 576;
-            // while (i > 36 && xr[ch][i - 1] == 0)
-            //     --i;
+            i = 576;
+            while (i > 36 && xr[ch][i - 1] == 0)
+                --i;
 
-            // sblimit = 32 - (((576 - i) / 18) << 0);
-
-            sblimit = 32;
+            sblimit = 32 - (((576 - i) / 18) << 0);
 
             if (channel.block_type != 2) {
                 /* long blocks */
@@ -1197,7 +1189,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
                 }
             }
 
-            /* remaining (zero) subbands */
+            // remaining (zero) subbands
             for (var sb = sblimit; sb < 32; ++sb) {
                 Mad.III_overlap_z(frame.overlap[ch][sb], sample, sb);
 
@@ -1206,9 +1198,11 @@ Mad.III_decode = function (ptr, frame, si, nch) {
             }
 
             // var sys = require('sys');
-            // for (var i = 0; i < 576; i++) {
-            //     sys.print(xr[0][i].toFixed(8) + "\t");
-            //     if (i % 8 == 7) sys.print("\n");
+            // for (var i = 0; i < 18; i++) {
+            //     for (var j = 0; j < 2; j++) {
+            //         sys.print(sample[i][j].toFixed(8) + "\t");
+            //     }
+            //     if (i % 4 == 3) sys.print("\n");
             // }
 
         }
@@ -1490,10 +1484,6 @@ Mad.III_aliasreduce = function(xr, lines) {
 
 Mad.III_overlap = function (output /* [36] */, overlap /* [18] */, sample /* [18][32] */, sb) {
     for (var i = 0; i < 18; ++i) {
-        // var sys = require('sys');
-        // sys.print(overlap[i].toFixed(8) + "\t");
-        // if (i % 4 == 3) sys.print("\n");
-
         sample[i][sb] = output[i +  0] + overlap[i];
         overlap[i]    = output[i + 18];
     }
