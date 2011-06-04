@@ -27,12 +27,17 @@ var data = fs.readFileSync("one_second_beep.mp3", "binary");
 var stream = new Mad.Stream(data);
 var synth = new Mad.Synth();
 
-Debug = {
-    iteration: 0,
-    huffdecode: fs.createWriteStream('huffdecode-js.txt'),
-    sample: fs.createWriteStream('sample-js.txt'),
-    pcm: fs.createWriteStream('pcm-js.txt')
-};
+if (process.argv[2] == '-d') {
+    Debug = {
+        iteration: 0,
+        huffdecode: fs.createWriteStream('huffdecode-js.txt'),
+        sample: fs.createWriteStream('sample-js.txt'),
+        pcm: fs.createWriteStream('pcm-js.txt')
+    };
+}
+else {
+    Debug = false;
+}
 
 ID3_skipHeader(stream);
 
@@ -65,11 +70,15 @@ for (var i = 0; i < len; i++) {
     var sample = pcm[i] * max;
     buf[(i * 2) + 0] = (sample & 0xff00) >> 8;
     buf[(i * 2) + 1] = sample & 0xff;
-    Debug.pcm.write(pcm[i].toFixed(8) + "\n");
+    if (Debug) {
+        Debug.pcm.write(pcm[i].toFixed(8) + "\n");        
+    }
 }
 
 fs.writeFileSync("out.raw", buf, 'binary');
 
-Debug.huffdecode.end();
-Debug.sample.end();
-Debug.pcm.end();
+if (Debug) {
+    Debug.huffdecode.end();
+    Debug.sample.end();
+    Debug.pcm.end();    
+}
