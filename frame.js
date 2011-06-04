@@ -349,8 +349,8 @@ Mad.Frame = function () {
     }
 };
 
-Mad.Frame.decode = function(stream) {
-    var frame = new Mad.Frame();
+Mad.Frame.decode = function(frame, stream) {
+    // var frame = new Mad.Frame();
 
     frame.options = stream.options;
     
