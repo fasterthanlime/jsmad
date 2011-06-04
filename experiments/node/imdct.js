@@ -14,7 +14,7 @@ function test_imdct_s() {
 
     var _z = [];
 
-    Mad.III_imdct_s(X, 0, _z);
+    Mad.III_imdct_s(X, _z);
 
     for (var i = 0; i < 36; i++) {
         console.log(Math.abs(_z[i] - z[i]));
@@ -31,7 +31,7 @@ function test_imdct_l() {
 
     _z = [];
 
-    Mad.III_imdct_l(X, 0, _z, 0);
+    Mad.III_imdct_l(X, _z, 0);
 
     for (var i = 0; i < 36; i++) {
         console.log(Math.abs(_z[i] - z[i]));
@@ -44,7 +44,7 @@ function test_imdct_l() {
 
     _z = [];
 
-    Mad.III_imdct_l(X, 0, _z, 1);
+    Mad.III_imdct_l(X, _z, 1);
 
     for (var i = 0; i < 36; i++) {
         console.log(Math.abs(_z[i] - z[i]));
@@ -56,7 +56,7 @@ function test_imdct_l() {
         0.00000000,0.00000000,0.00000000,0.00000000,0.00000000,0.00000000,0.00000061,-0.00000124,0.00000068,-0.00000089,0.00000298,-0.00000468,0.00000791,-0.00001652,0.00000371,0.00001790,0.00000728,0.00000033,-0.00000029,0.00000181,0.00000694,-0.00000166,0.00002309,-0.00000006,0.00002645,0.00001713,-0.00000899,-0.00000824,0.00001314,0.00001685,-0.00000003,0.00000956,-0.00000053,0.00000154,0.00000024,-0.00000001];
 
 
-    Mad.III_imdct_l(X, 0, _z, 3);
+    Mad.III_imdct_l(X, _z, 3);
 
     for (var i = 0; i < 36; i++) {
         console.log(Math.abs(_z[i] - z[i]));
