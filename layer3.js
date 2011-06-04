@@ -1095,6 +1095,13 @@ Mad.III_decode = function (ptr, frame, si, nch) {
                 return error;
         }
 
+        if (Debug) {
+            for (var i = 0; i < 576; i++) {
+                Debug.huffdecode.write(xr[0][i].toFixed(8) + "\t");
+            }
+            Debug.huffdecode.write("\n");
+        }
+
         /* joint stereo processing */
         if (header.mode == Mad.Mode.JOINT_STEREO && header.mode_extension) {
             error = Mad.III_stereo(xr, granule, header, sfbwidth[0]);
@@ -1111,12 +1118,6 @@ Mad.III_decode = function (ptr, frame, si, nch) {
             var sb, l = 0, i, sblimit;
             // var output = new Float64Array(new ArrayBuffer(8 * 36));
             var output = [];
-
-            // var sys = require('sys');
-            // for (var i = 0; i < 576; i++) {
-            //     sys.print(xr[0][i].toFixed(8) + "\t");
-            //     if (i % 8 == 7) sys.print("\n");
-            // }
 
             if (channel.block_type == 2) {
                 Mad.III_reorder(xr[ch], channel, sfbwidth[ch]);
@@ -1198,14 +1199,14 @@ Mad.III_decode = function (ptr, frame, si, nch) {
                     Mad.III_freqinver(sample, sb);
             }
 
-            // var sys = require('sys');
-            // for (var i = 0; i < 18; i++) {
-            //     for (var j = 0; j < 2; j++) {
-            //         sys.print(sample[i][j].toFixed(8) + "\t");
-            //     }
-            //     if (i % 4 == 3) sys.print("\n");
-            // }
-
+            if (Debug) {
+                for (var i = 0; i < 18; i++) {
+                    for (var j = 0; j < 32; j++) {
+                        Debug.sample.write(sample[i][j].toFixed(8) + "\t");
+                    }
+                }
+            }
+            Debug.sample.write("\n");
         }
     }
 
