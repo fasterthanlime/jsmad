@@ -354,13 +354,13 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
             /* hcod (0..19) */
             clumpsz = startbits;
-            pair    = table[Mad.MASK(bitcache, cachesz, clumpsz)];
+            pair    = table[ (((bitcache) >> ((cachesz) - (clumpsz))) & ((1 << (clumpsz)) - 1))];
             
             while (!pair.final) {
                 cachesz -= clumpsz;
 
                 clumpsz = pair.ptr.bits;
-                pair    = table[pair.ptr.offset + Mad.MASK(bitcache, cachesz, clumpsz)];
+                pair    = table[pair.ptr.offset +  (((bitcache) >> ((cachesz) - (clumpsz))) & ((1 << (clumpsz)) - 1))];
             }
 
             cachesz -= pair.value.hlen;
@@ -382,7 +382,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                         bits_left -= 16;
                     }
 
-                    value += Mad.MASK(bitcache, cachesz, linbits);
+                    value +=  (((bitcache) >> ((cachesz) - (linbits))) & ((1 << (linbits)) - 1));
                     cachesz -= linbits;
 
                     requantized = Mad.III_requantize(value, exp);
@@ -400,7 +400,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                 }
                 
                 if(x_final) {
-                    xr[xrptr] = Mad.MASK1BIT(bitcache, cachesz--) ?
+                    xr[xrptr] = ((bitcache) & (1 << ((cachesz--) - 1))) ?
                         -requantized : requantized;
                 }
 
@@ -420,7 +420,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                         bits_left -= 16;
                     }
 
-                    value += Mad.MASK(bitcache, cachesz, linbits);
+                    value +=  (((bitcache) >> ((cachesz) - (linbits))) & ((1 << (linbits)) - 1));
                     cachesz -= linbits;
 
                     requantized = Mad.III_requantize(value, exp);
@@ -439,7 +439,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                 }
                 
                 if(y_final) {
-                    xr[xrptr + 1] = Mad.MASK1BIT(bitcache, cachesz--) ?
+                    xr[xrptr + 1] = ((bitcache) & (1 << ((cachesz--) - 1))) ?
                         -requantized : requantized;
                 }
             } else {
@@ -456,7 +456,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                         requantized = reqcache[value] = Mad.III_requantize(value, exp);
                     }
 
-                    xr[xrptr] = Mad.MASK1BIT(bitcache, cachesz--) ?
+                    xr[xrptr] = ((bitcache) & (1 << ((cachesz--) - 1))) ?
                         -requantized : requantized;
                 }
 
@@ -473,7 +473,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                         requantized = reqcache[value] = Mad.III_requantize(value, exp);
                     }
 
-                    xr[xrptr + 1] = Mad.MASK1BIT(bitcache, cachesz--) ?
+                    xr[xrptr + 1] = ((bitcache) & (1 << ((cachesz--) - 1))) ?
                         -requantized : requantized;
                 }
             }
@@ -502,14 +502,14 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                 bits_left -= 16;
             }
             
-            var quad = table[Mad.MASK(bitcache, cachesz, 4)];
+            var quad = table[ (((bitcache) >> ((cachesz) - (4))) & ((1 << (4)) - 1))];
 
             /* quad tables guaranteed to have at most one extra lookup */
             if (!quad.final) {
                 cachesz -= 4;
 
                 quad = table[quad.ptr.offset +
-                             Mad.MASK(bitcache, cachesz, quad.ptr.bits)];
+                              (((bitcache) >> ((cachesz) - (quad.ptr.bits))) & ((1 << (quad.ptr.bits)) - 1))];
             }
 
             cachesz -= quad.value.hlen;
@@ -527,11 +527,11 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
             /* v (0..1) */
             xr[xrptr] = quad.value.v ?
-                (Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
+                (((bitcache) & (1 << ((cachesz--) - 1))) ? -requantized : requantized) : 0;
 
             /* w (0..1) */
             xr[xrptr + 1] = quad.value.w ?
-                (Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
+                (((bitcache) & (1 << ((cachesz--) - 1))) ? -requantized : requantized) : 0;
 
             xrptr += 2;
 
@@ -548,11 +548,11 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
             /* x (0..1) */
             xr[xrptr] = quad.value.x ?
-                (Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
+                (((bitcache) & (1 << ((cachesz--) - 1))) ? -requantized : requantized) : 0;
 
             /* y (0..1) */
             xr[xrptr + 1] = quad.value.y ?
-                (Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
+                (((bitcache) & (1 << ((cachesz--) - 1))) ? -requantized : requantized) : 0;
 
             xrptr += 2;
         }
