@@ -12,24 +12,28 @@ Mad.Synth = function () {
         channels: 0,
         length: 0,
         samples: [
-            new Float64Array(new ArrayBuffer(8 * 1152)),
-            new Float64Array(new ArrayBuffer(8 * 1152))
+            // new Float64Array(new ArrayBuffer(8 * 1152)),
+            // new Float64Array(new ArrayBuffer(8 * 1152))
+            [],
+            []
         ]
     };
     
-    this.pcm.clone = function() {
-        var copy = {};
-        copy.samplerate = this.samplerate;
-        copy.channels = this.channels;
-        copy.length = this.length;
-        copy.samples = [
-            new Float64Array(new ArrayBuffer(8 * 1152)),
-            new Float64Array(new ArrayBuffer(8 * 1152))
-        ];
-        copy.samples[0].set(this.samples[0]);
-        copy.samples[1].set(this.samples[1]);
-        return copy;
-    }; 
+    // this.pcm.clone = function() {
+    //     var copy = {};
+    //     copy.samplerate = this.samplerate;
+    //     copy.channels = this.channels;
+    //     copy.length = this.length;
+    //     copy.samples = [
+    //         // new Float64Array(new ArrayBuffer(8 * 1152)),
+    //         // new Float64Array(new ArrayBuffer(8 * 1152))
+    //         [],
+    //         []
+    //     ];
+    //     copy.samples[0].set(this.samples[0]);
+    //     copy.samples[1].set(this.samples[1]);
+    //     return copy;
+    // }; 
 }
 
 /*
@@ -56,6 +60,38 @@ Mad.Synth.prototype.mute = function () {
     }
 };
 
+/* costab[i] = cos(PI / (2 * 32) * i) */
+var costab1  =  0.998795456;
+var costab2  =  0.995184727;
+var costab3  =  0.989176510;
+var costab4  =  0.980785280;
+var costab5  =  0.970031253;
+var costab6  =  0.956940336;
+var costab7  =  0.941544065;
+var costab8  =  0.923879533;
+var costab9  =  0.903989293;
+var costab10 =  0.881921264;
+var costab11 =  0.857728610;
+var costab12 =  0.831469612;
+var costab13 =  0.803207531;
+var costab14 =  0.773010453;
+var costab15 =  0.740951125;
+var costab16 =  0.707106781;
+var costab17 =  0.671558955;
+var costab18 =  0.634393284;
+var costab19 =  0.595699304;
+var costab20 =  0.555570233;
+var costab21 =  0.514102744;
+var costab22 =  0.471396737;
+var costab23 =  0.427555093;
+var costab24 =  0.382683432;
+var costab25 =  0.336889853;
+var costab26 =  0.290284677;
+var costab27 =  0.242980180;
+var costab28 =  0.195090322;
+var costab29 =  0.146730474;
+var costab30 =  0.098017140;
+var costab31 =  0.049067674;
 
 /*
  * NAME:    dct32()
@@ -86,38 +122,6 @@ Mad.Synth.dct32 = function (_in /* [32] */, slot, lo /* [16][8] */, hi /* [16][8
     var t168, t169, t170, t171, t172, t173, t174, t175;
     var t176;
 
-    /* costab[i] = cos(PI / (2 * 32) * i) */
-    var costab1  =  0.998795456;
-    var costab2  =  0.995184727;
-    var costab3  =  0.989176510;
-    var costab4  =  0.980785280;
-    var costab5  =  0.970031253;
-    var costab6  =  0.956940336;
-    var costab7  =  0.941544065;
-    var costab8  =  0.923879533;
-    var costab9  =  0.903989293;
-    var costab10 =  0.881921264;
-    var costab11 =  0.857728610;
-    var costab12 =  0.831469612;
-    var costab13 =  0.803207531;
-    var costab14 =  0.773010453;
-    var costab15 =  0.740951125;
-    var costab16 =  0.707106781;
-    var costab17 =  0.671558955;
-    var costab18 =  0.634393284;
-    var costab19 =  0.595699304;
-    var costab20 =  0.555570233;
-    var costab21 =  0.514102744;
-    var costab22 =  0.471396737;
-    var costab23 =  0.427555093;
-    var costab24 =  0.382683432;
-    var costab25 =  0.336889853;
-    var costab26 =  0.290284677;
-    var costab27 =  0.242980180;
-    var costab28 =  0.195090322;
-    var costab29 =  0.146730474;
-    var costab30 =  0.098017140;
-    var costab31 =  0.049067674;
 
     // var sys = require('sys');
     // for (i = 0; i < 32; i++) {
@@ -1038,24 +1042,27 @@ Mad.Synth.prototype.full = function(frame, nch, ns) {
             Dptr = 0;
 
             ptr = D[Dptr];
-            lo =  fx[fxPtr][0] * ptr[po +  0];
-            lo += fx[fxPtr][1] * ptr[po + 14];
-            lo += fx[fxPtr][2] * ptr[po + 12];
-            lo += fx[fxPtr][3] * ptr[po + 10];
-            lo += fx[fxPtr][4] * ptr[po +  8];
-            lo += fx[fxPtr][5] * ptr[po +  6];
-            lo += fx[fxPtr][6] * ptr[po +  4];
-            lo += fx[fxPtr][7] * ptr[po +  2];
+            _fx = fx[fxPtr];
+            _fe = fe[fePtr];
+
+            lo =  _fx[0] * ptr[po +  0];
+            lo += _fx[1] * ptr[po + 14];
+            lo += _fx[2] * ptr[po + 12];
+            lo += _fx[3] * ptr[po + 10];
+            lo += _fx[4] * ptr[po +  8];
+            lo += _fx[5] * ptr[po +  6];
+            lo += _fx[6] * ptr[po +  4];
+            lo += _fx[7] * ptr[po +  2];
             lo = -lo;                      
             
-            lo += fe[fePtr][0] * ptr[pe +  0];
-            lo += fe[fePtr][1] * ptr[pe + 14];
-            lo += fe[fePtr][2] * ptr[pe + 12];
-            lo += fe[fePtr][3] * ptr[pe + 10];
-            lo += fe[fePtr][4] * ptr[pe +  8];
-            lo += fe[fePtr][5] * ptr[pe +  6];
-            lo += fe[fePtr][6] * ptr[pe +  4];
-            lo += fe[fePtr][7] * ptr[pe +  2];
+            lo += _fe[0] * ptr[pe +  0];
+            lo += _fe[1] * ptr[pe + 14];
+            lo += _fe[2] * ptr[pe + 12];
+            lo += _fe[3] * ptr[pe + 10];
+            lo += _fe[4] * ptr[pe +  8];
+            lo += _fe[5] * ptr[pe +  6];
+            lo += _fe[6] * ptr[pe +  4];
+            lo += _fe[7] * ptr[pe +  2];
 
             pcm[pcm1Ptr++] = lo;
             pcm2Ptr = pcm1Ptr + 30;
@@ -1067,44 +1074,47 @@ Mad.Synth.prototype.full = function(frame, nch, ns) {
                 /* D[32 - sb][i] == -D[sb][31 - i] */
 
                 ptr = D[Dptr];
-                lo  = fo[foPtr][0] * ptr[po +  0];
-                lo += fo[foPtr][1] * ptr[po + 14];
-                lo += fo[foPtr][2] * ptr[po + 12];
-                lo += fo[foPtr][3] * ptr[po + 10];
-                lo += fo[foPtr][4] * ptr[po +  8];
-                lo += fo[foPtr][5] * ptr[po +  6];
-                lo += fo[foPtr][6] * ptr[po +  4];
-                lo += fo[foPtr][7] * ptr[po +  2];
+                _fo = fo[foPtr];
+                _fe = fe[fePtr];
+
+                lo  = _fo[0] * ptr[po +  0];
+                lo += _fo[1] * ptr[po + 14];
+                lo += _fo[2] * ptr[po + 12];
+                lo += _fo[3] * ptr[po + 10];
+                lo += _fo[4] * ptr[po +  8];
+                lo += _fo[5] * ptr[po +  6];
+                lo += _fo[6] * ptr[po +  4];
+                lo += _fo[7] * ptr[po +  2];
                 lo = -lo;
 
-                lo += fe[fePtr][7] * ptr[pe +  2];
-                lo += fe[fePtr][6] * ptr[pe +  4];
-                lo += fe[fePtr][5] * ptr[pe +  6];
-                lo += fe[fePtr][4] * ptr[pe +  8];
-                lo += fe[fePtr][3] * ptr[pe + 10];
-                lo += fe[fePtr][2] * ptr[pe + 12];
-                lo += fe[fePtr][1] * ptr[pe + 14];
-                lo += fe[fePtr][0] * ptr[pe +  0];
+                lo += _fe[7] * ptr[pe + 2];
+                lo += _fe[6] * ptr[pe + 4];
+                lo += _fe[5] * ptr[pe + 6];
+                lo += _fe[4] * ptr[pe + 8];
+                lo += _fe[3] * ptr[pe + 10];
+                lo += _fe[2] * ptr[pe + 12];
+                lo += _fe[1] * ptr[pe + 14];
+                lo += _fe[0] * ptr[pe + 0];
 
                 pcm[pcm1Ptr++] = lo;
 
-                lo =  fe[fePtr][0] * ptr[-pe + 31 - 16];
-                lo += fe[fePtr][1] * ptr[-pe + 31 - 14];
-                lo += fe[fePtr][2] * ptr[-pe + 31 - 12];
-                lo += fe[fePtr][3] * ptr[-pe + 31 - 10];
-                lo += fe[fePtr][4] * ptr[-pe + 31 -  8];
-                lo += fe[fePtr][5] * ptr[-pe + 31 -  6];
-                lo += fe[fePtr][6] * ptr[-pe + 31 -  4];
-                lo += fe[fePtr][7] * ptr[-pe + 31 -  2];
+                lo =  _fe[0] * ptr[-pe + 31 - 16];
+                lo += _fe[1] * ptr[-pe + 31 - 14];
+                lo += _fe[2] * ptr[-pe + 31 - 12];
+                lo += _fe[3] * ptr[-pe + 31 - 10];
+                lo += _fe[4] * ptr[-pe + 31 -  8];
+                lo += _fe[5] * ptr[-pe + 31 -  6];
+                lo += _fe[6] * ptr[-pe + 31 -  4];
+                lo += _fe[7] * ptr[-pe + 31 -  2];
 
-                lo += fo[foPtr][7] * ptr[-po + 31 -  2];
-                lo += fo[foPtr][6] * ptr[-po + 31 -  4];
-                lo += fo[foPtr][5] * ptr[-po + 31 -  6];
-                lo += fo[foPtr][4] * ptr[-po + 31 -  8];
-                lo += fo[foPtr][3] * ptr[-po + 31 - 10];
-                lo += fo[foPtr][2] * ptr[-po + 31 - 12];
-                lo += fo[foPtr][1] * ptr[-po + 31 - 14];
-                lo += fo[foPtr][0] * ptr[-po + 31 - 16];
+                lo += _fo[7] * ptr[-po + 31 -  2];
+                lo += _fo[6] * ptr[-po + 31 -  4];
+                lo += _fo[5] * ptr[-po + 31 -  6];
+                lo += _fo[4] * ptr[-po + 31 -  8];
+                lo += _fo[3] * ptr[-po + 31 - 10];
+                lo += _fo[2] * ptr[-po + 31 - 12];
+                lo += _fo[1] * ptr[-po + 31 - 14];
+                lo += _fo[0] * ptr[-po + 31 - 16];
 
                 pcm[pcm2Ptr--] = lo;
                 ++foPtr;
@@ -1113,14 +1123,16 @@ Mad.Synth.prototype.full = function(frame, nch, ns) {
             ++Dptr;
 
             ptr = D[Dptr];
-            lo  = fo[foPtr][0] * ptr[po +  0];
-            lo += fo[foPtr][1] * ptr[po + 14];
-            lo += fo[foPtr][2] * ptr[po + 12];
-            lo += fo[foPtr][3] * ptr[po + 10];
-            lo += fo[foPtr][4] * ptr[po +  8];
-            lo += fo[foPtr][5] * ptr[po +  6];
-            lo += fo[foPtr][6] * ptr[po +  4];
-            lo += fo[foPtr][7] * ptr[po +  2];
+            _fo = fo[foPtr];
+
+            lo  = _fo[0] * ptr[po +  0];
+            lo += _fo[1] * ptr[po + 14];
+            lo += _fo[2] * ptr[po + 12];
+            lo += _fo[3] * ptr[po + 10];
+            lo += _fo[4] * ptr[po +  8];
+            lo += _fo[5] * ptr[po +  6];
+            lo += _fo[6] * ptr[po +  4];
+            lo += _fo[7] * ptr[po +  2];
 
             pcm[pcm1Ptr] = -lo;
             pcm1Ptr += 16;
@@ -1128,6 +1140,7 @@ Mad.Synth.prototype.full = function(frame, nch, ns) {
         }
     }
 }
+
 
 /*
  * NAME:    synth.half()
@@ -1282,7 +1295,7 @@ Mad.Synth.prototype.frame = function (frame) {
     this.pcm.channels   = nch;
     this.pcm.length     = 32 * ns;
 
-    // console.log("\n\n\nnch: " + nch + " ns: " + ns + "\n");
+    // console.log("ns: " + ns);
 
     /*
      if (frame.options & Mad.Option.HALFSAMPLERATE) {

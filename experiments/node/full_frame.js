@@ -907,13 +907,15 @@ pcm.push([
 var ns = 36;
 var synth = new Mad.Synth();
 
-for (var x = 0; x < sbsamples.length; x++) {    
-    var frame = new Mad.Frame();
-    frame.sbsample[0] = sbsamples[x];
-    synth.full(frame, 1, ns);
-    synth.phase = (synth.phase + ns) % 16;
+for (var i = 0; i < 1000; i++) {
+    for (var x = 0; x < sbsamples.length; x++) {    
+        var frame = new Mad.Frame();
+        frame.sbsample[0] = sbsamples[x];
+        synth.full(frame, 1, ns);
+        synth.phase = (synth.phase + ns) % 16;
 
-    for (var i = 0; i < 1152; i++) {
-        console.log(Math.abs(synth.pcm.samples[0][i] - pcm[x][i]));
+        // for (var i = 0; i < 1152; i++) {
+        //     console.log(Math.abs(synth.pcm.samples[0][i] - pcm[x][i]));
+        // }
     }
 }
