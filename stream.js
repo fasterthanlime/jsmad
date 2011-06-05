@@ -1,31 +1,31 @@
 
 Mad.Error = {
-  NONE     : 0x0000,    /* no error */
+  NONE           : 0x0000,      /* no error */
 
-  BUFLEN           : 0x0001,    /* input buffer too small (or EOF) */
-  BUFPTR           : 0x0002,    /* invalid (null) buffer pointer */
+  BUFLEN         : 0x0001,      /* input buffer too small (or EOF) */
+  BUFPTR         : 0x0002,      /* invalid (null) buffer pointer */
 
-  NOMEM    : 0x0031,        /* not enough memory */
+  NOMEM          : 0x0031,      /* not enough memory */
 
-  LOSTSYNC         : 0x0101,    /* lost synchronization */
-  BADLAYER         : 0x0102,    /* reserved header layer value */
-  BADBITRATE       : 0x0103,    /* forbidden bitrate value */
+  LOSTSYNC       : 0x0101,      /* lost synchronization */
+  BADLAYER       : 0x0102,      /* reserved header layer value */
+  BADBITRATE     : 0x0103,      /* forbidden bitrate value */
   BADSAMPLERATE  : 0x0104,      /* reserved sample frequency value */
-  BADEMPHASIS      : 0x0105,    /* reserved emphasis value */
+  BADEMPHASIS    : 0x0105,      /* reserved emphasis value */
 
-  BADCRC               : 0x0201,        /* CRC check failed */
-  BADBITALLOC      : 0x0211,    /* forbidden bit allocation value */
+  BADCRC         : 0x0201,      /* CRC check failed */
+  BADBITALLOC    : 0x0211,      /* forbidden bit allocation value */
   BADSCALEFACTOR : 0x0221,      /* bad scalefactor index */
   BADMODE        : 0x0222,      /* bad bitrate/mode combination */
-  BADFRAMELEN      : 0x0231,    /* bad frame length */
+  BADFRAMELEN    : 0x0231,      /* bad frame length */
   BADBIGVALUES   : 0x0232,      /* bad big_values count */
   BADBLOCKTYPE   : 0x0233,      /* reserved block_type */
-  BADSCFSI         : 0x0234,    /* bad scalefactor selection info */
-  BADDATAPTR       : 0x0235,    /* bad main_data_begin pointer */
-  BADPART3LEN      : 0x0236,    /* bad audio data length */
+  BADSCFSI       : 0x0234,      /* bad scalefactor selection info */
+  BADDATAPTR     : 0x0235,      /* bad main_data_begin pointer */
+  BADPART3LEN    : 0x0236,      /* bad audio data length */
   BADHUFFTABLE   : 0x0237,      /* bad Huffman table select */
-  BADHUFFDATA      : 0x0238,    /* Huffman data overrun */
-  BADSTEREO        : 0x0239     /* incompatible block_type for JS */
+  BADHUFFDATA    : 0x0238,      /* Huffman data overrun */
+  BADSTEREO      : 0x0239       /* incompatible block_type for JS */
 };
 
 Mad.BUFFER_GUARD = 8;
