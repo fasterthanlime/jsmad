@@ -19,8 +19,10 @@ require("../../layer3.js");
 require("../../frame.js");
 require("../../synth.js");
 
-var data = fs.readFileSync("one_second_beep.mp3", "binary");
-// var data = fs.readFileSync("one_second_of_silence.mp3", "binary");
+//var data = fs.readFileSync("one_second_beep.mp3", "binary");
+//var data = fs.readFileSync("one_second_of_silence.mp3", "binary");
+//var data = fs.readFileSync("output.mp3", "binary");
+var data = fs.readFileSync("stylo.mp3", "binary");
 
 // console.log("Reading a " + Math.round(data.length / 1024) + "KB file");
 
@@ -75,7 +77,7 @@ for (var i = 0; i < len; i++) {
     }
 }
 
-fs.writeFileSync("out.raw", buf, 'binary');
+fs.writeFileSync("stylo.raw", buf, 'binary');
 
 if (Debug) {
     Debug.huffdecode.end();
