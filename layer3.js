@@ -90,17 +90,17 @@ var root_table /* 7 */ = [
 ];
 
 var cs = [
-  +0.857492926 , +0.881741997,
-  +0.949628649 , +0.983314592,
-  +0.995517816 , +0.999160558,
-  +0.999899195 , +0.999993155
+        +0.857492926 , +0.881741997,
+        +0.949628649 , +0.983314592,
+        +0.995517816 , +0.999160558,
+        +0.999899195 , +0.999993155
 ];
 
 var ca = [
-  -0.514495755, -0.471731969,
-  -0.313377454, -0.181913200,
-  -0.094574193, -0.040965583,
-  -0.014198569, -0.003699975
+        -0.514495755, -0.471731969,
+        -0.313377454, -0.181913200,
+        -0.094574193, -0.040965583,
+        -0.014198569, -0.003699975
 ];
 
 
@@ -1575,3 +1575,207 @@ Mad.III_reorder = function (xr /* [576] */, channel, sfbwidth /* [39] */) {
         xr[18 * sb + i] = tmp2[sb + i];
     }
 }
+
+Mad.III_stereo = function(xr /* [2][576] */, granule, header, sfbwidth) {
+    var modes = [];
+    var sfbi, l, n, i;
+
+    if (granule.ch[0].block_type !=
+        granule.ch[1].block_type ||
+        (granule.ch[0].flags & Mad.mixed_block_flag) !=
+        (granule.ch[1].flags & Mad.mixed_block_flag))
+        return Mad.Error.BADSTEREO;
+
+    for (i = 0; i < 39; ++i)
+        modes[i] = header.mode_extension;
+
+    /* intensity stereo */
+
+    if (header.mode_extension & Mad.I_STEREO) {
+        var right_ch = granule.ch[1];
+        var right_xr = xr[1];
+        var is_pos;
+
+        header.flags |= Mad.Flag.I_STEREO;
+
+        /* first determine which scalefactor bands are to be processed */
+
+        if (right_ch.block_type == 2) {
+            var lower, start, max, bound = [], w;
+
+            lower = start = max = bound[0] = bound[1] = bound[2] = 0;
+
+            sfbi = l = 0;
+
+            if (right_ch.flags & Mad.mixed_block_flag) {
+                while (l < 36) {
+                    n = sfbwidth[sfbi++];
+
+                    for (i = 0; i < n; ++i) {
+                        if (right_xr[i]) {
+                            lower = sfbi;
+                            break;
+                        }
+                    }
+
+                    right_xr += n;
+                    l += n;
+                }
+
+                start = sfbi;
+            }
+
+            w = 0;
+            while (l < 576) {
+                n = sfbwidth[sfbi++];
+
+                for (i = 0; i < n; ++i) {
+                    if (right_xr[i]) {
+                        max = bound[w] = sfbi;
+                        break;
+                    }
+                }
+
+                right_xr += n;
+                l += n;
+                w = (w + 1) % 3;
+            }
+
+            if (max)
+                lower = start;
+
+            /* long blocks */
+
+            for (i = 0; i < lower; ++i)
+                modes[i] = header.mode_extension & ~Mad.I_STEREO;
+
+            /* short blocks */
+
+            w = 0;
+            for (i = start; i < max; ++i) {
+                if (i < bound[w])
+                    modes[i] = header.mode_extension & ~Mad.I_STEREO;
+
+                w = (w + 1) % 3;
+            }
+        }
+        else {  /* right_ch.block_type != 2 */
+            var bound;
+
+            bound = 0;
+            for (sfbi = l = 0; l < 576; l += n) {
+                n = sfbwidth[sfbi++];
+
+                for (i = 0; i < n; ++i) {
+                    if (right_xr[i]) {
+                        bound = sfbi;
+                        break;
+                    }
+                }
+
+                right_xr += n;
+            }
+
+            for (i = 0; i < bound; ++i)
+                modes[i] = header.mode_extension & ~Mad.I_STEREO;
+        }
+
+        /* now do the actual processing */
+
+        if (header.flags & Mad.Flag.LSF_EXT) {
+            illegal_pos = granule[1].ch[1].scalefac;
+            var lsf_scale;
+
+            /* intensity_scale */
+            lsf_scale = is_lsf_table[right_ch.scalefac_compress & 0x1];
+
+            for (sfbi = l = 0; l < 576; ++sfbi, l += n) {
+                n = sfbwidth[sfbi];
+
+                if (!(modes[sfbi] & Mad.I_STEREO))
+                    continue;
+
+                if (illegal_pos[sfbi]) {
+                    modes[sfbi] &= ~Mad.I_STEREO;
+                    continue;
+                }
+
+                is_pos = right_ch.scalefac[sfbi];
+
+                for (i = 0; i < n; ++i) {
+                    var left;
+
+                    left = xr[0][l + i];
+
+                    if (is_pos == 0)
+                        xr[1][l + i] = left;
+                    else {
+                        var opposite;
+
+                        opposite = left * lsf_scale[(is_pos - 1) / 2];
+
+                        if (is_pos & 1) {
+                            xr[0][l + i] = opposite;
+                            xr[1][l + i] = left;
+                        }
+                        else
+                            xr[1][l + i] = opposite;
+                    }
+                }
+            }
+        }
+        else {  /* !(header.flags & MAD_FLAG_LSF_EXT) */
+            for (sfbi = l = 0; l < 576; ++sfbi, l += n) {
+                n = sfbwidth[sfbi];
+
+                if (!(modes[sfbi] & Mad.I_STEREO))
+                    continue;
+
+                is_pos = right_ch.scalefac[sfbi];
+
+                if (is_pos >= 7) {  /* illegal intensity position */
+                    modes[sfbi] &= ~Mad.I_STEREO;
+                    continue;
+                }
+
+                for (i = 0; i < n; ++i) {
+                    var left;
+
+                    left = xr[0][l + i];
+
+                    xr[0][l + i] = left * is_table[    is_pos];
+                    xr[1][l + i] = left * is_table[6 - is_pos];
+                }
+            }
+        }
+    }
+
+    /* middle/side stereo */
+
+    if (header.mode_extension & Mad.MS_STEREO) {
+        var invsqrt2;
+
+        header.flags |= Mad.Flag.MS_STEREO;
+
+        invsqrt2 = root_table[3 + -2];
+
+        for (sfbi = l = 0; l < 576; ++sfbi, l += n) {
+            n = sfbwidth[sfbi];
+
+            if (modes[sfbi] != Mad.MS_STEREO)
+                continue;
+
+            for (i = 0; i < n; ++i) {
+                var m, s;
+
+                m = xr[0][l + i];
+                s = xr[1][l + i];
+
+                xr[0][l + i] = (m + s) * invsqrt2;  /* l = (m + s) / sqrt(2) */
+                xr[1][l + i] = (m - s) * invsqrt2;  /* r = (m - s) / sqrt(2) */
+            }
+        }
+    }
+
+    return Mad.Error.NONE;    
+};
