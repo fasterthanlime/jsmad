@@ -15,12 +15,16 @@ function readFile() {
         var synth = new Mad.Synth();
         var frame = new Mad.Frame();
         
-        frame = Mad.Frame.decode(frame, stream);
+        frame = Mad.Frame.decode(frame, stream);        
+        while(frame == null && Mad.recoverable(stream.error)) {
+            frame = Mad.Frame.decode(frame, stream);
+        }
+            
         if(frame == null) {
             if(stream.error == Mad.Error.BUFLEN) {
                 console.log("End of file!");
             }
-            console.log("Error! code = " + stream.error);
+            console.log("First error! code = " + stream.error + ", recoverable ? = " + Mad.recoverable(stream.error));
         }
         
         var channelCount = frame.header.nchannels();
@@ -51,9 +55,9 @@ function readFile() {
                     if(frame == null) {
                         if(stream.error == Mad.Error.BUFLEN) {
                             console.log("End of file!");
-                            dev.kill();
                         }
                         console.log("Error! code = " + stream.error);
+                        dev.kill();
                     } else {
                         synth.frame(frame);
                     }
