@@ -1105,7 +1105,7 @@ Mad.III_decode = function (ptr, frame, si, nch) {
         }
 
         /* joint stereo processing */
-        if (header.mode == Mad.Mode.JOINT_STEREO && header.mode_extension) {
+        if ((header.mode == Mad.Mode.JOINT_STEREO) && (header.mode_extension != 0)) {
             error = Mad.III_stereo(xr, granule, header, sfbwidth[0]);
             
             if (error)
