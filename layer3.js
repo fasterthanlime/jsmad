@@ -377,7 +377,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
                 case 15:
                     if (cachesz < linbits + 2) {
-                        bitcache   = Mad.bitwiseOr(Mad.lshiftU32(bitcache, 16), peek.read(16));
+                        bitcache   = (bitcache << 16) | peek.read(16);
                         cachesz   += 16;
                         bits_left -= 16;
                     }
@@ -415,7 +415,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
                 case 15:
                     if (cachesz < linbits + 1) {
-                        bitcache   = Mad.bitwiseOr(Mad.lshiftU32(bitcache, 16), peek.read(16));
+                        bitcache   = (bitcache << 16) | peek.read(16);
                         cachesz   += 16;
                         bits_left -= 16;
                     }
@@ -497,7 +497,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
         while (cachesz + bits_left > 0 && xrptr <= 572) {
             /* hcod (1..6) */
             if (cachesz < 10) {
-                bitcache   = Mad.bitwiseOr(Mad.lshiftU32(bitcache, 16), peek.read(16));
+                bitcache   = (bitcache << 16) | peek.read(16);
                 cachesz   += 16;
                 bits_left -= 16;
             }
