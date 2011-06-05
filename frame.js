@@ -211,31 +211,39 @@ Mad.Header.decode = function(stream) {
         syncing = false;
  
         /* synchronize */
-        if (stream.sync) {
-            if (end - ptr < Mad.BUFFER_GUARD) {
-                stream.next_frame = ptr;
+        try {
+            if (stream.sync) {
+                if (end - ptr < Mad.BUFFER_GUARD) {
+                    stream.next_frame = ptr;
 
-                stream.error = Mad.Error.BUFLEN;
-                return null;
-            } else if (!(stream.getU8(ptr) == 0xff && (stream.getU8(ptr + 1) & 0xe0) == 0xe0)) {
-                /* mark point where frame sync word was expected */
-                stream.this_frame = ptr;
-                stream.next_frame = ptr + 1;
+                    stream.error = Mad.Error.BUFLEN;
+                    return null;
+                } else if (!(stream.getU8(ptr) == 0xff && (stream.getU8(ptr + 1) & 0xe0) == 0xe0)) {
+                    /* mark point where frame sync word was expected */
+                    stream.this_frame = ptr;
+                    stream.next_frame = ptr + 1;
 
-                stream.error = Mad.Error.LOSTSYNC;
-                return null;
+                    stream.error = Mad.Error.LOSTSYNC;
+                    return null;
+                }
+            } else {
+                stream.ptr = new Mad.Bit(stream.stream, ptr);
+
+                if (stream.doSync() == -1) {
+                    if (end - stream.next_frame >= Mad.BUFFER_GUARD)
+                        stream.next_frame = end - Mad.BUFFER_GUARD;
+                    stream.error = Mad.Error.BUFLEN;
+                    return null;
+                }
+
+                ptr = stream.ptr.nextbyte();
             }
-        } else {
-            stream.ptr = new Mad.Bit(stream.stream, ptr);
+        } catch (e) {
+            console.log("Synchronization error: " + e);
             
-            if (stream.doSync() == -1) {
-                if (end - stream.next_frame >= Mad.BUFFER_GUARD)
-                    stream.next_frame = end - Mad.BUFFER_GUARD;
-                stream.error = Mad.Error.BUFLEN;
-                return null;
-            }
-
-            ptr = stream.ptr.nextbyte();
+            stream.error = Mad.Error.BUFLEN;
+            
+            return null;
         }
 
         /* begin processing */
