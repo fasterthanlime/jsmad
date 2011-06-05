@@ -1,8 +1,18 @@
-Mad.FileStream = function(file) {
+Mad.FileStream = function(file, callback) {
     this.state = { 'offset': 0 };
     
-    this.state['buffer'] = file.getAsBinary()
-    this.state['amountRead'] = this.state['buffer'].length;
+    var self = this, reader = new FileReader();
+    
+    reader.onload = function () {
+      self.state['buffer']     = reader.result;
+      self.state['amountRead'] = self.state['buffer'].length;
+      
+      self.length = self.state['amountRead'];
+      
+      callback(self);
+    }
+    
+    reader.readAsBinaryString(file);
 }
 
 Mad.FileStream.prototype = new Mad.ByteStream();
