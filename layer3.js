@@ -1275,7 +1275,7 @@ Mad.layer_III = function (stream, frame) {
 
     /* find main_data of next frame */
     {
-        var peek = new Mad.Bit(stream.data, stream.next_frame);
+        var peek = new Mad.Bit(stream.stream, stream.next_frame);
 
         header = peek.read(32);
         
@@ -1326,7 +1326,7 @@ Mad.layer_III = function (stream, frame) {
                 frame_used = md_len - si.main_data_begin;
                 
                 /* memcpy(dst, dstOffset, src, srcOffset, length) - returns a copy of dst with modified bytes */
-                stream.main_data = Mad.memcpy(stream.main_data, stream.md_len, stream.ptr.data, stream.ptr.nextbyte(), frame_used);
+                stream.main_data = Mad.memcpy(stream.main_data, stream.md_len, stream.ptr.stream, stream.ptr.nextbyte(), frame_used);
                 
                 /*
                 // Keeping this here as a handy little reference
@@ -1370,7 +1370,7 @@ Mad.layer_III = function (stream, frame) {
 
     /* preload main_data buffer with up to 511 bytes for next frame(s) */
     if (frame_free >= next_md_begin) {
-        stream.main_data = Mad.memcpy(stream.main_data, 0, stream.data, stream.next_frame - next_md_begin, next_md_begin);
+        stream.main_data = Mad.memcpy(stream.main_data, 0, stream.stream, stream.next_frame - next_md_begin, next_md_begin);
         /*
         // Keeping here for reference
         memcpy(*stream.main_data, stream.next_frame - next_md_begin, next_md_begin);
@@ -1394,7 +1394,7 @@ Mad.layer_III = function (stream, frame) {
             stream.md_len = 0;
         }
 
-        stream.main_data = Mad.memcpy(stream.main_data, stream.md_len, stream.data, stream.next_frame - frame_free, frame_free);
+        stream.main_data = Mad.memcpy(stream.main_data, stream.md_len, stream.stream, stream.next_frame - frame_free, frame_free);
         /*
         // Keeping here for reference
         memcpy(*stream.main_data + stream.md_len, stream.next_frame - frame_free, frame_free);
