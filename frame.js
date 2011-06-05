@@ -261,7 +261,8 @@ Mad.Header.decode = function(stream) {
 
         /* calculate free bit rate */
         if (header.bitrate == 0) {
-            console.log("Uh oh. VBR. We're fucked.");
+            console.log("Uh oh, a free bitrate stream. We're fucked.");
+            stream.error = Mad.Error.BADDATAPTR; // best guess
             return null;
             
     //        if ((stream.freerate == 0 || !stream.sync ||
@@ -276,9 +277,9 @@ Mad.Header.decode = function(stream) {
         /* calculate beginning of next frame */
         pad_slot = (header.flags & Mad.Flag.PADDING) ? 1 : 0;
 
-        if (header.layer == Mad.Layer.I)
+        if (header.layer == Mad.Layer.I) {
             N = (((12 * header.bitrate / header.samplerate) << 0) + pad_slot) * 4;
-        else {
+        } else {
             var slots_per_frame = (header.layer == Mad.Layer.III &&
                    (header.flags & Mad.Flag.LSF_EXT)) ? 72 : 144;
             //console.log("slots_per_frame = " + slots_per_frame + ", bitrate = " + header.bitrate + ", samplerate = " + header.samplerate);
