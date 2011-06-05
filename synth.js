@@ -12,24 +12,28 @@ Mad.Synth = function () {
         channels: 0,
         length: 0,
         samples: [
-            new Float64Array(new ArrayBuffer(8 * 1152)),
-            new Float64Array(new ArrayBuffer(8 * 1152))
+            // new Float64Array(new ArrayBuffer(8 * 1152)),
+            // new Float64Array(new ArrayBuffer(8 * 1152))
+            [],
+            []
         ]
     };
     
-    this.pcm.clone = function() {
-        var copy = {};
-        copy.samplerate = this.samplerate;
-        copy.channels = this.channels;
-        copy.length = this.length;
-        copy.samples = [
-            new Float64Array(new ArrayBuffer(8 * 1152)),
-            new Float64Array(new ArrayBuffer(8 * 1152))
-        ];
-        copy.samples[0].set(this.samples[0]);
-        copy.samples[1].set(this.samples[1]);
-        return copy;
-    }; 
+    // this.pcm.clone = function() {
+    //     var copy = {};
+    //     copy.samplerate = this.samplerate;
+    //     copy.channels = this.channels;
+    //     copy.length = this.length;
+    //     copy.samples = [
+    //         // new Float64Array(new ArrayBuffer(8 * 1152)),
+    //         // new Float64Array(new ArrayBuffer(8 * 1152))
+    //         [],
+    //         []
+    //     ];
+    //     copy.samples[0].set(this.samples[0]);
+    //     copy.samples[1].set(this.samples[1]);
+    //     return copy;
+    // }; 
 }
 
 /*
@@ -1122,7 +1126,7 @@ Mad.Synth.prototype.full = function(frame, nch, ns) {
             lo += fo[foPtr][6] * ptr[po +  4];
             lo += fo[foPtr][7] * ptr[po +  2];
 
-            pcm[pcm1Ptr] = lo;
+            pcm[pcm1Ptr] = -lo;
             pcm1Ptr += 16;
             phase = (phase + 1) % 16;
         }
@@ -1282,7 +1286,7 @@ Mad.Synth.prototype.frame = function (frame) {
     this.pcm.channels   = nch;
     this.pcm.length     = 32 * ns;
 
-    // console.log("\n\n\nnch: " + nch + " ns: " + ns + "\n");
+    // console.log("ns: " + ns);
 
     /*
      if (frame.options & Mad.Option.HALFSAMPLERATE) {
