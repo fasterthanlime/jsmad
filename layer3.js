@@ -1095,13 +1095,13 @@ Mad.III_decode = function (ptr, frame, si, nch) {
                 return error;
         }
 
-        if (typeof(Debug) != "undefined") {
-            Debug.huffdecode.write(Debug.iteration + "\t");
+        if (Mad.debug) {
+            Mad.debug.huffdecode.write(Mad.debug.iteration + "\t");
 
             for (var i = 0; i < 576; i++) {
-                Debug.huffdecode.write(xr[0][i].toFixed(8) + "\t");
+                Mad.debug.huffdecode.write(xr[0][i].toFixed(8) + "\t");
             }
-            Debug.huffdecode.write("\n");
+            Mad.debug.huffdecode.write("\n");
         }
 
         /* joint stereo processing */
@@ -1201,15 +1201,15 @@ Mad.III_decode = function (ptr, frame, si, nch) {
                     Mad.III_freqinver(sample, sb);
             }
 
-            if (typeof(Debug) != "undefined") {                
+            if (Mad.debug) {
                 for (var i = 0; i < 18; i++) {
-                    Debug.sample.write(Debug.iteration * 18 + i + "\t");
+                    Mad.debug.sample.write(Mad.debug.iteration * 18 + i + "\t");
                     for (var j = 0; j < 32; j++) {
-                        Debug.sample.write(sample[i][j].toFixed(8) + "\t");
+                        Mad.debug.sample.write(sample[i][j].toFixed(8) + "\t");
                     }
-                    Debug.sample.write("\n");
+                    Mad.debug.sample.write("\n");
                 }
-                Debug.iteration += 1;
+                Mad.debug.iteration += 1;
             }       
         }
     }
