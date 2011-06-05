@@ -1122,7 +1122,7 @@ Mad.Synth.prototype.full = function(frame, nch, ns) {
             lo += fo[foPtr][6] * ptr[po +  4];
             lo += fo[foPtr][7] * ptr[po +  2];
 
-            pcm[pcm1Ptr] = lo;
+            pcm[pcm1Ptr] = -lo;
             pcm1Ptr += 16;
             phase = (phase + 1) % 16;
         }
