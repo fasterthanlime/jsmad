@@ -1013,7 +1013,7 @@ var D /* [17][32] */ = [
  * NAME:    synth.full()
  * DESCRIPTION: perform full frequency PCM synthesis
  */
-Mad.Synth.prototype.full = function(frame, nch, ns) {
+Mad.Synth.prototype.full_old = function(frame, nch, ns) {
     var Dptr, hi, lo, ptr;
     
     for (var ch = 0; ch < nch; ++ch) {
@@ -1132,6 +1132,139 @@ Mad.Synth.prototype.full = function(frame, nch, ns) {
         }
     }
 }
+
+/*
+ * NAME:    synth.full()
+ * DESCRIPTION: perform full frequency PCM synthesis
+ */
+Mad.Synth.prototype.full = function(frame, nch, ns) {
+    var Dptr, hi, lo, ptr;
+    
+    for (var ch = 0; ch < nch; ++ch) {
+        var sbsample /* [36][32] */ = frame.sbsample[ch];
+        var filter = this.filter[ch]  /* [2][2][16][8] */;
+        var phase    = this.phase;
+        var pcm      = this.pcm.samples[ch];
+        var pcm1Ptr  = 0;
+        var pcm2Ptr  = 0;
+
+        for (var s = 0; s < ns; ++s) {
+            Mad.Synth.dct32(sbsample[s], phase >> 1, filter[0][phase & 1], filter[1][phase & 1]);
+
+            var pe = phase & ~1;
+            var po = ((phase - 1) & 0xf) | 1;
+
+            /* calculate 32 samples */
+            var fe = filter[0][ phase & 1];
+            var fx = filter[0][~phase & 1];
+            var fo = filter[1][~phase & 1];
+
+            var fePtr = 0;
+            var fxPtr = 0;
+            var foPtr = 0;
+            
+            Dptr = 0;
+
+            ptr = D[Dptr];
+            _fx = fx[fxPtr];
+            _fe = fe[fePtr];
+
+            lo =  _fx[0] * ptr[po +  0];
+            lo += _fx[1] * ptr[po + 14];
+            lo += _fx[2] * ptr[po + 12];
+            lo += _fx[3] * ptr[po + 10];
+            lo += _fx[4] * ptr[po +  8];
+            lo += _fx[5] * ptr[po +  6];
+            lo += _fx[6] * ptr[po +  4];
+            lo += _fx[7] * ptr[po +  2];
+            lo = -lo;                      
+            
+            lo += _fe[0] * ptr[pe +  0];
+            lo += _fe[1] * ptr[pe + 14];
+            lo += _fe[2] * ptr[pe + 12];
+            lo += _fe[3] * ptr[pe + 10];
+            lo += _fe[4] * ptr[pe +  8];
+            lo += _fe[5] * ptr[pe +  6];
+            lo += _fe[6] * ptr[pe +  4];
+            lo += _fe[7] * ptr[pe +  2];
+
+            pcm[pcm1Ptr++] = lo;
+            pcm2Ptr = pcm1Ptr + 30;
+
+            for (var sb = 1; sb < 16; ++sb) {
+                ++fePtr;
+                ++Dptr;
+
+                /* D[32 - sb][i] == -D[sb][31 - i] */
+
+                ptr = D[Dptr];
+                _fo = fo[foPtr];
+                _fe = fe[fePtr];
+
+                lo  = _fo[0] * ptr[po +  0];
+                lo += _fo[1] * ptr[po + 14];
+                lo += _fo[2] * ptr[po + 12];
+                lo += _fo[3] * ptr[po + 10];
+                lo += _fo[4] * ptr[po +  8];
+                lo += _fo[5] * ptr[po +  6];
+                lo += _fo[6] * ptr[po +  4];
+                lo += _fo[7] * ptr[po +  2];
+                lo = -lo;
+
+                lo += _fe[7] * ptr[pe + 2];
+                lo += _fe[6] * ptr[pe + 4];
+                lo += _fe[5] * ptr[pe + 6];
+                lo += _fe[4] * ptr[pe + 8];
+                lo += _fe[3] * ptr[pe + 10];
+                lo += _fe[2] * ptr[pe + 12];
+                lo += _fe[1] * ptr[pe + 14];
+                lo += _fe[0] * ptr[pe + 0];
+
+                pcm[pcm1Ptr++] = lo;
+
+                lo =  _fe[0] * ptr[-pe + 31 - 16];
+                lo += _fe[1] * ptr[-pe + 31 - 14];
+                lo += _fe[2] * ptr[-pe + 31 - 12];
+                lo += _fe[3] * ptr[-pe + 31 - 10];
+                lo += _fe[4] * ptr[-pe + 31 -  8];
+                lo += _fe[5] * ptr[-pe + 31 -  6];
+                lo += _fe[6] * ptr[-pe + 31 -  4];
+                lo += _fe[7] * ptr[-pe + 31 -  2];
+
+                lo += _fo[7] * ptr[-po + 31 -  2];
+                lo += _fo[6] * ptr[-po + 31 -  4];
+                lo += _fo[5] * ptr[-po + 31 -  6];
+                lo += _fo[4] * ptr[-po + 31 -  8];
+                lo += _fo[3] * ptr[-po + 31 - 10];
+                lo += _fo[2] * ptr[-po + 31 - 12];
+                lo += _fo[1] * ptr[-po + 31 - 14];
+                lo += _fo[0] * ptr[-po + 31 - 16];
+
+                pcm[pcm2Ptr--] = lo;
+                ++foPtr;
+            }
+
+            ++Dptr;
+
+            ptr = D[Dptr];
+            _fo = fo[foPtr];
+
+            lo  = _fo[0] * ptr[po +  0];
+            lo += _fo[1] * ptr[po + 14];
+            lo += _fo[2] * ptr[po + 12];
+            lo += _fo[3] * ptr[po + 10];
+            lo += _fo[4] * ptr[po +  8];
+            lo += _fo[5] * ptr[po +  6];
+            lo += _fo[6] * ptr[po +  4];
+            lo += _fo[7] * ptr[po +  2];
+
+            pcm[pcm1Ptr] = -lo;
+            pcm1Ptr += 16;
+            phase = (phase + 1) % 16;
+        }
+    }
+}
+
 
 /*
  * NAME:    synth.half()
