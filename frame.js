@@ -30,10 +30,10 @@ Mad.Layer = {
 };
 
 Mad.Mode = {
-    SINGLE_CHANNEL        : 0,
-    MAD_MODE_DUAL_CHANNEL : 1,      /* dual channel */
-    MAD_MODE_JOINT_STEREO : 2,      /* joint (MS/intensity) stereo */
-    MAD_MODE_STEREO       : 3       /* normal LR stereo */
+    SINGLE_CHANNEL      : 0,
+    DUAL_CHANNEL        : 1,      /* dual channel */
+    JOINT_STEREO        : 2,      /* joint (MS/intensity) stereo */
+    STEREO              : 3       /* normal LR stereo */
 };
 
 Mad.Emphasis = {
