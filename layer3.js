@@ -1209,9 +1209,8 @@ Mad.III_decode = function (ptr, frame, si, nch) {
                     }
                     Debug.sample.write("\n");
                 }
-            }       
-
-            Debug.iteration += 1;
+                Debug.iteration += 1;
+            } 
         }
     }
 
