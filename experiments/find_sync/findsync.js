@@ -13,7 +13,9 @@ function readFile() {
         var STEPS_COUNT = 0;
         
         var synth = new Mad.Synth();
-        var frame = Mad.Frame.decode(stream);
+        var frame = new Mad.Frame();
+        
+        frame = Mad.Frame.decode(frame, stream);
         if(frame == null) {
             if(stream.error == Mad.Error.BUFLEN) {
                 console.log("End of file!");
@@ -39,7 +41,7 @@ function readFile() {
         // Create a device.
         var dev = audioLib.AudioDevice(function(sampleBuffer) {
             total += sampleBuffer.length;
-            console.log("being asked for " + sampleBuffer.length + " bytes, total = " + total);
+            //console.log("being asked for " + sampleBuffer.length + " bytes, total = " + total);
             var index = 0;
             
             while(index < sampleBuffer.length) {
@@ -47,7 +49,8 @@ function readFile() {
                     var sample = synth.pcm.samples[i][offset];
                     
                     if(!isNaN(sample)) {
-                        sampleBuffer[index++] = Math.min(-1.0, Math.max(1.0, sample));
+                        //sampleBuffer[index++] = Math.min(-1.0, Math.max(1.0, sample));
+                        sampleBuffer[index++] = sample;
                         
                         if(min > sample)
                             min = sample;
@@ -61,10 +64,10 @@ function readFile() {
                 
                 if(offset >= synth.pcm.samples[0].length) {
                     offset = 0;
-                    console.log("min =  " + min + ", max = " + max + ", mean = " + mean);
+                    //console.log("min =  " + min + ", max = " + max + ", mean = " + mean);
                     min = 0; max = 0; mean = 0;
                 
-                    frame = Mad.Frame.decode(stream);
+                    frame = Mad.Frame.decode(frame, stream);
                     if(frame == null) {
                         if(stream.error == Mad.Error.BUFLEN) {
                             console.log("End of file!");
