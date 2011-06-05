@@ -60,6 +60,38 @@ Mad.Synth.prototype.mute = function () {
     }
 };
 
+/* costab[i] = cos(PI / (2 * 32) * i) */
+var costab1  =  0.998795456;
+var costab2  =  0.995184727;
+var costab3  =  0.989176510;
+var costab4  =  0.980785280;
+var costab5  =  0.970031253;
+var costab6  =  0.956940336;
+var costab7  =  0.941544065;
+var costab8  =  0.923879533;
+var costab9  =  0.903989293;
+var costab10 =  0.881921264;
+var costab11 =  0.857728610;
+var costab12 =  0.831469612;
+var costab13 =  0.803207531;
+var costab14 =  0.773010453;
+var costab15 =  0.740951125;
+var costab16 =  0.707106781;
+var costab17 =  0.671558955;
+var costab18 =  0.634393284;
+var costab19 =  0.595699304;
+var costab20 =  0.555570233;
+var costab21 =  0.514102744;
+var costab22 =  0.471396737;
+var costab23 =  0.427555093;
+var costab24 =  0.382683432;
+var costab25 =  0.336889853;
+var costab26 =  0.290284677;
+var costab27 =  0.242980180;
+var costab28 =  0.195090322;
+var costab29 =  0.146730474;
+var costab30 =  0.098017140;
+var costab31 =  0.049067674;
 
 /*
  * NAME:    dct32()
@@ -90,38 +122,6 @@ Mad.Synth.dct32 = function (_in /* [32] */, slot, lo /* [16][8] */, hi /* [16][8
     var t168, t169, t170, t171, t172, t173, t174, t175;
     var t176;
 
-    /* costab[i] = cos(PI / (2 * 32) * i) */
-    var costab1  =  0.998795456;
-    var costab2  =  0.995184727;
-    var costab3  =  0.989176510;
-    var costab4  =  0.980785280;
-    var costab5  =  0.970031253;
-    var costab6  =  0.956940336;
-    var costab7  =  0.941544065;
-    var costab8  =  0.923879533;
-    var costab9  =  0.903989293;
-    var costab10 =  0.881921264;
-    var costab11 =  0.857728610;
-    var costab12 =  0.831469612;
-    var costab13 =  0.803207531;
-    var costab14 =  0.773010453;
-    var costab15 =  0.740951125;
-    var costab16 =  0.707106781;
-    var costab17 =  0.671558955;
-    var costab18 =  0.634393284;
-    var costab19 =  0.595699304;
-    var costab20 =  0.555570233;
-    var costab21 =  0.514102744;
-    var costab22 =  0.471396737;
-    var costab23 =  0.427555093;
-    var costab24 =  0.382683432;
-    var costab25 =  0.336889853;
-    var costab26 =  0.290284677;
-    var costab27 =  0.242980180;
-    var costab28 =  0.195090322;
-    var costab29 =  0.146730474;
-    var costab30 =  0.098017140;
-    var costab31 =  0.049067674;
 
     // var sys = require('sys');
     // for (i = 0; i < 32; i++) {
