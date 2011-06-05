@@ -344,11 +344,10 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                 ++expptr;
             }
             
-            //console.log("cachesz = " + cachesz);
 
             if (cachesz < 21) {
                 var bits       = ((32 - 1 - 21) + (21 - cachesz)) & ~7;
-                bitcache   = Mad.bitwiseOr(Mad.lshiftU32(bitcache, bits), peek.read(bits));
+                bitcache   = (bitcache << bits) | peek.read(bits);
                 cachesz   += bits;
                 bits_left -= bits;
             }
