@@ -245,11 +245,13 @@ Mad.Channel = function() {
 
 /* we must take care that sz >= bits and sz < sizeof(long) lest bits == 0 */
 Mad.MASK = function (cache, sz, bits) {
-    return Mad.bitwiseAnd(Mad.rshift(cache, sz - bits), Mad.lshift(1, bits) - 1);
+    // return Mad.bitwiseAnd(Mad.rshift(cache, sz - bits), Mad.lshift(1, bits) - 1);
+    return (((cache) >> ((sz) - (bits))) & ((1 << (bits)) - 1));
 }
 
 Mad.MASK1BIT = function (cache, sz) {
-    return Mad.bitwiseAnd(cache, Mad.lshift(1, sz - 1));
+    // return Mad.bitwiseAnd(cache, Mad.lshift(1, sz - 1));
+    return ((cache) & (1 << ((sz) - 1)));
 }
 
 /*
@@ -342,24 +344,23 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                 ++expptr;
             }
             
-            //console.log("cachesz = " + cachesz);
 
             if (cachesz < 21) {
                 var bits       = ((32 - 1 - 21) + (21 - cachesz)) & ~7;
-                bitcache   = Mad.bitwiseOr(Mad.lshiftU32(bitcache, bits), peek.read(bits));
+                bitcache   = (bitcache << bits) | peek.read(bits);
                 cachesz   += bits;
                 bits_left -= bits;
             }
 
             /* hcod (0..19) */
             clumpsz = startbits;
-            pair    = table[Mad.MASK(bitcache, cachesz, clumpsz)];
+            pair    = table[ (((bitcache) >> ((cachesz) - (clumpsz))) & ((1 << (clumpsz)) - 1))];
             
             while (!pair.final) {
                 cachesz -= clumpsz;
 
                 clumpsz = pair.ptr.bits;
-                pair    = table[pair.ptr.offset + Mad.MASK(bitcache, cachesz, clumpsz)];
+                pair    = table[pair.ptr.offset +  (((bitcache) >> ((cachesz) - (clumpsz))) & ((1 << (clumpsz)) - 1))];
             }
 
             cachesz -= pair.value.hlen;
@@ -376,12 +377,12 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
                 case 15:
                     if (cachesz < linbits + 2) {
-                        bitcache   = Mad.bitwiseOr(Mad.lshiftU32(bitcache, 16), peek.read(16));
+                        bitcache   = (bitcache << 16) | peek.read(16);
                         cachesz   += 16;
                         bits_left -= 16;
                     }
 
-                    value += Mad.MASK(bitcache, cachesz, linbits);
+                    value +=  (((bitcache) >> ((cachesz) - (linbits))) & ((1 << (linbits)) - 1));
                     cachesz -= linbits;
 
                     requantized = Mad.III_requantize(value, exp);
@@ -399,7 +400,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                 }
                 
                 if(x_final) {
-                    xr[xrptr] = Mad.MASK1BIT(bitcache, cachesz--) ?
+                    xr[xrptr] = ((bitcache) & (1 << ((cachesz--) - 1))) ?
                         -requantized : requantized;
                 }
 
@@ -414,12 +415,12 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
                 case 15:
                     if (cachesz < linbits + 1) {
-                        bitcache   = Mad.bitwiseOr(Mad.lshiftU32(bitcache, 16), peek.read(16));
+                        bitcache   = (bitcache << 16) | peek.read(16);
                         cachesz   += 16;
                         bits_left -= 16;
                     }
 
-                    value += Mad.MASK(bitcache, cachesz, linbits);
+                    value +=  (((bitcache) >> ((cachesz) - (linbits))) & ((1 << (linbits)) - 1));
                     cachesz -= linbits;
 
                     requantized = Mad.III_requantize(value, exp);
@@ -438,7 +439,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                 }
                 
                 if(y_final) {
-                    xr[xrptr + 1] = Mad.MASK1BIT(bitcache, cachesz--) ?
+                    xr[xrptr + 1] = ((bitcache) & (1 << ((cachesz--) - 1))) ?
                         -requantized : requantized;
                 }
             } else {
@@ -455,7 +456,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                         requantized = reqcache[value] = Mad.III_requantize(value, exp);
                     }
 
-                    xr[xrptr] = Mad.MASK1BIT(bitcache, cachesz--) ?
+                    xr[xrptr] = ((bitcache) & (1 << ((cachesz--) - 1))) ?
                         -requantized : requantized;
                 }
 
@@ -472,7 +473,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
                         requantized = reqcache[value] = Mad.III_requantize(value, exp);
                     }
 
-                    xr[xrptr + 1] = Mad.MASK1BIT(bitcache, cachesz--) ?
+                    xr[xrptr + 1] = ((bitcache) & (1 << ((cachesz--) - 1))) ?
                         -requantized : requantized;
                 }
             }
@@ -496,19 +497,19 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
         while (cachesz + bits_left > 0 && xrptr <= 572) {
             /* hcod (1..6) */
             if (cachesz < 10) {
-                bitcache   = Mad.bitwiseOr(Mad.lshiftU32(bitcache, 16), peek.read(16));
+                bitcache   = (bitcache << 16) | peek.read(16);
                 cachesz   += 16;
                 bits_left -= 16;
             }
             
-            var quad = table[Mad.MASK(bitcache, cachesz, 4)];
+            var quad = table[ (((bitcache) >> ((cachesz) - (4))) & ((1 << (4)) - 1))];
 
             /* quad tables guaranteed to have at most one extra lookup */
             if (!quad.final) {
                 cachesz -= 4;
 
                 quad = table[quad.ptr.offset +
-                             Mad.MASK(bitcache, cachesz, quad.ptr.bits)];
+                              (((bitcache) >> ((cachesz) - (quad.ptr.bits))) & ((1 << (quad.ptr.bits)) - 1))];
             }
 
             cachesz -= quad.value.hlen;
@@ -526,11 +527,11 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
             /* v (0..1) */
             xr[xrptr] = quad.value.v ?
-                (Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
+                (((bitcache) & (1 << ((cachesz--) - 1))) ? -requantized : requantized) : 0;
 
             /* w (0..1) */
             xr[xrptr + 1] = quad.value.w ?
-                (Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
+                (((bitcache) & (1 << ((cachesz--) - 1))) ? -requantized : requantized) : 0;
 
             xrptr += 2;
 
@@ -547,11 +548,11 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
 
             /* x (0..1) */
             xr[xrptr] = quad.value.x ?
-                (Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
+                (((bitcache) & (1 << ((cachesz--) - 1))) ? -requantized : requantized) : 0;
 
             /* y (0..1) */
             xr[xrptr + 1] = quad.value.y ?
-                (Mad.MASK1BIT(bitcache, cachesz--) ? -requantized : requantized) : 0;
+                (((bitcache) & (1 << ((cachesz--) - 1))) ? -requantized : requantized) : 0;
 
             xrptr += 2;
         }
@@ -1095,13 +1096,13 @@ Mad.III_decode = function (ptr, frame, si, nch) {
                 return error;
         }
 
-        if (typeof(Debug) != "undefined") {
-            Debug.huffdecode.write(Debug.iteration + "\t");
+        if (Mad.debug) {
+            Mad.debug.huffdecode.write(Mad.debug.iteration + "\t");
 
             for (var i = 0; i < 576; i++) {
-                Debug.huffdecode.write(xr[0][i].toFixed(8) + "\t");
+                Mad.debug.huffdecode.write(xr[0][i].toFixed(8) + "\t");
             }
-            Debug.huffdecode.write("\n");
+            Mad.debug.huffdecode.write("\n");
         }
 
         /* joint stereo processing */
@@ -1201,17 +1202,16 @@ Mad.III_decode = function (ptr, frame, si, nch) {
                     Mad.III_freqinver(sample, sb);
             }
 
-            if (typeof(Debug) != "undefined") {                
+            if (Mad.debug) {
                 for (var i = 0; i < 18; i++) {
-                    Debug.sample.write(Debug.iteration * 18 + i + "\t");
+                    Mad.debug.sample.write(Mad.debug.iteration * 18 + i + "\t");
                     for (var j = 0; j < 32; j++) {
-                        Debug.sample.write(sample[i][j].toFixed(8) + "\t");
+                        Mad.debug.sample.write(sample[i][j].toFixed(8) + "\t");
                     }
-                    Debug.sample.write("\n");
+                    Mad.debug.sample.write("\n");
                 }
-                Debug.iteration += 1;
+                Mad.debug.iteration += 1;
             }       
-
         }
     }
 
