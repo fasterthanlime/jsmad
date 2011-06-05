@@ -185,11 +185,6 @@ Mad.Header.decode = function(stream) {
     var pad_slot = 0;
     var N = 0;
     
-    if (stream.data == null) {
-        stream.error = Mad.Error.BUFPTR;
-        return null;
-    }
-
     /* stream skip */
     if (stream.skiplen) {
         if (!stream.sync)
@@ -231,7 +226,7 @@ Mad.Header.decode = function(stream) {
                 return null;
             }
         } else {
-            stream.ptr = new Mad.Bit(stream.data, ptr);
+            stream.ptr = new Mad.Bit(stream.stream, ptr);
             
             if (stream.doSync() == -1) {
                 if (end - stream.next_frame >= Mad.BUFFER_GUARD)
@@ -247,7 +242,7 @@ Mad.Header.decode = function(stream) {
         stream.this_frame = ptr;
         stream.next_frame = ptr + 1;  /* possibly bogus sync word */
 
-        stream.ptr = new Mad.Bit(stream.data, stream.this_frame);
+        stream.ptr = new Mad.Bit(stream.stream, stream.this_frame);
         
         header = Mad.Header.actually_decode(stream);
         if(header == null) return null; // well Duh^2

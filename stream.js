@@ -31,33 +31,28 @@ Mad.Error = {
 Mad.BUFFER_GUARD = 8;
 Mad.BUFFER_MDLEN = (511 + 2048 + Mad.BUFFER_GUARD);
 
-Mad.Stream = function (data) {
-    if(typeof(data) != "string") {
-        console.log("Invalid data type: " + typeof(data));
-        return;
-    }
-  
-    this.data = data; /* actual buffer (js doesn't have pointers!) */
-    this.buffer = 0; /* input bitstream buffer */
-    this.bufend = data.length; /* input bitstream buffer */
-    this.skiplen = 0; /* bytes to skip before next frame */
+Mad.Stream = function (stream) {
+    this.stream = stream;                           /* actual buffer (js doesn't have pointers!) */
+    this.buffer = 0;                                /* input bitstream buffer */
+    this.bufend = stream.length;                    /* input bitstream buffer */
+    this.skiplen = 0;                               /* bytes to skip before next frame */
 
-    this.sync = 0;                      /* stream sync found */
-    this.freerate = 0;          /* free bitrate (fixed) */
+    this.sync = 0;                                  /* stream sync found */
+    this.freerate = 0;                              /* free bitrate (fixed) */
 
-    this.this_frame = 0;        /* start of current frame */
-    this.next_frame = 0;        /* start of next frame */
+    this.this_frame = 0;                            /* start of current frame */
+    this.next_frame = 0;                            /* start of next frame */
     
-    this.ptr = new Mad.Bit(this.data, this.buffer); /* current processing bit pointer */
+    this.ptr = new Mad.Bit(this.stream, this.buffer); /* current processing bit pointer */
     
-    this.anc_ptr = /* MadBit */ null;           /* ancillary bits pointer */
+    this.anc_ptr = /* MadBit */ null;               /* ancillary bits pointer */
     this.anc_bitlen = 0;                            /* number of ancillary bits */
 
     this.main_data = /* string */ Mad.mul("\0", Mad.BUFFER_MDLEN); /* Layer III main_data() */
     this.md_len = 0; /* bytes in main_data */
 
-    var options = 0;                            /* decoding options (see below) */
-    var error = Mad.Error.NONE;                 /* error code (see above) */
+    var options = 0;                                /* decoding options (see below) */
+    var error = Mad.Error.NONE;                     /* error code (see above) */
 };
 
 Mad.Stream.fromFile = function(file, callback) {
@@ -69,45 +64,28 @@ Mad.Stream.fromFile = function(file, callback) {
 };
 
 Mad.Stream.prototype.readShort = function(bBigEndian) {
-    if(typeof(bBigEndian) == "undefined") {
-        bBigEndian = false;
-    }
-    
-    var byte1 = this.readU8();
-    var byte2 = this.readU8();
-
-    var iShort = bBigEndian ? (byte1 << 8) + byte2 : (byte2 << 8) + byte1;
-    if (iShort < 0) iShort += 65536;
-    return iShort;
+    return this.stream.readU16(bBigEndian);
 };
     
 Mad.Stream.prototype.readSShort = function(bBigEndian) {
-    var iUShort = this.readShort(bBigEndian);
-    if (iUShort > 32767)
-        return iUShort - 65536;
-    else
-        return iUShort;
+    return this.stream.readI16(bBigEndian);
 };
 
 Mad.Stream.prototype.getU8 = function(index) {
-    return this.data.charCodeAt(index);
+    return this.stream.getU8(index);
 };
 
 
 Mad.Stream.prototype.readU8 = function() {
-    var c = this.data.charCodeAt(this.buffer);
-    this.buffer++;
-    return c;
+    return this.stream.readU8(index);
 };
 
 Mad.Stream.prototype.readChars = function(length) {
-    var bytes = this.data.slice(this.buffer, this.buffer + length);
-    this.buffer += length;
-    return bytes;
+    return this.stream.read(length);
 };
 
 Mad.Stream.prototype.peekChars = function(length) {
-    return this.data.slice(this.buffer, this.buffer + length);
+    return this.stream.peek(length);
 }
 
 /*
@@ -118,14 +96,16 @@ Mad.Stream.prototype.doSync = function() {
     var ptr = this.ptr.nextbyte();
     var end = this.bufend;
 
-    while (ptr < end - 1 &&
-            !(this.getU8(ptr) == 0xff && (this.getU8(ptr + 1) & 0xe0) == 0xe0))
+    while (ptr < end - 1 && !(this.getU8(ptr) == 0xff && (this.getU8(ptr + 1) & 0xe0) == 0xe0)) {
         ++ptr;
+    }
 
-    if (end - ptr < Mad.BUFFER_GUARD)
+    if (end - ptr < Mad.BUFFER_GUARD) {
         return -1;
+    }
 
-    this.ptr = new Mad.Bit(this.data, ptr);
+    this.ptr = new Mad.Bit(this.stream, ptr);
+    
     return 0;
 }
 
