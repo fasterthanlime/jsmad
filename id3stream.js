@@ -485,8 +485,12 @@ Mad.ID3Stream.prototype.read = function() {
     if (!this.array) {
         this.array = [], frame = null;
         
-        while (frame = this.readFrame()) {
-            this.array.push(frame);
+        try {
+            while (frame = this.readFrame()) {
+                this.array.push(frame);
+            }
+        } catch (e) {
+            console.log("ID3 Error: " + e);
         }
     }
     

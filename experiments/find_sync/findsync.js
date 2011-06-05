@@ -13,24 +13,25 @@ function readFile() {
       
       id3 = mp3.getID3v2Stream().toHash();
       
-      var id3element = document.getElementById('ID3');
-      
-      id3string =  "<p><strong>Title:</strong> " + id3['Title/Songname/Content description'] + "</p>";
-      id3string += "<p><strong>Track:</strong> " + id3['Track number/Position in set'] + "</p>";
-      id3string += "<p><strong>Artist:</strong> " + id3['Lead artist/Lead performer/Soloist/Performing group'] + "</p>";
-      id3string += "<p><strong>Album:</strong> " + id3['Album/Movie/Show title'] + "</p>";
-      id3string += "<p><strong>Year:</strong> " + id3['Year'] + "</p>";
-      
-      var pictures = id3['Attached picture'];
-      
-      if (pictures) {
-          var mime = pictures[0].mime;
-          var enc  = btoa(pictures[0].value);
-          id3string += "<img alt='cover' src='data:" + mime + ';base64,' + enc + "'></img>";
+      if (id3) {
+          var id3element = document.getElementById('ID3');
+          
+          id3string =  "<p><strong>Title:</strong> " + id3['Title/Songname/Content description'] + "</p>";
+          id3string += "<p><strong>Track:</strong> " + id3['Track number/Position in set'] + "</p>";
+          id3string += "<p><strong>Artist:</strong> " + id3['Lead artist/Lead performer/Soloist/Performing group'] + "</p>";
+          id3string += "<p><strong>Album:</strong> " + id3['Album/Movie/Show title'] + "</p>";
+          id3string += "<p><strong>Year:</strong> " + id3['Year'] + "</p>";
+          
+          var pictures = id3['Attached picture'];
+          
+          if (pictures) {
+              var mime = pictures[0].mime;
+              var enc  = btoa(pictures[0].value);
+              id3string += "<img alt='cover' src='data:" + mime + ';base64,' + enc + "'></img>";
+          }
+          
+          id3element.innerHTML = id3string;
       }
-      
-      id3element.innerHTML = id3string;
-      
       mpeg = mp3.getMpegStream();
       
       var synth = new Mad.Synth();
