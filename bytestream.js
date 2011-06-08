@@ -20,6 +20,16 @@ Mad.ByteStream.prototype.getU16 = function(offset, bigEndian) {
     return (bytes.charCodeAt(0) << 8) | bytes.charCodeAt(1);
 }
 
+Mad.ByteStream.prototype.getU24 = function(offset, bigEndian) {
+    var bytes = this.get(offset, 3);
+    
+    if (!bigEndian) {
+        bytes = bytes.reverse();
+    }
+    
+    return (bytes.charCodeAt(0) << 16) | (bytes.charCodeAt(1) << 8) | bytes.charCodeAt(2);
+}
+
 Mad.ByteStream.prototype.getU32 = function(offset, bigEndian) {
     var bytes = this.get(offset, 4);
     
@@ -56,6 +66,10 @@ Mad.ByteStream.prototype.peekU16 = function(bigEndian) {
     return this.getU16(this.state['offset'], bigEndian);
 }
 
+Mad.ByteStream.prototype.peekU24 = function(bigEndian) {
+    return this.getU24(this.state['offset'], bigEndian);
+}
+
 Mad.ByteStream.prototype.peekU32 = function(bigEndian) {
     return this.getU32(this.state['offset'], bigEndian);
 }
@@ -88,6 +102,14 @@ Mad.ByteStream.prototype.readU16 = function(bigEndian) {
     var result = this.peekU16(bigEndian);
     
     this.seek(2);
+    
+    return result;
+}
+
+Mad.ByteStream.prototype.readU24 = function(bigEndian) {
+    var result = this.peekU24(bigEndian);
+    
+    this.seek(3);
     
     return result;
 }

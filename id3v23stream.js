@@ -183,7 +183,7 @@ var extendWithPrivateFrame = function(tags, frame) {
     return tags;
 }
 
-Mad.ID3Stream = function(header, stream) {
+Mad.ID3v23Stream = function(header, stream) {
     this.offset = 0;
     
     this.header = header;
@@ -439,15 +439,15 @@ Mad.ID3Stream = function(header, stream) {
     };
 }
 
-Mad.ID3Stream.prototype.readFrame = function() {
-    if (this.offset >= this.header.size) {
+Mad.ID3v23Stream.prototype.readFrame = function() {
+    if (this.offset >= this.header.length) {
         return null;
     }
     
     var identifier = this.stream.read(4);
     
     if (identifier.charCodeAt(0) == 0) {
-        this.offset = this.header.size + 1;
+        this.offset = this.header.length + 1;
         
         return null;
     }
@@ -481,9 +481,11 @@ Mad.ID3Stream.prototype.readFrame = function() {
     return result;
 }
 
-Mad.ID3Stream.prototype.read = function() {
+Mad.ID3v23Stream.prototype.read = function() {
     if (!this.array) {
-        this.array = [], frame = null;
+        this.array = [];
+        
+        var frame = null;
         
         try {
             while (frame = this.readFrame()) {
@@ -497,7 +499,7 @@ Mad.ID3Stream.prototype.read = function() {
     return this.array;
 }
 
-Mad.ID3Stream.prototype.toHash = function() {
+Mad.ID3v23Stream.prototype.toHash = function() {
     var frames = this.read();
     
     var hash = {};
