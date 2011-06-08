@@ -33,11 +33,7 @@ function readFile() {
           }
           
           id3element.innerHTML = id3string;
-          
-          console.log(id3);
       }
-      
-      return;
       
       mpeg = mp3.getMpegStream();
       

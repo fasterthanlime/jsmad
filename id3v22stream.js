@@ -318,8 +318,6 @@ Mad.ID3v22Stream.prototype.read = function() {
         }
     }
     
-    console.log(this.array);
-    
     return this.array;
 }
 
