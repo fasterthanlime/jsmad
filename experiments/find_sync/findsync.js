@@ -11,9 +11,11 @@ function readFile() {
     new Mad.FileStream(file, function (stream) {
       mp3 = new Mad.MP3File(stream);
       
-      id3 = mp3.getID3v2Stream().toHash();
+      id3 = mp3.getID3v2Stream()
       
       if (id3) {
+          id3 = id3.toHash();
+          
           var id3element = document.getElementById('ID3');
           
           id3string =  "<p><strong>Title:</strong> " + id3['Title/Songname/Content description'] + "</p>";
@@ -31,7 +33,12 @@ function readFile() {
           }
           
           id3element.innerHTML = id3string;
+          
+          console.log(id3);
       }
+      
+      return;
+      
       mpeg = mp3.getMpegStream();
       
       var synth = new Mad.Synth();

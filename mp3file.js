@@ -15,7 +15,7 @@ Mad.MP3File.prototype.getID3v2Header = function() {
         
         var length = headerStream.readSyncInteger();
         
-        return { version: '2.' + major + '.' + minor, flags: flags, length: length };
+        return { version: '2.' + major + '.' + minor, major: major, minor: minor, flags: flags, length: length };
     } else {
         return null;
     }
@@ -25,7 +25,11 @@ Mad.MP3File.prototype.getID3v2Stream = function() {
     var header = this.getID3v2Header();
     
     if (header) {
-        return new Mad.ID3Stream(header, new Mad.SubStream(this.stream, 10, header['size']));
+        if (header.major > 2) {
+            return new Mad.ID3v23Stream(header, new Mad.SubStream(this.stream, 10, header.length));
+        } else {
+            return new Mad.ID3v22Stream(header, new Mad.SubStream(this.stream, 10, header.length));
+        }
     } else {
         return null;
     }
