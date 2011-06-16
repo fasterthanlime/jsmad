@@ -34,7 +34,7 @@ Mad.Player.prototype.createDevice = function() {
 	this.offset = 0;
 	this.frameIndex = 0;
 	this.lastRebuffer = Date.now();
-	this.playing = true;
+	this.playing = false;
 	this.progress();
 	
 	var preBufferSize = 65536 * 1024;
@@ -83,7 +83,7 @@ Mad.Player.prototype.pause = function () {
 
 Mad.Player.prototype.progress = function () {
     var playtime = ((this.frameIndex * 1152 + this.offset) / this.sampleRate) + (Date.now() - this.lastRebuffer) / 1000.0;
-    console.log("contentLength = " + this.stream.state.contentLength + ", this.offset = " + this.mpeg.this_frame);
+    //console.log("contentLength = " + this.stream.state.contentLength + ", this.offset = " + this.mpeg.this_frame);
     var total = playtime * this.stream.state.contentLength / this.mpeg.this_frame;
 
     if (this.playing) {
@@ -103,7 +103,7 @@ Mad.Player.fromFile = function (file, callback) {
 
 Mad.Player.fromURL = function (url, callback) {
     var stream = new Mad.AjaxStream(url);
-    stream.requestAbsolute(1024 * 1024, function () {
+    stream.requestAbsolute(128 * 1024, function () {
         callback(new Mad.Player(stream));
     });
 };
