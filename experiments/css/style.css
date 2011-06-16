@@ -135,5 +135,6 @@ div.meta { background-color: rgba(0, 0, 0, 0.1); width:460px; padding:20px; font
      text-decoration:none;
      color:#FA5945;}
      #footer a:hover { color:#000;}
+     #footer a span {font-weight:normal;color:#000; font-style:italic;font-size:12px;}
   #footer a.mhd { background:transparent; top:0;}
   #footer img { position: relative;top: 4px; }
