@@ -492,7 +492,8 @@ Mad.ID3v23Stream.prototype.read = function() {
                 this.array.push(frame);
             }
         } catch (e) {
-            console.log("ID3 Error: " + e);
+            throw(e);
+            //console.log("ID3 Error: " + e);
         }
     }
     

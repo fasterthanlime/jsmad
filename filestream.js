@@ -6,6 +6,7 @@ Mad.FileStream = function(file, callback) {
     reader.onload = function () {
       self.state['buffer']     = reader.result;
       self.state['amountRead'] = self.state['buffer'].length;
+      self.state['contentLength'] = self.state['buffer'].length;
       
       self.length = self.state['amountRead'];
       
@@ -50,7 +51,6 @@ Mad.FileStream.prototype.peek = function(n) {
 }
 
 Mad.FileStream.prototype.get = function(offset, length) {
-	console.log("get(" + offset + ", " + length + ") = " + this.state['buffer'].slice(offset, offset + length));
     if (this.absoluteAvailable(offset + length)) {
         return this.state['buffer'].slice(offset, offset + length);
     } else {
