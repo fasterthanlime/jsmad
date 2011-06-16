@@ -1,4 +1,16 @@
 
+function onPlayPause() {
+	console.log("playPause");	
+}
+
+function onSeek(percentage) {
+	console.log("seek " + percentage + "%");
+}
+
+function onProgress(current, total) {
+	console.log("current = " + current + ", total = " + total);
+}
+
 function readFile() {
     // uploadData is a form element
     // fileChooser is input element of type 'file'
@@ -8,18 +20,12 @@ function readFile() {
         return;
     }
     
-    new Mad.FileStream(file, function (stream) {
-      mp3 = new Mad.MP3File(stream);
-      
-      id3 = mp3.getID3v2Stream()
-      
-      if (id3) {
-          id3 = id3.toHash();
-          
+    Mad.Player.fromFile(file, function(player) {
+	  if (player.id3) {
+          var id3 = player.id3.toHash();
           var id3element = document.getElementById('ID3');
-          
-          id3string = "<div class='player'><div class='picture'>";
-          
+
+          var id3string = "<div class='player'><div class='picture'>";
           var pictures = id3['Attached picture'];
           
           if (pictures) {
@@ -28,11 +34,9 @@ function readFile() {
               id3string += "<img class='picture' src='data:" + mime + ';base64,' + enc + "' />";
           }
 
-
-        	
-
           id3string += "<a href='#' class='button play'></a>";
-          id3string += "<div class='timeline'><div id='progressBar'></div></div>";
+          id3string += "<div class='timeline'></div>";
+
           id3string += "</div></div>";
           id3string += "<div class='info'>";
           id3string += "<h2>" + id3['Title/Songname/Content description'] + "</h2>";
@@ -44,67 +48,11 @@ function readFile() {
           id3string += "</div>";
           id3string += "</div>";
           
-
-          
           id3element.innerHTML = id3string;
       }
       
-      mpeg = mp3.getMpegStream();
-      
-      var synth = new Mad.Synth();
-      var frame = new Mad.Frame();
-      
-      frame = Mad.Frame.decode(frame, mpeg);
-      
-      if(frame == null) {
-          if(mpeg.error == Mad.Error.BUFLEN) {
-              console.log("End of file!");
-          }
-          
-          console.log("First error! code = " + mpeg.error + ", recoverable ? = " + Mad.recoverable(mpeg.error));
-          
-          return;
-      }
-      
-      var channelCount = frame.header.nchannels();
-      var preBufferSize = 65536 * 1024;
-      var sampleRate = frame.header.samplerate;
-
-      console.log("playing " + channelCount + " channels, samplerate = " + sampleRate + " audio, mode " + frame.header.mode);
-
-      synth.frame(frame);
-      var offset = 0;
-
-      // Create a device.
-      var dev = audioLib.AudioDevice(function(sampleBuffer) {
-          //console.log("being asked for " + sampleBuffer.length + " bytes");
-          var index = 0;
-          
-          while(index < sampleBuffer.length) {
-              for(var i = 0; i < channelCount; ++i) {
-                  sampleBuffer[index++] = synth.pcm.samples[i][offset];
-              }
-              
-              offset++;
-              
-              if(offset >= synth.pcm.samples[0].length) {
-                  offset = 0;
-              
-                  frame = Mad.Frame.decode(frame, mpeg);
-                  if(frame == null) {
-                      if(stream.error == Mad.Error.BUFLEN) {
-                          console.log("End of file!");
-                      }
-                      console.log("Error! code = " + mpeg.error);
-                      dev.kill();
-                  } else {
-                      synth.frame(frame);
-                  }
-              }
-          }
-      
-      }, channelCount, preBufferSize, sampleRate);
-      
+      player.onProgress = onProgress;
+      player.createDevice();
     });
     
     return;
