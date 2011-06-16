@@ -24,15 +24,30 @@
 <script type="text/javascript" src="findsync.js"></script>
 
 <link rel="stylesheet" href="../css/style.css" type="text/css" media="screen" />
+<title>JSMAD - JavaScript MPEG Audio Decoder</title>
 </head>
 
 <body>
-  <h1>Find sync test</h1>
-  <form id="uploadData">
-    Choose an MP3 file: <input id="fileChooser" type="file" onchange="readFile()"></input>
-  </form>
-  
-  <div id='ID3'>
+  <div id="header">
+    <h1>JSMAD - JavaScript MPEG Audio Decoder</h1>
+    <form id="uploadData">
+      <label for="fileChooser" style="display:block;">Select an MP3 file</label> 
+      <input id="fileChooser" type="file" onchange="readFile()"></input>
+    </form>
   </div>
+  <div id="content">
+    <div id='ID3'>
+    </div>
+  </div>
+  <div id="footer">
+    <ul>
+      <li>
+        salut
+      </li>
+    </ul>
+  </div>
+  
+  
+
 </body>
 </html>
