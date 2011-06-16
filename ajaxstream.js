@@ -75,8 +75,7 @@ Mad.AjaxStream.prototype.updateBuffer = function() {
 Mad.AjaxStream.prototype.absoluteAvailable = function(n, updated) {
     if (n > this.state['amountRead']) {
         if (updated) {
-            console.log("TODO: THROW AVAILABLE ERROR!");
-            
+			throw new Error("buffer underflow with absoluteAvailable!");
             return false;
         } else if (this.updateBuffer()) {
             return this.absoluteAvailable(n, true);
@@ -108,7 +107,7 @@ Mad.AjaxStream.prototype.peek = function(n) {
         
         return result;
     } else {
-        console.log('TODO: THROW PEEK ERROR!');
+		throw new Error("buffer underflow with peek!");
         return;
     }
 }
@@ -121,8 +120,7 @@ Mad.AjaxStream.prototype.get = function(offset, length) {
 		}
 		return tmpbuffer;
     } else {
-        console.log('TODO: THROW GET ERROR!');
-        
+		throw new Error("buffer underflow with get!");        
         return;
     }
 }

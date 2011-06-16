@@ -12,12 +12,7 @@ function readFile() {
     
     var track_id = document.getElementById('idChooser').value;
     
-    // example url: http://cdn.official.fm/mp3s/260/260626
-	if(window.location.host == 'sandbox.official.fm') {
-		var url = "http://cdn.official.fm/mp3s/" + Math.floor(track_id / 1000) + "/" + track_id + ".mp3";
-	} else {
-		var url = "http://localhost:81/jsmad/experiments/official/cdn/" + Math.floor(track_id / 1000) + "/" + track_id + ".mp3";
-    }
+	var url = "http://sandbox.official.fm/jsmad-proxy/?id=" + track_id;
     
     console.log("url = " + url);
     if (!url) {
@@ -78,6 +73,8 @@ function readFile() {
       var offset = 0;
       var frameIndex = 0;
       var lastRebuffer = Date.now();
+      
+      var playing = true;
 
 	  var progress = function() {
 		  var currentTimeMillis = Date.now();
@@ -85,7 +82,10 @@ function readFile() {
 		  console.log("amountRead = " + stream.state.amountRead + ", offset = " + mpeg.this_frame);
 		  var total = playtime * stream.state.amountRead / mpeg.this_frame;
 		  
-		  onProgress(playtime, total);
+		  if(playing) {
+		      onProgress(playtime, total);
+		  }
+		  
 		  setTimeout(progress, 100);
 	  }
 	  progress();
@@ -113,6 +113,7 @@ function readFile() {
                           console.log("End of file!");
                       }
                       console.log("Error! code = " + mpeg.error);
+                      playing = false;
                       dev.kill();
                   } else {
                       synth.frame(frame);
