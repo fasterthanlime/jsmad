@@ -55,7 +55,7 @@ div.timeline {
   left:20px;
 }
 div.info { display:inline-block;}
-div.meta { background: #ccc; padding:20px; font-size:12px; }
+div.meta { background: #ccc; width:400px; font-size:12px; }
     
     
 #footer {
