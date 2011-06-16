@@ -9,6 +9,8 @@ function onSeek(percentage) {
 
 function onProgress(current, total) {
 	console.log("current = " + current + ", total = " + total);
+	var slider = document.getElementById('progressBar');
+	slider.style.width = (current / total * 360) + 'px';
 }
 
 function readFile() {
