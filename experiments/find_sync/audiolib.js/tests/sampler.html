@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="../lib/audiolib.js"></script>
+		<script>
+(function(){
+
+var	
+	sample	= new Float32Array(100000),
+	sampler,
+	dev, sampleRate;
+
+for (dev=0; dev<100000; dev+=2){
+	sample[dev] = sample[dev+1] = Math.random() * 0.3;
+}
+
+function audioProcess(buffer, channelCount){
+	var	l	= buffer.length,
+		smpl,
+		i, n;
+	for (i=0; i<l; i+=channelCount){
+		sampler.generate();
+		smpl = sampler.getMix();
+		for (n=0; n<channelCount; n++){
+			buffer[n + i] = smpl;
+		}
+	}
+}
+
+window.onload	= function(){
+	setTimeout(function(){
+		dev		= audioLib.AudioDevice(audioProcess, 2);
+		sampleRate	= dev.sampleRate;
+		sampler		= new audioLib.Sampler(sampleRate, sample);
+	}, 2000);
+};
+
+window.play	= function(frequency){
+	console.log(sampler.noteOn(frequency));
+}
+
+}());
+
+		</script>
+	</head>
+	<body>
+		<label for="f">Frequency</label>
+		<input id="f" value="440">
+		<button onclick="play(document.getElementById('f').value)">Play</button>
+	</body>
+</html>

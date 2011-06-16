@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="../lib/audiolib.js"></script>
+		<script>
+(function(){
+
+window.onload = function(){
+//The timeout is a temporary fix for Chromium issue 82795, (see http://goo.gl/IXMXA ), will be removed later, don't use for production.
+setTimeout(function(){
+	var
+		dev	= audioLib.AudioDevice.createScheduled(function(buffer, ch){
+			var	l	= buffer.length / ch,
+				smpl, i, n;
+			for (i=0; i<l; i++){
+				osc.generate();
+				smpl = osc.getMix();
+				for (n=0; n<ch; n++){
+					buffer[i*ch + n] = smpl;
+				}
+			}
+		}, 2),
+		osc	= new audioLib.Oscillator(dev.sampleRate);
+		window.onmousemove = function(e){
+			var	freq	= e.clientY / window.innerHeight * 880,
+				pw	= e.clientX / window.innerWidth;
+			dev.schedule(function(){
+				osc.frequency	= freq;
+				osc.pulseWidth	= pw;
+			});
+		};
+}, 2000);
+};
+
+}());
+		</script>
+	</head>
+	<body>
+	</body>
+</html>
