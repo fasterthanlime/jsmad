@@ -46,7 +46,7 @@ Mad.Player.prototype.createDevice = function() {
 	
 	var MARGIN = 10;
 	
-	var dev = audioLib.AudioDevice(function (sampleBuffer) {
+	this.dev = audioLib.AudioDevice(function (sampleBuffer) {
 		//console.log("delta = " + (Date.now() - self.lastRebuffer) + ", asked for " + sampleBuffer.length);
 		self.lastRebuffer = Date.now();
 		
@@ -72,7 +72,7 @@ Mad.Player.prototype.createDevice = function() {
 					console.log("Error! code = " + self.mpeg.error);
 					self.playing = false;
 					self.onProgress(1, 1);
-					dev.kill();
+					self.dev.kill();
 				} else {
 					synth.frame(self.frame);
 					self.frameSamples.push(synth.pcm.samples);
@@ -93,6 +93,11 @@ Mad.Player.prototype.setPlaying = function(playing) {
 	}
 }
 
+Mad.Player.prototype.destroy = function() {
+	clearTimeout(this.progressTimeout);
+	this.dev.kill();
+}
+
 Mad.Player.prototype.progress = function () {
     var playtime = ((this.frameIndex * 1152 + this.offset) / this.sampleRate) + (Date.now() - this.lastRebuffer) / 1000.0;
     //console.log("contentLength = " + this.stream.state.contentLength + ", this.offset = " + this.mpeg.this_frame);
@@ -104,7 +109,7 @@ Mad.Player.prototype.progress = function () {
     
     var that = this;
     var nextCall = function() { that.progress(); };
-    setTimeout(nextCall, 500);
+    this.progressTimeout = setTimeout(nextCall, 500);
 }
 
 Mad.Player.fromFile = function (file, callback) {

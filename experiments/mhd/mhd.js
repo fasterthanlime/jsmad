@@ -12,6 +12,8 @@ function onProgress(current, total) {
     slider.style.width = (current / total * 360) + 'px';
 }
 
+var globalPlayer = null;
+
 function readFile() {
     // uploadData is a form element
     // fileChooser is input element of type 'file'
@@ -22,6 +24,8 @@ function readFile() {
     }
 
     Mad.Player.fromFile(file, function (player) {
+		if(globalPlayer) globalPlayer.destroy();
+        globalPlayer = player;
         if (player.id3) {
             var id3 = player.id3.toHash();
             var id3element = document.getElementById('ID3');
