@@ -28,9 +28,11 @@ function readFile() {
               id3string += "<img class='picture' src='data:" + mime + ';base64,' + enc + "' />";
           }
 
-          id3string += "<a href='#' class='button play'></a>";
-          id3string += "<div class='timeline'></div>";
 
+        	
+
+          id3string += "<a href='#' class='button play'></a>";
+          id3string += "<div class='timeline'><div id='progressBar'></div></div>";
           id3string += "</div></div>";
           id3string += "<div class='info'>";
           id3string += "<h2>" + id3['Title/Songname/Content description'] + "</h2>";

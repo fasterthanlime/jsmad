@@ -111,6 +111,8 @@ div.timeline {
   top:-140px;
   left:20px;
 }
+div#progressbar { width: 0; height: 20px; background-color: #ddd; }
+
 div.info { display:inline-block;}
 div.meta { background-color: rgba(0, 0, 0, 0.1); width:460px; padding:20px; font-size:12px; }
     
