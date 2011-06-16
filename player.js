@@ -42,6 +42,10 @@ Mad.Player.prototype.createDevice = function() {
 	
 	var dev = audioLib.AudioDevice(function (sampleBuffer) {
 		//console.log("being asked for " + sampleBuffer.length + " bytes");
+		self.lastRebuffer = Date.now();
+		
+		if(!self.playing) return; // empty sampleBuffer, no prob
+		
 		var index = 0;
 
 		while (index < sampleBuffer.length) {
@@ -50,15 +54,14 @@ Mad.Player.prototype.createDevice = function() {
 			}
 
 			self.offset++;
-			self.lastRebuffer = Date.now();
-
+			
 			if (self.offset >= synth.pcm.samples[0].length) {
 				self.offset = 0;
 
 				self.frameIndex++;
 				frame = Mad.Frame.decode(frame, self.mpeg);
 				if (frame == null) {
-					if (stream.error == Mad.Error.BUFLEN) {
+					if (self.stream.error == Mad.Error.BUFLEN) {
 						console.log("End of file!");
 					}
 					console.log("Error! code = " + self.mpeg.error);
@@ -73,6 +76,10 @@ Mad.Player.prototype.createDevice = function() {
 
 	}, this.channelCount, preBufferSize, this.sampleRate);
 };
+
+Mad.Player.prototype.pause = function () {
+	this.playing = false;
+}
 
 Mad.Player.prototype.progress = function () {
     var playtime = ((this.frameIndex * 1152 + this.offset) / this.sampleRate) + (Date.now() - this.lastRebuffer) / 1000.0;
@@ -96,7 +103,7 @@ Mad.Player.fromFile = function (file, callback) {
 
 Mad.Player.fromURL = function (url, callback) {
     var stream = new Mad.AjaxStream(url);
-    stream.requestAbsolute(128000, function () {
+    stream.requestAbsolute(1024 * 1024, function () {
         callback(new Mad.Player(stream));
     });
 };
