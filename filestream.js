@@ -6,6 +6,7 @@ Mad.FileStream = function(file, callback) {
     reader.onload = function () {
       self.state['buffer']     = reader.result;
       self.state['amountRead'] = self.state['buffer'].length;
+      self.state['contentLength'] = self.state['buffer'].length;
       
       self.length = self.state['amountRead'];
       
