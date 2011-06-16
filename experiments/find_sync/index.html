@@ -24,28 +24,39 @@
 <script type="text/javascript" src="findsync.js"></script>
 
 <link rel="stylesheet" href="../css/style.css" type="text/css" media="screen" />
-<title>JSMAD - JavaScript MPEG Audio Decoder</title>
+<title>JSMAD - 100% JavaScript MPEG Audio Decoder</title>
 </head>
 
 <body>
-  <div id="header">
-    <h1>JSMAD - JavaScript MPEG Audio Decoder</h1>
-    <form id="uploadData">
-      <label for="fileChooser" style="display:block;">Select an MP3 file</label> 
-      <input id="fileChooser" type="file" onchange="readFile()"></input>
-    </form>
-  </div>
-  <div id="content">
-    <div id='ID3'>
-      <p>blah blah</p>
+  <div id="container">
+    <div id="header">
+      <h1><span>JSMAD - JavaScript MPEG Audio Decoder</span></h1>
+      <div class="github">
+        <a href="https://github.com/nddrylliog/jsmad">https://github.com/nddrylliog/jsmad</a>
+      </div>
+      <div class="select">
+        <form id="streamData">
+          <label for="ofm" style="display:block;">Search on official.fm</label> 
+          <input id="ofm" />
+        </form>
+        <span>or</span>
+        <form id="uploadData">
+          <label for="fileChooser" style="display:block;">Select a local MP3 file</label> 
+          <input id="fileChooser" type="file" onchange="readFile()"></input>
+        </form>
+      </div>
     </div>
-  </div>
-  <div id="footer">
-    <ul>
-      <li>
-        salut
-      </li>
-    </ul>
+    <div id="content">
+      <div id='ID3'>
+        <div class="intro">
+          <h2>JSMAD is a pure JavaScript MPEG Audio Decoder</h2>
+          <p>no flash, blah blah</p>
+        </div>
+      </div>
+    </div>
+    <div id="footer">
+      <p>Made in <a href="http://musichackday.org"><img src="../images/mhd.png" alt="musichackday" /></a> by <a href="http://twitter.com/nddrylliog">@nddrylliog</a>, <a href="http://twitter.com/antoinem">@antoinem</a>, <a href="http://twitter.com/antoinem">@antoinem</a> and <a href="http://twitter.com/antoinem">@antoinem</a></p>
+    </div>
   </div>
   
   
