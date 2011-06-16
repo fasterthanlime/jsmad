@@ -119,8 +119,15 @@ div.meta { background-color: rgba(0, 0, 0, 0.1); width:460px; padding:20px; font
   clear:both;
   padding:0 20px 20px;
   color:#FFE400;
+  font-size:15px;
   }
-  
-  #footer img { margin: 0 5px;
-  position: relative;
-  top: 4px; }
+  #footer a { background:#fff; padding:2px 5px; -moz-border-radius:3px;font-size: 15px;
+     padding: 3px 5px 1px;
+     position: relative;
+     top: -1px;
+     font-weight:bold;
+     text-decoration:none;
+     color:#FA5945;}
+     #footer a:hover { color:#000;}
+  #footer a.mhd { background:transparent; top:0;}
+  #footer img { position: relative;top: 4px; }
