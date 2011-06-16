@@ -106,6 +106,12 @@ a.play {
   }
   a.play:hover {opacity:1;}
 
+a.pause {
+  background: transparent url(../images/pause.png) no-repeat top left; 
+  opacity:0.7;
+  }
+  a.pause:hover {opacity:1;}
+
 div.timeline {
   width:360px;
   height:20px;
@@ -115,7 +121,7 @@ div.timeline {
   top:-140px;
   left:20px;
 }
-div#progressbar { width: 0; height: 20px; background-color: #ddd; }
+div#progressbar { width: 0; height: 20px; background-color: rgba(255,228,0,0.7); }
 
 div.info { display:inline-block;}
 div.meta { background-color: rgba(0, 0, 0, 0.1); width:460px; padding:20px; font-size:12px; }
