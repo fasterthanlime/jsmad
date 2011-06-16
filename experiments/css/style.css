@@ -22,7 +22,7 @@ h1 {
 h2 { font-size: 30px; line-height: 42px; margin:0; }
 h3 { font-size: 22px; margin: 10px 0 20px; }
 
-a, a:active { color:#490CCE; }
+a, a:active { color:#490CCE; outline:0;}
 a:hover { color:#0A28AC; }
 
 div.github {
@@ -54,7 +54,6 @@ input { font-size:18px; }
 #content {
   clear:both;
 }
-
 
 #ID3 {
   background:#fff;
