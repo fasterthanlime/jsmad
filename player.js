@@ -38,7 +38,7 @@ Mad.Player.prototype.createDevice = function() {
 	this.frameSamples.push(synth.pcm.samples);
 	
 	this.lastRebuffer = Date.now();
-	this.playing = true;
+	this.playing = false;
 	this.progress();
 	
 	var preBufferSize = 65536 * 1024;
@@ -46,8 +46,8 @@ Mad.Player.prototype.createDevice = function() {
 	
 	var MARGIN = 10;
 	
-	var dev = audioLib.AudioDevice(function (sampleBuffer) {
-		//console.log("being asked for " + sampleBuffer.length + " bytes");
+	this.dev = audioLib.AudioDevice(function (sampleBuffer) {
+		//console.log("delta = " + (Date.now() - self.lastRebuffer) + ", asked for " + sampleBuffer.length);
 		self.lastRebuffer = Date.now();
 		
 		if(!self.playing) return; // empty sampleBuffer, no prob
@@ -72,7 +72,7 @@ Mad.Player.prototype.createDevice = function() {
 					console.log("Error! code = " + self.mpeg.error);
 					self.playing = false;
 					self.onProgress(1, 1);
-					dev.kill();
+					self.dev.kill();
 				} else {
 					synth.frame(self.frame);
 					self.frameSamples.push(synth.pcm.samples);
@@ -84,8 +84,18 @@ Mad.Player.prototype.createDevice = function() {
 	}, this.channelCount, preBufferSize, this.sampleRate);
 };
 
-Mad.Player.prototype.pause = function () {
-	this.playing = false;
+Mad.Player.prototype.setPlaying = function(playing) {
+	this.playing = playing;
+	if(playing) {
+		this.onPlay();
+	} else {
+		this.onPause();
+	}
+}
+
+Mad.Player.prototype.destroy = function() {
+	clearTimeout(this.progressTimeout);
+	this.dev.kill();
 }
 
 Mad.Player.prototype.progress = function () {
@@ -99,7 +109,7 @@ Mad.Player.prototype.progress = function () {
     
     var that = this;
     var nextCall = function() { that.progress(); };
-    setTimeout(nextCall, 500);
+    this.progressTimeout = setTimeout(nextCall, 500);
 }
 
 Mad.Player.fromFile = function (file, callback) {
