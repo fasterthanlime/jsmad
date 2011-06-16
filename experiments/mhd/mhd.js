@@ -9,6 +9,8 @@ function onSeek(percentage) {
 
 function onProgress(current, total) {
 	console.log("current = " + current + ", total = " + total);
+	var slider = document.getElementById('progressbar');
+	slider.style.width = (current / total * 360) + 'px';
 }
 
 function readFile() {
@@ -35,7 +37,7 @@ function readFile() {
           }
 
           id3string += "<a href='#' class='button play'></a>";
-          id3string += "<div class='timeline'></div>";
+          id3string += "<div class='timeline'><div id='progressbar'></div></div>";
 
           id3string += "</div></div>";
           id3string += "<div class='info'>";
