@@ -20,6 +20,7 @@
 <script type="text/javascript" src="../../mp3file.js"></script>
 
 <script type="text/javascript" src="../../stringstream.js"></script>
+<script type="text/javascript" src="../../player.js"></script>
 
 <script type="text/javascript" src="audiolib.js/lib/audiolib.js"></script>
 <script type="text/javascript" src="official.js"></script>
@@ -31,8 +32,11 @@
     Type an Official.fm track id: <input id="idChooser" type="text" value="7671"></input>
   </form>
   
-  <div id="progressOutline" style="width: 360px; height: 30px; border: 1px solid black;"></div>
-	<div id="progressBar" style="width: 0; height: 30px; background-color: #ddd;" ></div>
+  <div id="progressOutline" style="width: 360px; height: 30px; border: 1px solid black;">
+	<div id="progressbar" style="width: 0; height: 30px; background-color: #ddd;" ></div>
+  </div>
+  
+  <input id="playpause" type="button" value="||"/>
   
   <div id='ID3'>
   </div>
