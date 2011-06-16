@@ -62,6 +62,8 @@ Mad.AjaxStream.prototype.updateBuffer = function() {
         this.state['buffer'] = this.state['request'].responseText
         this.state['amountRead'] = this.state['buffer'].length
     
+		console.log("amountRead = " + this.state['amountRead']);
+    
         if (!this.state['inProgress']) {
             this.state['finalAmount'] = true;
         }
