@@ -37,7 +37,7 @@ div.github {
 }
 
 div.select {
-  top: 50px;
+  top: 46px;
   clear:right;
   position: relative;
 }
@@ -46,7 +46,8 @@ div.select span {
 }
 form { display: inline-block;}
 
-label { color:#FFE400; font-size: 18px; text-shadow: rgba(0,0,0,0.3) 1px 1px 1px;}
+label { color:#FFE400; font-size: 18px; line-height:22px; margin-bottom: 3px; text-shadow: rgba(0,0,0,0.3) 1px 1px 1px; display:block;}
+label.ofm { background:url(../images/ofm.png) no-repeat top left; padding-left:20px;}
 
 input { font-size:18px; }
 
