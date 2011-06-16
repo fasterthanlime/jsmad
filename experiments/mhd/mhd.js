@@ -1,4 +1,12 @@
 
+function onPlayPause() {
+	console.log("playPause");	
+}
+
+function onSeek(percentage) {
+	console.log("seek " + percentage + "%");
+}
+
 function readFile() {
     // uploadData is a form element
     // fileChooser is input element of type 'file'
