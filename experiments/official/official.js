@@ -92,9 +92,9 @@ function readFile() {
     };
     
     var stream = new Mad.AjaxStream(url);
-    setTimeout(function() {
+	stream.requestAbsolute(30000, function() {
 		playMusic(stream);
-    }, 2000);
+	});
     
     return false;
 }

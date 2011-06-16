@@ -3,6 +3,8 @@ Mad.AjaxStream = function(url) {
     
     var request = window.XMLHttpRequest ? new XMLHttpRequest() :  ActiveXObject("Microsoft.XMLHTTP");
     
+    // binary XHR kthx
+    request.overrideMimeType('text/plain; charset=x-user-defined');
     request.open('GET', url);
     
     this.state['request'] = request;
@@ -16,7 +18,6 @@ Mad.AjaxStream = function(url) {
     
     var onstatechange = function () {
         iteration += 1;
-        
         if (self.state['callbacks'].length > 0 && iteration % 64 == 0) {
             self.updateBuffer();
             
@@ -38,7 +39,6 @@ Mad.AjaxStream = function(url) {
         if (request.readyState == 4) {
             for (var i = 0; i < self.state['callbacks'].length; i++) {
                 var callback = self.state['callbacks'][i];
-                
                 callback[1]();
             }
             
@@ -58,6 +58,7 @@ Mad.AjaxStream = function(url) {
 Mad.AjaxStream.prototype = new Mad.ByteStream();
 
 Mad.AjaxStream.prototype.updateBuffer = function() {
+	console.log("updateBuffer!");
     if (!this.state['finalAmount']) {
         this.state['buffer'] = this.state['request'].responseText
         this.state['amountRead'] = this.state['buffer'].length
@@ -117,7 +118,11 @@ Mad.AjaxStream.prototype.peek = function(n) {
 
 Mad.AjaxStream.prototype.get = function(offset, length) {
     if (this.absoluteAvailable(offset + length)) {
-        return this.state['buffer'].slice(offset, offset + length);
+		var tmpbuffer = "";
+		for(var i = offset; i < offset + length; i += 1) {
+			tmpbuffer = tmpbuffer + String.fromCharCode(this.state['buffer'].charCodeAt(i) & 0xff);
+		}
+		return tmpbuffer;
     } else {
         console.log('TODO: THROW GET ERROR!');
         
