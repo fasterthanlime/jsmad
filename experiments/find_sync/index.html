@@ -24,15 +24,42 @@
 <script type="text/javascript" src="findsync.js"></script>
 
 <link rel="stylesheet" href="../css/style.css" type="text/css" media="screen" />
+<title>JSMAD - 100% JavaScript MPEG Audio Decoder</title>
 </head>
 
 <body>
-  <h1>Find sync test</h1>
-  <form id="uploadData">
-    Choose an MP3 file: <input id="fileChooser" type="file" onchange="readFile()"></input>
-  </form>
-  
-  <div id='ID3'>
+  <div id="container">
+    <div id="header">
+      <h1><span>JSMAD - JavaScript MPEG Audio Decoder</span></h1>
+      <div class="github">
+        <a href="https://github.com/nddrylliog/jsmad">https://github.com/nddrylliog/jsmad</a>
+      </div>
+      <div class="select">
+        <form id="streamData">
+          <label for="ofm" style="display:block;">Search on official.fm</label> 
+          <input id="ofm" />
+        </form>
+        <span>or</span>
+        <form id="uploadData">
+          <label for="fileChooser" style="display:block;">Select a local MP3 file</label> 
+          <input id="fileChooser" type="file" onchange="readFile()"></input>
+        </form>
+      </div>
+    </div>
+    <div id="content">
+      <div id='ID3'>
+        <div class="intro">
+          <h2>JSMAD is a pure JavaScript MPEG Audio Decoder</h2>
+          <p>no flash, blah blah</p>
+        </div>
+      </div>
+    </div>
+    <div id="footer">
+      <p>Made in <a href="http://musichackday.org" class="mhd"><img src="../images/mhd.png" alt="musichackday" /></a> by <a href="http://twitter.com/nddrylliog">@nddrylliog</a> <a href="http://twitter.com/antoinem">@antoinem</a> <a href="http://twitter.com/antoinem">@antoinem</a> <a href="http://twitter.com/antoinem">@antoinem</a></p>
+    </div>
   </div>
+  
+  
+
 </body>
 </html>

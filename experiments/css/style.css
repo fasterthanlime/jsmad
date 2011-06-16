@@ -1,0 +1,133 @@
+body {
+  font-family: Helvetica;
+  margin:0;
+  padding:0;
+  background:#fa5945 url(../images/header.png) repeat-x top left;
+}
+#container {
+  width:960px;
+  margin:0 auto;
+}
+
+h1 { 
+  background:transparent url(../images/logo.png) no-repeat top left;
+  width: 157px;
+  height: 180px;
+  display: block;
+  float:left;
+  margin:20px 40px 20px 20px;
+  }
+  h1 span { display:none; }
+  
+h2 { font-size: 30px; line-height: 42px; margin:0; }
+h3 { font-size: 22px; margin: 10px 0 20px; }
+
+a, a:active { color:#490CCE; }
+a:hover { color:#0A28AC; }
+
+div.github {
+  float:right;
+  padding:20px;
+  background:rgba(255,255,255,0.5);
+}
+
+div.select {
+  top: 85px;
+  clear:right;
+  position: relative;
+}
+div.select span {
+  margin:0 10px;
+}
+form { display: inline-block;}
+
+label { color:#FFE400; font-size: 18px; text-shadow: rgba(0,0,0,0.3) 1px 1px 1px;}
+
+input { font-size:18px; }
+
+#content {
+  clear:both;
+}
+
+
+#ID3 {
+  background:#fff;
+  padding:20px;
+  min-height:400px;
+  position:relative;
+}
+
+#ID3:before {
+  content: ' ';
+  height: 0;
+  position: absolute;
+  width: 0;	
+  border: 15px solid transparent;
+	border-bottom-color: #fff;
+	top: 0%;
+	left: 90px;
+	margin-top: -30px;
+}
+
+div.player { 
+  float:left;
+  margin-right:20px;
+  }
+
+div.picture {
+  width:400px; 
+  height:400px; 
+  display: block; 
+  background:#ffe400;
+}
+  div.picture img.picture {
+    width:400px; 
+    height:400px; 
+    display: block; 
+  }
+
+a.button {
+  width:100px; 
+  height:100px; 
+  display:block;
+  position:relative; 
+  top:-250px; 
+  left:150px;
+}
+
+a.play {
+  background: transparent url(../images/play.png) no-repeat top left; 
+  }
+  a.play:hover {
+    background: transparent url(../images/play.png) no-repeat bottom left; 
+    }
+
+div.timeline {
+  width:360px;
+  height:20px;
+  background:rgba(255,255,255,0.4);
+  display:block;
+  position:relative;
+  top:-140px;
+  left:20px;
+}
+div.info { display:inline-block;}
+div.meta { background-color: rgba(0, 0, 0, 0.1); width:460px; padding:20px; font-size:12px; }
+    
+    
+#footer {
+  clear:both;
+  padding:0 20px 20px;
+  color:#FFE400;
+  font-size:15px;
+  }
+  #footer a { background:#fff; padding:2px 5px; -moz-border-radius:3px;font-size: 15px;
+     padding: 3px 5px 1px;
+     position: relative;
+     top: -1px;
+     font-weight:bold;
+     text-decoration:none;
+     color:#FA5945;}
+     #footer a:hover { color:#000;}
+  #footer a.mhd { background:transparent; top:0;}
+  #footer img { position: relative;top: 4px; }
