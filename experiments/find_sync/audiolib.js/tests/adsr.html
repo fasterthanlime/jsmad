@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src=../lib/audiolib.js></script>
+		<script>
+function testADSREnvelope(){
+	var	canvas		= document.getElementById('c'),
+		context		= canvas.getContext('2d'),
+		width		= canvas.width,
+		height		= canvas.height;
+	canvas.width = width;
+
+	var i, adsr = new audioLib.ADSREnvelope(width, 50, 200, 0.4, 270);
+	adsr.release = 270;
+	context.beginPath();
+	adsr.triggerGate(true);
+	for (i=0; i<width; i++){
+		if (i === width / 2){
+			adsr.triggerGate(false);
+		}
+		context.lineTo(i, height - adsr.generate() * height);
+	}
+	context.stroke();
+}
+window.onload = testADSREnvelope;
+		</script>
+	</head>
+	<body>
+		<canvas id=c width=800 height=600></canvas>
+	</body>
+</html>
