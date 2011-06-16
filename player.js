@@ -14,9 +14,9 @@ Mad.Player = function (stream) {
 // Create a device.
 Mad.Player.prototype.createDevice = function() {
 	var synth = new Mad.Synth();
-	var frame = new Mad.Frame();
-	frame = Mad.Frame.decode(frame, this.mpeg);
-	if (frame == null) {
+	this.frame = new Mad.Frame();
+	this.frame = Mad.Frame.decode(this.frame, this.mpeg);
+	if (this.frame == null) {
 		if (mpeg.error == Mad.Error.BUFLEN) {
 			console.log("End of file!");
 		}
@@ -25,20 +25,26 @@ Mad.Player.prototype.createDevice = function() {
 		return;
 	}
 
-	this.channelCount = frame.header.nchannels();
-	this.sampleRate = frame.header.samplerate;
+	this.channelCount = this.frame.header.nchannels();
+	this.sampleRate = this.frame.header.samplerate;
 
-	console.log("this.playing " + this.channelCount + " channels, samplerate = " + this.sampleRate + " audio, mode " + frame.header.mode);
+	console.log("this.playing " + this.channelCount + " channels, samplerate = " + this.sampleRate + " audio, mode " + this.frame.header.mode);
 
-	synth.frame(frame);
 	this.offset = 0;
 	this.frameIndex = 0;
+	this.frameSamples = [];
+	
+	synth.frame(this.frame);
+	this.frameSamples.push(synth.pcm.samples);
+	
 	this.lastRebuffer = Date.now();
-	this.playing = false;
+	this.playing = true;
 	this.progress();
 	
 	var preBufferSize = 65536 * 1024;
 	var self = this;
+	
+	var MARGIN = 10;
 	
 	var dev = audioLib.AudioDevice(function (sampleBuffer) {
 		//console.log("being asked for " + sampleBuffer.length + " bytes");
@@ -50,17 +56,16 @@ Mad.Player.prototype.createDevice = function() {
 
 		while (index < sampleBuffer.length) {
 			for (var i = 0; i < self.channelCount; ++i) {
-				sampleBuffer[index++] = synth.pcm.samples[i][self.offset];
+				sampleBuffer[index++] = self.frameSamples[self.frameIndex][i][self.offset];
 			}
 
 			self.offset++;
 			
-			if (self.offset >= synth.pcm.samples[0].length) {
+			if (self.offset >= self.frameSamples[self.frameIndex][0].length) {
 				self.offset = 0;
 
-				self.frameIndex++;
-				frame = Mad.Frame.decode(frame, self.mpeg);
-				if (frame == null) {
+				self.frame = Mad.Frame.decode(self.frame, self.mpeg);
+				if (self.frame == null) {
 					if (self.stream.error == Mad.Error.BUFLEN) {
 						console.log("End of file!");
 					}
@@ -69,7 +74,9 @@ Mad.Player.prototype.createDevice = function() {
 					self.onProgress(1, 1);
 					dev.kill();
 				} else {
-					synth.frame(frame);
+					synth.frame(self.frame);
+					self.frameSamples.push(synth.pcm.samples);
+					self.frameIndex++;
 				}
 			}
 		}
