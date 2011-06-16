@@ -4,7 +4,7 @@ function pad(length, sym, str) {
 }
 
 function onProgress(current, total) {
-    console.log("current = " + current + " / " + total);
+    //console.log("current = " + current + " / " + total);
 
     var slider = document.getElementById('progressbar');
     slider.style.width = (current / total * 360) + 'px';
@@ -45,6 +45,7 @@ function readFile() {
         player.onProgress = onProgress;
         document.getElementById('playpause').onclick = function () {
 			player.playing = !player.playing;
+			this.value = player.playing ? "pause" : "play ";
         };
 
         player.createDevice();
