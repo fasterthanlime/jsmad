@@ -18,6 +18,7 @@
 <script type="text/javascript" src="../../id3v23stream.js"></script>
 <script type="text/javascript" src="../../mp3file.js"></script>
 
+<script type="text/javascript" src="../../ajaxstream.js"></script>
 <script type="text/javascript" src="../../stringstream.js"></script>
 <script type="text/javascript" src="../../player.js"></script>
 
@@ -28,7 +29,7 @@
 <title>JSMAD - 100% JavaScript MPEG Audio Decoder</title>
 </head>
 
-<body>
+<body onload="domReady()">
   <div id="container">
     <div id="header">
       <h1><span>JSMAD - JavaScript MPEG Audio Decoder</span></h1>
@@ -36,9 +37,9 @@
         <a href="https://github.com/nddrylliog/jsmad">https://github.com/nddrylliog/jsmad</a>
       </div>
       <div class="select">
-        <form id="streamData">
+        <form id="streamData" action="#">
           <label for="ofm" class="ofm">official.fm track ID</label> 
-          <input id="ofm" />
+          <input id="ofm" type="text"/>
         </form>
         <span>or</span>
         <form id="uploadData">

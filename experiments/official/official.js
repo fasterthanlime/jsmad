@@ -40,13 +40,14 @@ function readFile() {
             }
 
             id3element.innerHTML = id3string;
+            
+            document.getElementById('playpause').onclick = function () {
+				player.playing = !player.playing;
+				this.value = player.playing ? "pause" : "play ";
+			};
         }
 
         player.onProgress = onProgress;
-        document.getElementById('playpause').onclick = function () {
-			player.playing = !player.playing;
-			this.value = player.playing ? "pause" : "play ";
-        };
 
         player.createDevice();
     });

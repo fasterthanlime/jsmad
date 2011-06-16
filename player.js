@@ -44,7 +44,7 @@ Mad.Player.prototype.createDevice = function() {
 	var preBufferSize = 65536 * 1024;
 	var self = this;
 	
-	var MARGIN = 10;
+	var MAX_FRAMES_IN_BUFFER = 40;
 	
 	this.dev = audioLib.AudioDevice(function (sampleBuffer) {
 		//console.log("delta = " + (Date.now() - self.lastRebuffer) + ", asked for " + sampleBuffer.length);
@@ -77,6 +77,12 @@ Mad.Player.prototype.createDevice = function() {
 					synth.frame(self.frame);
 					self.frameSamples.push(synth.pcm.samples);
 					self.frameIndex++;
+					
+					if(self.frameSamples.length > MAX_FRAMES_IN_BUFFER) {
+						var oldlength = self.frameSamples.length;
+						self.frameSamples = self.frameSamples.slice(0, 2);
+						self.frameIndex -= (oldlength - self.frameSamples.length);
+					}
 				}
 			}
 		}
@@ -95,7 +101,9 @@ Mad.Player.prototype.setPlaying = function(playing) {
 
 Mad.Player.prototype.destroy = function() {
 	clearTimeout(this.progressTimeout);
-	this.dev.kill();
+	if(this.dev) {
+		this.dev.kill();
+	}
 }
 
 Mad.Player.prototype.progress = function () {
