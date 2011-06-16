@@ -31,13 +31,13 @@ div.github {
   background: none repeat scroll 0 0 rgba(255, 255, 255, 0.5);
   box-shadow: 0 0 27px rgba(0, 0, 0, 0.08);
   float: right;
-  padding: 30px;
+  padding: 50px 30px 30px;
   position: relative;
-  top: 15px;
+  top: -20px;
 }
 
 div.select {
-  top: 70px;
+  top: 50px;
   clear:right;
   position: relative;
 }
