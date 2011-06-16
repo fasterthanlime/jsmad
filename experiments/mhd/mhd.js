@@ -37,7 +37,9 @@ function readFile() {
                 var mime = pictures[0].mime;
                 var enc = btoa(pictures[0].value);
                 id3string += "<img class='picture' src='data:" + mime + ';base64,' + enc + "' />";
-            }
+            } else {
+              id3string += "<img class='picture' src='../images/nopicture.png' />";
+			}
 
             id3string += "<a href='#' id='playpause' class='button play'></a>";
             id3string += "<div class='timeline'><div id='progressbar'></div></div>";
