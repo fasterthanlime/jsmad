@@ -465,15 +465,13 @@ Mad.ID3v23Stream.prototype.readFrame = function() {
     
     if (this.decoders[identifier]) {
         result = this.decoders[identifier](header, this.stream);
-    } else if(this.names[identifier] || this.extenders[identifier]) {
+    } else {
         result = {
             'identifier': identifier,
             'header': header
         };
         
-        this.stream.read(length);
-    } else {
-		return null;
+        this.stream.read(Math.min(length, this.header.length - this.offset));
 	}
     
     result['name'] = this.names[identifier] ? this.names[identifier] : 'UNKNOWN';
