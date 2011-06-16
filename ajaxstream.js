@@ -50,7 +50,7 @@ Mad.AjaxStream = function(url) {
     
     request.onreadystatechange = onstatechange;
     
-    this.state['timer'] = window.setInterval(onstatechange, 1000);
+    this.state['timer'] = window.setInterval(onstatechange, 250);
     
     request.send(null);
 }
@@ -61,6 +61,12 @@ Mad.AjaxStream.prototype.updateBuffer = function() {
     if (!this.state['finalAmount']) {
         this.state['buffer'] = this.state['request'].responseText
         this.state['amountRead'] = this.state['buffer'].length
+		this.state['contentLength'] = this.state['request'].getResponseHeader('Content-Length');
+		if(!this.state['contentLength']) {
+			// if the server doesn't send a Content-Length Header, just use amountRead instead
+			// it's less precise at first, but once everything is buffered it becomes accurate.
+			this.state['contentLength'] = this.state['amountRead'];
+		}
     
         if (!this.state['inProgress']) {
             this.state['finalAmount'] = true;

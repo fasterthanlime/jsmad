@@ -6,6 +6,9 @@ function pad(length, sym, str) {
 
 function onProgress(playtime, total) {
 	console.log("playtime = " + playtime + " / " + total);
+	
+	var slider = document.getElementById('progressBar');
+	slider.style.width = (playtime / total * 360) + 'px';
 }
 
 function readFile() {
@@ -79,14 +82,14 @@ function readFile() {
 	  var progress = function() {
 		  var currentTimeMillis = Date.now();
 		  var playtime = ((frameIndex * 1152 + offset) / sampleRate) + (currentTimeMillis - lastRebuffer) / 1000.0;
-		  console.log("amountRead = " + stream.state.amountRead + ", offset = " + mpeg.this_frame);
-		  var total = playtime * stream.state.amountRead / mpeg.this_frame;
+		  console.log("contentLength = " + stream.state.contentLength + ", offset = " + mpeg.this_frame);
+		  var total = playtime * stream.state.contentLength / mpeg.this_frame;
 		  
 		  if(playing) {
 		      onProgress(playtime, total);
 		  }
 		  
-		  setTimeout(progress, 100);
+		  setTimeout(progress, 500);
 	  }
 	  progress();
 
@@ -114,6 +117,7 @@ function readFile() {
                       }
                       console.log("Error! code = " + mpeg.error);
                       playing = false;
+                      onProgress(1, 1);
                       dev.kill();
                   } else {
                       synth.frame(frame);
@@ -126,7 +130,7 @@ function readFile() {
     };
     
     var stream = new Mad.AjaxStream(url);
-	stream.requestAbsolute(30000, function() {
+	stream.requestAbsolute(128000, function() {
 		playMusic(stream);
 	});
     
