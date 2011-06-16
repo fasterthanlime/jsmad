@@ -58,12 +58,9 @@ Mad.AjaxStream = function(url) {
 Mad.AjaxStream.prototype = new Mad.ByteStream();
 
 Mad.AjaxStream.prototype.updateBuffer = function() {
-	console.log("updateBuffer!");
     if (!this.state['finalAmount']) {
         this.state['buffer'] = this.state['request'].responseText
         this.state['amountRead'] = this.state['buffer'].length
-    
-		console.log("amountRead = " + this.state['amountRead']);
     
         if (!this.state['inProgress']) {
             this.state['finalAmount'] = true;

@@ -1,33 +1,15 @@
 
-function pad(length, sym, str) {
-	while(str.length < length) str = sym + str;
-	return str;
-}
-
-function onProgress(playtime, total) {
-	console.log("playtime = " + playtime + " / " + total);
-}
-
 function readFile() {
     
-    var track_id = document.getElementById('idChooser').value;
-    
-    // example url: http://cdn.official.fm/mp3s/260/260626
-	if(window.location.host == 'sandbox.official.fm') {
-		var url = "http://cdn.official.fm/mp3s/" + Math.floor(track_id / 1000) + "/" + track_id + ".mp3";
-	} else {
-		var url = "http://localhost:81/jsmad/experiments/official/cdn/" + Math.floor(track_id / 1000) + "/" + track_id + ".mp3";
-    }
-    
-    console.log("url = " + url);
+    var url = document.getElementById('urlChooser').value;
     if (!url) {
         return;
     }
     
     var playMusic = function (stream) {
-      var mp3 = new Mad.MP3File(stream);
+      mp3 = new Mad.MP3File(stream);
       
-      var id3 = mp3.getID3v2Stream()
+      id3 = mp3.getID3v2Stream()
       
       if (id3) {
           id3 = id3.toHash();
@@ -51,7 +33,7 @@ function readFile() {
           id3element.innerHTML = id3string;
       }
       
-      var mpeg = mp3.getMpegStream();
+      mpeg = mp3.getMpegStream();
       
       var synth = new Mad.Synth();
       var frame = new Mad.Frame();
@@ -76,37 +58,22 @@ function readFile() {
 
       synth.frame(frame);
       var offset = 0;
-      var frameIndex = 0;
-      var lastRebuffer = Date.now();
-
-	  var progress = function() {
-		  var currentTimeMillis = Date.now();
-		  var playtime = ((frameIndex * 1152 + offset) / sampleRate) + (currentTimeMillis - lastRebuffer) / 1000.0;
-		  console.log("amountRead = " + stream.state.amountRead + ", offset = " + mpeg.this_frame);
-		  var total = playtime * stream.state.amountRead / mpeg.this_frame;
-		  
-		  onProgress(playtime, total);
-		  setTimeout(progress, 100);
-	  }
-	  progress();
 
       // Create a device.
       var dev = audioLib.AudioDevice(function(sampleBuffer) {
           //console.log("being asked for " + sampleBuffer.length + " bytes");
           var index = 0;
-                   
+          
           while(index < sampleBuffer.length) {
               for(var i = 0; i < channelCount; ++i) {
                   sampleBuffer[index++] = synth.pcm.samples[i][offset];
               }
-                            
+              
               offset++;
-              lastRebuffer = Date.now();
               
               if(offset >= synth.pcm.samples[0].length) {
                   offset = 0;
               
-				  frameIndex++;
                   frame = Mad.Frame.decode(frame, mpeg);
                   if(frame == null) {
                       if(stream.error == Mad.Error.BUFLEN) {
