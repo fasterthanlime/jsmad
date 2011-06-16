@@ -1,0 +1,23 @@
+{
+	"name":		"audiolib",
+	"author":	"Jussi Kalliokoski",
+	"version":	"0.4.4",
+	"description":	"audiolib.js is a powerful audio tools library for javascript.",
+	"repository":	{
+		"type":		"git",
+		"url":		"http://github.com/jussi-kalliokoski/audiolib.js.git"
+	},
+	"engines":	{
+		"node":		">=0.2.0-0"
+	},
+	"licenses":	[{
+		"type":		"MIT"
+	}],
+	"bugs":		{
+		"web":		"http://github.com/jussi-kalliokoski/audiolib.js/issues"
+	},
+	"directories":	{
+		"lib":		"./lib"
+	},
+	"main":		"./lib/audiolib"
+}
