@@ -15,13 +15,18 @@ function onProgress(current, total, preload) {
 }
 
 var globalPlayer = null;
+var ofm = new OfficialFM('Q5Bd7987TmfsNVOHP9Zt');
+var ofmTrack = null;
 
 function domReady() {
 	document.getElementById('ofm').onkeypress = function (ev) {
 		if(ev.keyCode == 13) { // enter pressed?
 			var track_id = this.value;
 			var url = "http://sandbox.official.fm/jsmad-proxy/?id=" + track_id;
-			Mad.Player.fromURL(url, usePlayer);
+			ofm.track(track_id, function(track) {
+				ofmTrack = track;
+				Mad.Player.fromURL(url, usePlayer);
+			});
 			return false;
 		}
 	};
@@ -42,8 +47,10 @@ function usePlayer (player) {
 			var mime = pictures[0].mime;
 			var enc = btoa(pictures[0].value);
 			id3string += "<img class='picture' src='data:" + mime + ';base64,' + enc + "' />";
+		} else if(ofmTrack) {
+			id3string += "<img class='picture' src='" + ofmTrack.picture_absolute_url.replace('_small', '_large') + "' />";
 		} else {
-		  id3string += "<img class='picture' src='../images/nopicture.png' />";
+			id3string += "<img class='picture' src='../images/nopicture.png' />";
 		}
 
 		id3string += "<a href='#' id='playpause' class='button play'></a>";
@@ -51,14 +58,21 @@ function usePlayer (player) {
 
 		id3string += "</div></div>";
 		id3string += "<div class='info'>";
-		id3string += "<h2>" + id3['Title/Songname/Content description'] + "</h2>";
-		id3string += "<h3>" + id3['Lead artist/Lead performer/Soloist/Performing group'] + "</h3>";
+		id3string += "<h2>" + (ofmTrack ? ofmTrack.title : id3['Title/Songname/Content description']) + "</h2>";
+		id3string += "<h3>" + (ofmTrack? ofmTrack.artist_string: id3['Lead artist/Lead performer/Soloist/Performing group']) + "</h3>";
 		id3string += "<div class='meta'>";
-		id3string += "<p><strong>Album:</strong> " + id3['Album/Movie/Show title'] + "</p>";
-		id3string += "<p><strong>Track:</strong> " + id3['Track number/Position in set'] + "</p>";
-		id3string += "<p><strong>Year:</strong> " + id3['Year'] + "</p>";
+		if(id3['Album/Movie/Show title']) {
+			id3string += "<p><strong>Album:</strong> " + id3['Album/Movie/Show title'] + "</p>";
+		}
+		if(id3['Track number/Position in set']) {
+			id3string += "<p><strong>Track:</strong> " + id3['Track number/Position in set'] + "</p>";
+		}
+		if(id3['Year']) {
+			id3string += "<p><strong>Year:</strong> " + id3['Year'] + "</p>";
+		}
 		id3string += "</div>";
 		id3string += "</div>";
+		ofmTrack = null;
 
 		id3element.innerHTML = id3string;
 	
