@@ -1,8 +1,6 @@
 ## About
 
-jsmad is a pure javascript MP3 decoder.
-
-jsmad is a pure javascript port of [libmad](http://www.underbit.com/products/mad/)
+jsmad is a pure javascript MP3 decoder, based on [libmad](http://www.underbit.com/products/mad/), with an ID3 written from scratch.
 
 For example, jsmad allows Firefox 4.0+ to play MP3s without any Flash. Faster loading times. Less security holes. No 64-bit headaches on Linux. Less memory leaks.
 
@@ -12,7 +10,15 @@ jsmad is GPL-ed, fork yours today!
 
 See a live demo here: http://jsmad.org/ in collaboration with [official.fm](http://official.fm/) and using the [musicmetric](http://musicmetric.com/) API
 
-It works fine under Firefox 4.0 and above, and should work under Chrome 10+ thanks to audiolib.js, although we haven't gotten it to work ourselves.
+It works out of the box under Firefox 4.0 and above. On Chrome 13.0+, you have to enable manually the Web Audio API in 'about:flags', then restart the browser and it should work fine! No Opera support at the moment.
+
+## Authors
+
+  * [@nddrylliog](http://twitter.com/nddrylliog) - lead developer
+  * [@jensnockert](http://twitter.com/jensnockert) - helped porting & debugging the code at MusicHackDay Berlin
+  * [@mgeorgi](http://twitter.com/mgeorgi) - helped debugging the code after MusicHackDay Berlin
+
+Special thanks to [@antoinem](http://twitter.com/antoinem) for the Demo design and particularly to [@_romac](http://twitter.com/_romac) for adding features & keeping the demo server alive!
 
 ## Porting notes
 
@@ -57,13 +63,8 @@ What's next? A few things:
 
   - Strings are still used in the core decoding routines instead of Uint8Arrays - this should change
   - Optimizations, always
-  - Chrome 10+ support - have no idea why it doesn't work, it seems that only the audio output is broken, everything else runs fine
   - Better buffering strategy - player.js is still pretty naive and we stumble now and then onto buffer underflow
   - MPEG Layer I and II are not supported, only Layer III is - it should be pretty trivial but we had no interest for it in the first place.
   - MPEG 2.5 is not supported.
   - Free bitrate streams are not supported (this is different from VBR - VBR is supported)
   - Most of ID3v2.2 and ID3v2.3 are implemented, but some tags are mising.
-
-## That's all, folks!
-
-Thanks for your time :) Hope you like jsmad.
