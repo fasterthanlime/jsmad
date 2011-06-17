@@ -64,12 +64,14 @@ Mad.AjaxStream.prototype = new Mad.ByteStream();
 
 Mad.AjaxStream.prototype.updateBuffer = function() {
     if (!this.state['finalAmount']) {
-        this.state['buffer'] = this.state['request'].responseText
         this.state['arrayBuffer'] = this.state['request'].mozResponseArrayBuffer;
         if(this.state['arrayBuffer']) {
-			this['byteBuffer'] = new Uint8Array(this.state['arrayBuffer']);
+			this.state['byteBuffer'] = new Uint8Array(this.state['arrayBuffer']);
+			this.state['amountRead'] = this.state['arrayBuffer'].byteLength;
+		} else {
+			this.state['buffer'] = this.state['request'].responseText
+			this.state['amountRead'] = this.state['buffer'].length;
 		}
-        this.state['amountRead'] = this.state['arrayBuffer'] ? this.state['arrayBuffer'].byteLength : this.state['buffer'].length;
         
 		this.state['contentLength'] = this.state['request'].getResponseHeader('Content-Length');
 		if(!this.state['contentLength']) {
