@@ -100,8 +100,8 @@ function usePlayer (player) {
 					dataType: "json",
 					success: function(json) {
 						console.log("success? " + json.success);
-						var previousFans = Integer.parseInt(json.response.fans.total.previous);
-						var  currentFans = Integer.parseInt(json.response.fans.total.current);
+						var previousFans = parseInt(json.response.fans.total.previous);
+						var  currentFans = parseInt(json.response.fans.total.current);
 						console.log("previous/current fans? " + previousFans + "/" + currentFans);
 						$('#ID3').append('<p><strong>Tendency: </strong>' + ((currentFans == previousFans) ? 'holding up' : (currentFans > previousFans ? 'on the rise' : 'falling down')) + '</p>');
 					}
