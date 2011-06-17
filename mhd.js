@@ -62,7 +62,7 @@ function usePlayer (player) {
 		var artist = ofmTrack? ofmTrack.artist_string: id3['Lead artist/Lead performer/Soloist/Performing group'];
 		id3string += "<h2 id='track_span'>" + (ofmTrack ? ofmTrack.title : id3['Title/Songname/Content description']) + "</h2>";
 		id3string += "<h3 id='artist_span'>" + artist + "</h3>";
-		id3string += "<div class='meta'>";
+		id3string += "<div class='meta' id='meta_info'>";
 		if(id3['Album/Movie/Show title']) {
 			id3string += "<p><strong>Album:</strong> " + id3['Album/Movie/Show title'] + "</p>";
 		}
@@ -100,10 +100,11 @@ function usePlayer (player) {
 					dataType: "json",
 					success: function(json) {
 						console.log("success? " + json.success);
-						var previousFans = json.response.fans.total.previous;
-						var  currentFans = json.response.fans.total.current;
+						var previousFans = parseInt(json.response.fans.total.previous);
+						var  currentFans = parseInt(json.response.fans.total.current);
 						console.log("previous/current fans? " + previousFans + "/" + currentFans);
-						$('#ID3').appendTo('<p><strong>Tendency: </strong>' + (currentFans == PreviousFans) ? 'holding up' : (currentFans > previousFans ? 'on the rise' : 'falling down') + '</p>');
+						$('#meta_info').append('<p><strong>Tendency: </strong>' + ((currentFans == previousFans) ? 'holding up' : (currentFans > previousFans ? 'on the rise' : 'falling down')) + '</p>');
+						$('#artist_span').append(' <small>(' + json.response.fans.total.total + ' fans)</small>');
 					}
 				});
 			}
