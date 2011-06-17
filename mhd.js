@@ -43,12 +43,12 @@ function usePlayer (player) {
 		var id3string = "<div class='player'><div class='picture'>";
 		var pictures = id3['Attached picture'];
 
-		if (pictures) {
+		if(ofmTrack) {
+			id3string += "<img class='picture' src='" + ofmTrack.picture_absolute_url.replace('_small', '_large') + "' />";
+		} else if (pictures) {
 			var mime = pictures[0].mime;
 			var enc = btoa(pictures[0].value);
 			id3string += "<img class='picture' src='data:" + mime + ';base64,' + enc + "' />";
-		} else if(ofmTrack) {
-			id3string += "<img class='picture' src='" + ofmTrack.picture_absolute_url.replace('_small', '_large') + "' />";
 		} else {
 			id3string += "<img class='picture' src='../images/nopicture.png' />";
 		}
