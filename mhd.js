@@ -103,7 +103,8 @@ function usePlayer (player) {
 						var previousFans = parseInt(json.response.fans.total.previous);
 						var  currentFans = parseInt(json.response.fans.total.current);
 						console.log("previous/current fans? " + previousFans + "/" + currentFans);
-						$('#ID3').append('<p><strong>Tendency: </strong>' + ((currentFans == previousFans) ? 'holding up' : (currentFans > previousFans ? 'on the rise' : 'falling down')) + '</p>');
+						$('#ID3').innerHTML += ('<p><strong>Tendency: </strong>' + ((currentFans == previousFans) ? 'holding up' : (currentFans > previousFans ? 'on the rise' : 'falling down')) + '</p>');
+						$('#artist_span').innerHTML ++ ('<small>(' + json.response.fans.total.total + ' fans)</small>');
 					}
 				});
 			}
