@@ -98,12 +98,23 @@ function usePlayer (player) {
 				var artist_id = doc.find('artist').attr('id');
 				console.log("musicbrainz artist id = " + artist_id);
 
+				var icons = {
+					facebook: 'http://facebook.com/favicon.ico',
+					lastfm: 'http://last.fm/favicon.ico',
+					myspace: 'http://myspace.com/favicon.ico',
+					twitter: 'http://twitter.com/favicon.ico',
+					youtube: 'http://www.youtube.com/favicon.ico',
+				};
+
 				$.ajax({
 					type: "GET",
 					url: "http://jsmad.org/musicmetric/musicbrainz:" + artist_id,
 					dataType: "json",
 					success: function(json) {
 						console.log("success? " + json.success);
+						var up_img = '<img src="http://jsmad.org/images/up.png">';
+						var down_img = '<img src="http://jsmad.org/images/down.png">';
+						var equal_img = '<img src="http://jsmad.org/images/equal.png">';
 
 						for(var platform in json.response.fans) {
 							if(!json.response.fans.hasOwnProperty(platform)) continue;
@@ -114,7 +125,7 @@ function usePlayer (player) {
 							var  currentFans = parseInt(fans.current);
 							var    totalFans = parseInt(fans.total);
 							console.log("previous/current fans? " + previousFans + "/" + currentFans);
-							$('#meta_info').append('<p><strong>' + platform + ': ' + totalFans + ' fans, </strong>' + (Math.abs(currentFans - previousFans) < 100 ? 'holding up' : (currentFans > previousFans ? 'on the rise' : 'falling down')) + '</p>');
+							$('#meta_info').append('<p><strong>' + (Math.abs(currentFans - previousFans) < 5 ? equal_img : (currentFans > previousFans ? up_img : down_img)) + ' <img src="' + icons[platform] + '"> ' + platform + ': ' + (totalFans > 1000000 ? ((Math.floor(totalFans / 100000) / 10.0) + "M") : (totalFans > 1000 ? ((Math.floor(totalFans / 100) / 10.0) + "K") : totalFans)) + ' fans</strong>' + '</p>');
 						}
 						$('#artist_span').append(' <small>(' + json.response.fans.total.total + ' fans)</small>');
 					}
