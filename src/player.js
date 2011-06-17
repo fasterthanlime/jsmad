@@ -104,16 +104,17 @@ Mad.Player.prototype.destroy = function() {
 
 Mad.Player.prototype.progress = function () {
 	var delta = Date.now() - this.lastRebuffer;
-	if(delta > 500) {
+	if(delta > 1000) {
 		// freaking Firefox sometimes fails at scheduling tasks and we lose audio streaming
+		console.log("Device reinit - buffer underflow.");
 		this.reinitDevice();
 	}
 	
     var playtime = ((this.absoluteFrameIndex * 1152 + this.offset) / this.sampleRate) + delta / 1000.0;
-    //console.log("delta = " + delta + ", contentLength = " + this.stream.state.contentLength + ", this.offset = " + this.mpeg.this_frame);
+    console.log("delta = " + delta + ", contentLength = " + this.stream.state.contentLength + ", this.offset = " + this.mpeg.this_frame);
     var total = playtime * this.stream.state.contentLength / this.mpeg.this_frame;
 	var preloaded = this.stream.state.amountRead / this.stream.state.contentLength;
-	//console.log("amountRead = " + this.stream.state.amountRead + ", preloaded = " + preloaded);
+	console.log("amountRead = " + this.stream.state.amountRead + ", preloaded = " + preloaded);
 	this.onProgress(playtime, total, preloaded);
     
     var that = this;
