@@ -66,8 +66,9 @@ Mad.AjaxStream.prototype.updateBuffer = function() {
     if (!this.state['finalAmount']) {
         this.state['buffer'] = this.state['request'].responseText
         this.state['arrayBuffer'] = this.state['request'].mozResponseArrayBuffer;
-        
-        if(this.state['arrayBuffer']) console.log("Gecko 4+ ! yay!");
+        if(this.state['arrayBuffer']) {
+			this['byteBuffer'] = new Uint8Array(this.state['arrayBuffer']);
+		}
         this.state['amountRead'] = this.state['arrayBuffer'] ? this.state['arrayBuffer'].byteLength : this.state['buffer'].length;
         
 		this.state['contentLength'] = this.state['request'].getResponseHeader('Content-Length');
@@ -130,8 +131,14 @@ Mad.AjaxStream.prototype.peek = function(n) {
 Mad.AjaxStream.prototype.get = function(offset, length) {
     if (this.absoluteAvailable(offset + length)) {
 		var tmpbuffer = "";
-		for(var i = offset; i < offset + length; i += 1) {
-			tmpbuffer = tmpbuffer + String.fromCharCode(this.state['buffer'].charCodeAt(i) & 0xff);
+		if(this.state['byteBuffer']) {
+			for(var i = offset; i < offset + length; i += 1) {
+				tmpbuffer = tmpbuffer + String.fromCharCode(this.state['byteBuffer'][i]);
+			}
+		} else {
+			for(var i = offset; i < offset + length; i += 1) {
+				tmpbuffer = tmpbuffer + String.fromCharCode(this.state['buffer'].charCodeAt(i) & 0xff);
+			}
 		}
 		return tmpbuffer;
     } else {
