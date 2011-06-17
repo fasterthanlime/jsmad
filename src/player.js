@@ -31,12 +31,8 @@ Mad.Player.prototype.createDevice = function() {
 	console.log("this.playing " + this.channelCount + " channels, samplerate = " + this.sampleRate + " audio, mode " + this.frame.header.mode);
 
 	this.offset = 0;
-	this.frameIndex = 0;
 	this.absoluteFrameIndex = 0;
-	this.frameSamples = [];
-	
 	synth.frame(this.frame);
-	this.frameSamples.push(synth.pcm.samples);
 	
 	this.lastRebuffer = Date.now();
 	this.playing = false;
@@ -55,12 +51,12 @@ Mad.Player.prototype.createDevice = function() {
 
 		while (index < sampleBuffer.length) {
 			for (var i = 0; i < self.channelCount; ++i) {
-				sampleBuffer[index++] = self.frameSamples[self.frameIndex][i][self.offset];
+				sampleBuffer[index++] = synth.pcm.samples[i][self.offset];
 			}
 
 			self.offset++;
 			
-			if (self.offset >= self.frameSamples[self.frameIndex][0].length) {
+			if (self.offset >= synth.pcm.samples[0].length) {
 				self.offset = 0;
 
 				self.frame = Mad.Frame.decode(self.frame, self.mpeg);
@@ -74,15 +70,7 @@ Mad.Player.prototype.createDevice = function() {
 					self.dev.kill();
 				} else {
 					synth.frame(self.frame);
-					self.frameSamples.push(synth.pcm.samples);
-					self.frameIndex++;
 					self.absoluteFrameIndex++;
-					
-					if(self.frameSamples.length > MAX_FRAMES_IN_BUFFER) {
-						var oldlength = self.frameSamples.length;
-						self.frameSamples = self.frameSamples.slice(0, 2);
-						self.frameIndex -= (oldlength - self.frameSamples.length);
-					}
 				}
 			}
 		}
