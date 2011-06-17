@@ -7,7 +7,7 @@ function onSeek(percentage) {
 }
 
 function onProgress(current, total, preload) {
-    console.log("current = " + current + ", total = " + total);
+    //console.log("current = " + current + ", total = " + total);
     var preloadbar = document.getElementById('preloadbar');
     preloadbar.style.width = (preload * 360) + 'px';
     var progressbar = document.getElementById('progressbar');
