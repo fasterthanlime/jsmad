@@ -111,10 +111,10 @@ Mad.Player.prototype.progress = function () {
 	}
 	
     var playtime = ((this.absoluteFrameIndex * 1152 + this.offset) / this.sampleRate) + delta / 1000.0;
-    console.log("delta = " + delta + ", contentLength = " + this.stream.state.contentLength + ", this.offset = " + this.mpeg.this_frame);
+    //console.log("delta = " + delta + ", contentLength = " + this.stream.state.contentLength + ", this.offset = " + this.mpeg.this_frame);
     var total = playtime * this.stream.state.contentLength / this.mpeg.this_frame;
 	var preloaded = this.stream.state.amountRead / this.stream.state.contentLength;
-	console.log("amountRead = " + this.stream.state.amountRead + ", preloaded = " + preloaded);
+	//console.log("amountRead = " + this.stream.state.amountRead + ", preloaded = " + preloaded);
 	this.onProgress(playtime, total, preloaded);
     
     var that = this;
