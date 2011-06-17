@@ -22,7 +22,7 @@ function domReady() {
 	document.getElementById('ofm').onkeypress = function (ev) {
 		if(ev.keyCode == 13) { // enter pressed?
 			var track_id = this.value;
-			var url = "http://sandbox.official.fm/jsmad-proxy/?id=" + track_id;
+			var url = "http://jsmad.org/track/" + track_id;
 			ofm.track(track_id, function(track) {
 				ofmTrack = track;
 				Mad.Player.fromURL(url, usePlayer);
