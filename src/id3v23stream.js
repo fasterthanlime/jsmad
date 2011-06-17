@@ -85,7 +85,8 @@ var decodeTerminatedString = function(header, stream) {
 	// skip 4 bytes, then read binary length
 	stream.read(4);
 	var length = stream.readU32(true) - 4;
-	console.log("Skipping " + length + " bytes of binary data");
+	
+	if(length > header.length) return null;
 	var value = stream.read(length);
 	
 	return {
@@ -531,7 +532,9 @@ Mad.ID3v23Stream.prototype.readFrame = function() {
         this.stream.read(Math.min(length, this.header.length - this.offset));
 	}
     
-    result['name'] = this.names[identifier] ? this.names[identifier] : 'UNKNOWN';
+    if(result) {
+		result['name'] = this.names[identifier] ? this.names[identifier] : 'UNKNOWN';
+    }
     
     this.offset += 10 + length;
     
