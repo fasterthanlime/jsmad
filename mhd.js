@@ -58,8 +58,10 @@ function usePlayer (player) {
 
 		id3string += "</div></div>";
 		id3string += "<div class='info'>";
-		id3string += "<h2>" + (ofmTrack ? ofmTrack.title : id3['Title/Songname/Content description']) + "</h2>";
-		id3string += "<h3>" + (ofmTrack? ofmTrack.artist_string: id3['Lead artist/Lead performer/Soloist/Performing group']) + "</h3>";
+		
+		var artist = ofmTrack? ofmTrack.artist_string: id3['Lead artist/Lead performer/Soloist/Performing group'];
+		id3string += "<h2 id='track_span'>" + (ofmTrack ? ofmTrack.title : id3['Title/Songname/Content description']) + "</h2>";
+		id3string += "<h3 id='artist_span'>" + artist + "</h3>";
 		id3string += "<div class='meta'>";
 		if(id3['Album/Movie/Show title']) {
 			id3string += "<p><strong>Album:</strong> " + id3['Album/Movie/Show title'] + "</p>";
@@ -80,6 +82,32 @@ function usePlayer (player) {
 			player.setPlaying(!player.playing);
 			return false;
 		};
+		
+		// musicbrainz + musicmetric queries
+		$.ajax({
+			type: "GET",
+			url: "http://jsmad.org/musicbrainz/" + escape(artist),
+			dataType: "xml",
+			success: function(xml) {
+				var doc = $(xml);
+				console.log("real artist name = " + doc.find('artist').children('name').text());
+				var artist_id = doc.find('artist').attr('id');
+				console.log("musicbrainz artist id = " + artist_id);
+
+				$.ajax({
+					type: "GET",
+					url: "http://jsmad.org/musicmetric/musicbrainz:" + artist_id,
+					dataType: "json",
+					success: function(json) {
+						console.log("success? " + json.success);
+						var previousFans = json.response.fans.total.previous;
+						var  currentFans = json.response.fans.total.current;
+						console.log("previous/current fans? " + previousFans + "/" + currentFans);
+						$('#ID3').appendTo('<p><strong>Tendency: </strong>' + (currentFans == PreviousFans) ? 'holding up' : (currentFans > previousFans ? 'on the rise' : 'falling down') + '</p>');
+					}
+				});
+			}
+		}); 
 	}
 
 	player.onProgress = onProgress;
