@@ -147,6 +147,14 @@ Mad.AjaxStream.prototype.get = function(offset, length) {
     }
 }
 
+Mad.ByteStream.prototype.getU8 = function(offset, bigEndian) {
+	if(this.state['byteBuffer']) {
+		return this.state['byteBuffer'][offset];
+	}
+		
+    return this.get(offset, 1).charCodeAt(0);
+}
+
 Mad.AjaxStream.prototype.requestAbsolute = function(n, callback) {
     if (n < this.state['amountRead']) {
         callback();
