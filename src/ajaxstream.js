@@ -68,7 +68,7 @@ Mad.AjaxStream.prototype.updateBuffer = function() {
         //this.state['amountRead'] = this.state['buffer'].length
         
         if(this.state['request'].mozResponseArrayBuffer) console.log("Gecko 4+ ! yay!");
-        this.state['amountRead'] = this.state['request'].mozResponseArrayBuffer ? this.state['request'].mozResponseArrayBuffer.length : this.state['buffer'].length;
+        this.state['amountRead'] = this.state['request'].mozResponseArrayBuffer ? this.state['request'].mozResponseArrayBuffer.byteLength : this.state['buffer'].length;
         
 		this.state['contentLength'] = this.state['request'].getResponseHeader('Content-Length');
 		if(!this.state['contentLength']) {
