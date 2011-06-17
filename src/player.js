@@ -116,9 +116,9 @@ Mad.Player.prototype.destroy = function() {
 
 Mad.Player.prototype.progress = function () {
 	var delta = Date.now() - this.lastRebuffer;
-	if(delta > 1000) {
+	if(delta > 2000) {
 		// freaking Firefox sometimes fails at scheduling tasks and we lose audio streaming
-		reinitDevice();
+		this.reinitDevice();
 	}
 	
     var playtime = ((this.absoluteFrameIndex * 1152 + this.offset) / this.sampleRate) + delta / 1000.0;
