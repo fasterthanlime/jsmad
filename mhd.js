@@ -19,18 +19,22 @@ var ofm = new OfficialFM('Q5Bd7987TmfsNVOHP9Zt');
 var ofmTrack = null;
 
 function domReady() {
-	document.getElementById('ofm').onkeypress = function (ev) {
+	var playOfm = function () {
+		var track_id = document.getElementById('ofm').value;
+		var url = "http://jsmad.org/track/" + track_id;
+		ofm.track(track_id, function(track) {
+			ofmTrack = track;
+			Mad.Player.fromURL(url, usePlayer);
+		});
+		return false;
+	};
+	document.getElementById('ofm').onkeypress = function(ev) {
 		if(ev.keyCode == 13) { // enter pressed?
-			var track_id = this.value;
-			var url = "http://jsmad.org/track/" + track_id;
-			ofm.track(track_id, function(track) {
-				ofmTrack = track;
-				Mad.Player.fromURL(url, usePlayer);
-			});
+			playOfm();
 			return false;
 		}
 	};
-
+	playOfm();
 }
 
 function usePlayer (player) {
@@ -103,7 +107,7 @@ function usePlayer (player) {
 						var previousFans = parseInt(json.response.fans.total.previous);
 						var  currentFans = parseInt(json.response.fans.total.current);
 						console.log("previous/current fans? " + previousFans + "/" + currentFans);
-						$('#meta_info').append('<p><strong>Tendency: </strong>' + ((currentFans == previousFans) ? 'holding up' : (currentFans > previousFans ? 'on the rise' : 'falling down')) + '</p>');
+						$('#meta_info').append('<p><strong>Tendency: </strong>' + (Math.abs(currentFans - previousFans) < 100 ? 'holding up' : (currentFans > previousFans ? 'on the rise' : 'falling down')) + '</p>');
 						$('#artist_span').append(' <small>(' + json.response.fans.total.total + ' fans)</small>');
 					}
 				});
