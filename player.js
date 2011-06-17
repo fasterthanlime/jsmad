@@ -32,6 +32,7 @@ Mad.Player.prototype.createDevice = function() {
 
 	this.offset = 0;
 	this.frameIndex = 0;
+	this.absoluteFrameIndex = 0;
 	this.frameSamples = [];
 	
 	synth.frame(this.frame);
@@ -77,6 +78,7 @@ Mad.Player.prototype.createDevice = function() {
 					synth.frame(self.frame);
 					self.frameSamples.push(synth.pcm.samples);
 					self.frameIndex++;
+					self.absoluteFrameIndex++;
 					
 					if(self.frameSamples.length > MAX_FRAMES_IN_BUFFER) {
 						var oldlength = self.frameSamples.length;
@@ -107,8 +109,9 @@ Mad.Player.prototype.destroy = function() {
 }
 
 Mad.Player.prototype.progress = function () {
-    var playtime = ((this.frameIndex * 1152 + this.offset) / this.sampleRate) + (Date.now() - this.lastRebuffer) / 1000.0;
-    //console.log("contentLength = " + this.stream.state.contentLength + ", this.offset = " + this.mpeg.this_frame);
+	var delta = Date.now() - this.lastRebuffer;
+    var playtime = ((this.absoluteFrameIndex * 1152 + this.offset) / this.sampleRate) + delta / 1000.0;
+    console.log("delta = " + delta + ", contentLength = " + this.stream.state.contentLength + ", this.offset = " + this.mpeg.this_frame);
     var total = playtime * this.stream.state.contentLength / this.mpeg.this_frame;
 
     if (this.playing) {
