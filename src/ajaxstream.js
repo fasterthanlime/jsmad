@@ -27,7 +27,11 @@ Mad.AjaxStream = function(url) {
                 var callback = self.state['callbacks'][i];
                 
                 if (callback[0] < self.state['amountRead']) {
-                    callback[1]();
+					try {
+						callback[1]();
+					} catch (e) {
+						console.log(e);
+					}
                 } else {
                     newCallbacks.push(callback);
                 }

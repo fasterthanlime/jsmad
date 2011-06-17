@@ -42,9 +42,7 @@ Mad.Player.prototype.createDevice = function() {
 	this.playing = false;
 	this.progress();
 	
-	var preBufferSize = 65536 * 1024;
-	var self = this;
-	
+	var self = this;	
 	var MAX_FRAMES_IN_BUFFER = 40;
 	
 	this.refill = function (sampleBuffer) {
@@ -96,6 +94,7 @@ Mad.Player.prototype.createDevice = function() {
 
 Mad.Player.prototype.reinitDevice = function() {
 	if(this.dev) this.dev.kill();
+	var preBufferSize = 65536 * 1024;
 	this.dev = audioLib.AudioDevice(this.refill, this.channelCount, preBufferSize, this.sampleRate);
 }
 
