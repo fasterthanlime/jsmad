@@ -121,6 +121,7 @@ div.timeline {
   left:20px;
 }
 div#progressbar { width: 0; height: 20px; background-color: rgba(255,228,0,0.7); }
+div#preloadbar { width: 0; height: 20px; background-color: rgba(255,228,0,0.3); }
 
 div.info { display:inline-block;}
 div.meta { background-color: rgba(0, 0, 0, 0.1); width:460px; padding:20px; font-size:12px; }

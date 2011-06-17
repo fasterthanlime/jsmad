@@ -6,8 +6,8 @@ Mad.Player = function (stream) {
     this.mpeg = this.mp3.getMpegStream();
 
     // default onProgress handler
-    this.onProgress = function (playtime, total) {
-        console.log("playtime = " + playtime + " / " + total);
+    this.onProgress = function (playtime, total, preloaded) {
+        console.log("playtime = " + playtime + " / " + total + ", preloaded = " + preloaded);
     }
 };
 
@@ -17,7 +17,7 @@ Mad.Player.prototype.createDevice = function() {
 	this.frame = new Mad.Frame();
 	this.frame = Mad.Frame.decode(this.frame, this.mpeg);
 	if (this.frame == null) {
-		if (mpeg.error == Mad.Error.BUFLEN) {
+		if (this.mpeg.error == Mad.Error.BUFLEN) {
 			console.log("End of file!");
 		}
 
@@ -72,7 +72,7 @@ Mad.Player.prototype.createDevice = function() {
 					}
 					console.log("Error! code = " + self.mpeg.error);
 					self.playing = false;
-					self.onProgress(1, 1);
+					self.onProgress(1.0, 1.0, 1.0);
 					self.dev.kill();
 				} else {
 					synth.frame(self.frame);
@@ -113,10 +113,9 @@ Mad.Player.prototype.progress = function () {
     var playtime = ((this.absoluteFrameIndex * 1152 + this.offset) / this.sampleRate) + delta / 1000.0;
     console.log("delta = " + delta + ", contentLength = " + this.stream.state.contentLength + ", this.offset = " + this.mpeg.this_frame);
     var total = playtime * this.stream.state.contentLength / this.mpeg.this_frame;
-
-    if (this.playing) {
-        this.onProgress(playtime, total);
-    }
+	var preloaded = this.stream.state.amountRead / this.stream.state.contentLength;
+	console.log("amountRead = " + this.stream.state.amountRead + ", preloaded = " + preloaded);
+	this.onProgress(playtime, total, preloaded);
     
     var that = this;
     var nextCall = function() { that.progress(); };

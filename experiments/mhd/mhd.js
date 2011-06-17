@@ -6,10 +6,12 @@ function onSeek(percentage) {
     console.log("seek " + percentage + "%");
 }
 
-function onProgress(current, total) {
+function onProgress(current, total, preload) {
     console.log("current = " + current + ", total = " + total);
-    var slider = document.getElementById('progressbar');
-    slider.style.width = (current / total * 360) + 'px';
+    var preloadbar = document.getElementById('preloadbar');
+    preloadbar.style.width = (preload * 360) + 'px';
+    var progressbar = document.getElementById('progressbar');
+    progressbar.style.width = (current / total * 360) + 'px';
 }
 
 var globalPlayer = null;
@@ -19,9 +21,7 @@ function domReady() {
 		if(ev.keyCode == 13) { // enter pressed?
 			var track_id = this.value;
 			var url = "http://sandbox.official.fm/jsmad-proxy/?id=" + track_id;
-			console.log("should play " + url);
 			Mad.Player.fromURL(url, usePlayer);
-			this.value = "";
 			return false;
 		}
 	};
@@ -47,7 +47,7 @@ function usePlayer (player) {
 		}
 
 		id3string += "<a href='#' id='playpause' class='button play'></a>";
-		id3string += "<div class='timeline'><div id='progressbar'></div></div>";
+		id3string += "<div class='timeline'><div id='preloadbar'><div id='progressbar'></div></div></div>";
 
 		id3string += "</div></div>";
 		id3string += "<div class='info'>";
@@ -61,13 +61,14 @@ function usePlayer (player) {
 		id3string += "</div>";
 
 		id3element.innerHTML = id3string;
+	
+		document.getElementById('playpause').onclick = function () {
+			player.setPlaying(!player.playing);
+			return false;
+		};
 	}
 
 	player.onProgress = onProgress;
-	document.getElementById('playpause').onclick = function () {
-		player.setPlaying(!player.playing);
-		return false;
-	};
 	
 	player.onPlay = function() {
 		document.getElementById('playpause').className = 'button pause';
