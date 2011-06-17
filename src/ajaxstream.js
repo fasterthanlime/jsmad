@@ -65,10 +65,10 @@ Mad.AjaxStream.prototype = new Mad.ByteStream();
 Mad.AjaxStream.prototype.updateBuffer = function() {
     if (!this.state['finalAmount']) {
         this.state['buffer'] = this.state['request'].responseText
-        //this.state['amountRead'] = this.state['buffer'].length
+        this.state['arrayBuffer'] = this.state['request'].mozResponseArrayBuffer;
         
-        if(this.state['request'].mozResponseArrayBuffer) console.log("Gecko 4+ ! yay!");
-        this.state['amountRead'] = this.state['request'].mozResponseArrayBuffer ? this.state['request'].mozResponseArrayBuffer.byteLength : this.state['buffer'].length;
+        if(this.state['arrayBuffer']) console.log("Gecko 4+ ! yay!");
+        this.state['amountRead'] = this.state['arrayBuffer'] ? this.state['arrayBuffer'].byteLength : this.state['buffer'].length;
         
 		this.state['contentLength'] = this.state['request'].getResponseHeader('Content-Length');
 		if(!this.state['contentLength']) {
