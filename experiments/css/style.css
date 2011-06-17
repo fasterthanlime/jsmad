@@ -22,22 +22,22 @@ h1 {
 h2 { font-size: 30px; line-height: 42px; margin:0; }
 h3 { font-size: 22px; margin: 10px 0 20px; }
 
-a, a:active { color:#490CCE; }
+a, a:active { color:#490CCE; outline:0;}
 a:hover { color:#0A28AC; }
 
 div.github {
   -moz-transform: rotate(2deg);
   -moz-transform-origin: left top;
-  background: none repeat scroll 0 0 rgba(255, 255, 255, 0.5);
+  background: url(../images/github.png) no-repeat 16px 10px rgba(255, 255, 255, 0.5);
   box-shadow: 0 0 27px rgba(0, 0, 0, 0.08);
   float: right;
-  padding: 50px 30px 30px;
+  padding: 30px 30px 30px 91px;
   position: relative;
-  top: -20px;
+  top: -3px;
 }
 
 div.select {
-  top: 46px;
+  top: 66px;
   clear:right;
   position: relative;
 }
@@ -54,7 +54,6 @@ input { font-size:18px; }
 #content {
   clear:both;
 }
-
 
 #ID3 {
   background:#fff;
