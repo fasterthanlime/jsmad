@@ -3,7 +3,7 @@ Mad.AjaxStream = function(url) {
     
     var request = window.XMLHttpRequest ? new XMLHttpRequest() :  ActiveXObject("Microsoft.XMLHTTP");
     
-    // binary XHR kthx
+    // pseudo-binary XHR
     request.overrideMimeType('text/plain; charset=x-user-defined');
     request.open('GET', url);
     
@@ -65,7 +65,11 @@ Mad.AjaxStream.prototype = new Mad.ByteStream();
 Mad.AjaxStream.prototype.updateBuffer = function() {
     if (!this.state['finalAmount']) {
         this.state['buffer'] = this.state['request'].responseText
-        this.state['amountRead'] = this.state['buffer'].length
+        //this.state['amountRead'] = this.state['buffer'].length
+        
+        if(this.state['request'].mozResponseArrayBuffer) console.log("Gecko 4+ ! yay!");
+        this.state['amountRead'] = this.state['request'].mozResponseArrayBuffer ? this.state['request'].mozResponseArrayBuffer.length : this.state['buffer'].length;
+        
 		this.state['contentLength'] = this.state['request'].getResponseHeader('Content-Length');
 		if(!this.state['contentLength']) {
 			// if the server doesn't send a Content-Length Header, just use amountRead instead
