@@ -47,7 +47,7 @@ Mad.Player.prototype.createDevice = function() {
 	
 	var MAX_FRAMES_IN_BUFFER = 40;
 	
-	this.dev = audioLib.AudioDevice(function (sampleBuffer) {
+	this.refill = function (sampleBuffer) {
 		//console.log("delta = " + (Date.now() - self.lastRebuffer) + ", asked for " + sampleBuffer.length);
 		self.lastRebuffer = Date.now();
 		
@@ -89,8 +89,15 @@ Mad.Player.prototype.createDevice = function() {
 			}
 		}
 
-	}, this.channelCount, preBufferSize, this.sampleRate);
+	};
+	
+	init.reinitDevice();
 };
+
+Mad.Player.prototype.reinitDevice = function() {
+	if(this.dev) this.dev.kill();
+	this.dev = audioLib.AudioDevice(this.refill, this.channelCount, preBufferSize, this.sampleRate);
+}
 
 Mad.Player.prototype.setPlaying = function(playing) {
 	this.playing = playing;
@@ -110,6 +117,11 @@ Mad.Player.prototype.destroy = function() {
 
 Mad.Player.prototype.progress = function () {
 	var delta = Date.now() - this.lastRebuffer;
+	if(delta > 1000) {
+		// freaking Firefox sometimes fails at scheduling tasks and we lose audio streaming
+		reinitDevice();
+	}
+	
     var playtime = ((this.absoluteFrameIndex * 1152 + this.offset) / this.sampleRate) + delta / 1000.0;
     console.log("delta = " + delta + ", contentLength = " + this.stream.state.contentLength + ", this.offset = " + this.mpeg.this_frame);
     var total = playtime * this.stream.state.contentLength / this.mpeg.this_frame;
