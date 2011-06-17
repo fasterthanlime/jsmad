@@ -91,7 +91,7 @@ Mad.Player.prototype.createDevice = function() {
 
 	};
 	
-	init.reinitDevice();
+	this.reinitDevice();
 };
 
 Mad.Player.prototype.reinitDevice = function() {
