@@ -22,6 +22,8 @@ h1 {
 h2 { font-size: 30px; line-height: 38px; margin:0; }
 h3 { font-size: 22px; margin: 10px 0 20px; }
 
+h3 small { font-size: 14px; color:#FA5945 !important; font-weight:normal !important; margin-left:10px; }
+
 a, a:active { color:#490CCE; outline:0;}
 a:hover { color:#0A28AC; }
 

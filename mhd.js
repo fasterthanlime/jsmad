@@ -127,7 +127,7 @@ function usePlayer (player) {
 							console.log("previous/current fans? " + previousFans + "/" + currentFans);
 							$('#meta_info').append('<p><strong>' + (Math.abs(currentFans - previousFans) < 5 ? equal_img : (currentFans > previousFans ? up_img : down_img)) + ' <img src="' + icons[platform] + '"> ' + platform + ': ' + (totalFans > 1000000 ? ((Math.floor(totalFans / 100000) / 10.0) + "M") : (totalFans > 1000 ? ((Math.floor(totalFans / 100) / 10.0) + "K") : totalFans)) + ' fans</strong>' + '</p>');
 						}
-						$('#artist_span').append(' <small>(' + json.response.fans.total.total + ' fans)</small>');
+						$('#artist_span').append(' <small>' + json.response.fans.total.total + ' fans</small>');
 					}
 				});
 			}
