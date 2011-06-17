@@ -61,7 +61,7 @@ What's next? A few things:
   - Better buffering strategy - player.js is still pretty naive and we stumble now and then onto buffer underflow
   - MPEG Layer I and II are not supported, only Layer III is - it should be pretty trivial but we had no interest for it in the first place.
   - MPEG 2.5 is not supported.
-  - Free bitrate streams are not supported.
+  - Free bitrate streams are not supported (this is different from VBR - VBR is supported)
   - Most of ID3v2.2 and ID3v2.3 are implemented, but some tags are mising.
 
 ## That's all, folks!
