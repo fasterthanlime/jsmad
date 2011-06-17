@@ -104,10 +104,18 @@ function usePlayer (player) {
 					dataType: "json",
 					success: function(json) {
 						console.log("success? " + json.success);
-						var previousFans = parseInt(json.response.fans.total.previous);
-						var  currentFans = parseInt(json.response.fans.total.current);
-						console.log("previous/current fans? " + previousFans + "/" + currentFans);
-						$('#meta_info').append('<p><strong>Tendency: </strong>' + (Math.abs(currentFans - previousFans) < 100 ? 'holding up' : (currentFans > previousFans ? 'on the rise' : 'falling down')) + '</p>');
+
+						for(var platform in json.response.fans) {
+							if(!json.response.fans.hasOwnProperty(platform)) continue;
+							if(platform == "total") continue;
+
+							var fans = json.response.fans[platform];
+							var previousFans = parseInt(fans.previous);
+							var  currentFans = parseInt(fans.current);
+							var    totalFans = parseInt(fans.total);
+							console.log("previous/current fans? " + previousFans + "/" + currentFans);
+							$('#meta_info').append('<p><strong>' + platform + ': ' + totalFans + ' fans, </strong>' + (Math.abs(currentFans - previousFans) < 100 ? 'holding up' : (currentFans > previousFans ? 'on the rise' : 'falling down')) + '</p>');
+						}
 						$('#artist_span').append(' <small>(' + json.response.fans.total.total + ' fans)</small>');
 					}
 				});
