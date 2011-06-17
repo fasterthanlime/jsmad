@@ -1,0 +1,30 @@
+<html>
+<body>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.js"></script>
+<script type="text/javascript">
+$.ajax({
+	type: "GET",
+	url: "http://jsmad.org/musicbrainz/the streets",
+	dataType: "xml",
+	success: function(xml) {
+		var doc = $(xml);
+		console.log("name = " + doc.find('artist').children('name').text());
+		var artist_id = doc.find('artist').attr('id');
+		console.log("id = " + artist_id);
+
+		$.ajax({
+			type: "GET",
+			url: "http://jsmad.org/musicmetric/musicbrainz:" + artist_id,
+			dataType: "json",
+			success: function(json) {
+				console.log("success? " + json.success);
+				console.log("previous/current fans? " + json.response.fans.total.previous + "/" + json.response.fans.total.current);
+			}
+		});
+	}
+}); 
+
+</script>
+</body>
+</html>
