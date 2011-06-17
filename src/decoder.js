@@ -61,7 +61,7 @@ Mad.Decoder.run_sync () {
     if (typeof(this.input_func) == "undefined")
         return 0; // no input = no cake.
 
-    if (typoef(this.error_func) != "undefined") {
+    if (typeof(this.error_func) != "undefined") {
         error_func = this.error_func;
         error_data = this.cb_data;
     } else { // double-negatives ftw
