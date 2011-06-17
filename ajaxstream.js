@@ -18,7 +18,7 @@ Mad.AjaxStream = function(url) {
     
     var onstatechange = function () {
         iteration += 1;
-        if (self.state['callbacks'].length > 0 && iteration % 64 == 0) {
+        if (/*self.state['callbacks'].length > 0 && */ iteration % 64 == 0) {
             self.updateBuffer();
             
             var newCallbacks = [];
@@ -37,6 +37,7 @@ Mad.AjaxStream = function(url) {
         }
         
         if (request.readyState == 4) {
+			self.state['amountRead'] = self.state['contentLength'];
             for (var i = 0; i < self.state['callbacks'].length; i++) {
                 var callback = self.state['callbacks'][i];
                 callback[1]();
