@@ -43,6 +43,61 @@ var stringToEncoding = function(string, encoding) {
     }
 }
 
+var decodeTerminatedString = function(header, stream) {
+
+	// skip text encoding (nobody cares, always ISO-8559-15)
+	stream.read(1);
+
+	var c;
+	
+	var mimetype = "";
+	while(true) {
+		c = stream.read(1);
+		if(c == "\0") {
+			break;
+		}
+		mimetype += c;
+	}
+	console.log("mimetype = " + mimetype);
+	
+	var filename = "";
+	while(true) {
+		c = stream.read(1);
+		if(c == "\0") {
+			break;
+		}
+		filename += c;
+	}
+	console.log("filename = " + filename);
+	
+	var contentDescription = "";
+	while(true) {
+		c = stream.read(1);
+		if(c == "\0") {
+			break;
+		}
+		contentDescription += c;
+	}
+	console.log("contentDescription = " + contentDescription);
+	
+	var objectName = stream.read(4);
+	
+	// skip 4 bytes, then read binary length
+	stream.read(4);
+	var length = stream.readU32(true) - 4;
+	console.log("Skipping " + length + " bytes of binary data");
+	var value = stream.read(length);
+	
+	return {
+		'header': header,
+		'mimetype': mimetype,
+		'filename': filename,
+		'contentDescription': contentDescription,
+		'objectName': objectName,
+		'value': value
+	};
+}
+
 var decodeTextFrame = function(header, stream) {
     var encoding = stream.readU8();
     var data = stream.read(header['length'] - 1);
@@ -269,7 +324,10 @@ Mad.ID3v23Stream = function(header, stream) {
         'TORY': decodeTextFrame,
         'TRDA': decodeTextFrame,
         'TSIZ': decodeTextFrame,
-        'TYER': decodeTextFrame
+        'TYER': decodeTextFrame,
+        
+        /* General encapsulated object */
+        'GEOB': decodeTerminatedString
     };
     
     this.names = {
@@ -448,7 +506,6 @@ Mad.ID3v23Stream.prototype.readFrame = function() {
     
     if (identifier.charCodeAt(0) == 0) {
         this.offset = this.header.length + 1;
-        
         return null;
     }
     
