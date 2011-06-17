@@ -123,7 +123,7 @@ div.timeline {
 div#progressbar { width: 0; height: 20px; background-color: #FA5945; }
 div#preloadbar { width: 0; height: 20px; background-color: rgba(255,228,0,0.5); }
 
-div.meta { background-color: rgba(0, 0, 0, 0.1); width:460px; padding:20px; font-size:12px; display:inline-block; }
+div.meta { background-color: rgba(0, 0, 0, 0.1); width:460px; padding:20px; font-size:16px; display:inline-block; }
     
     
 #footer {
