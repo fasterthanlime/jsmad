@@ -1,0 +1,69 @@
+<html>
+<head>
+<!-- <script type="text/javascript" src="srcde/typed-array.js"></script> -->
+<script type="text/javascript" src="src/mad.js"></script>
+<script type="text/javascript" src="src/rq_table.js"></script>
+<script type="text/javascript" src="src/imdct_s.js"></script>
+<script type="text/javascript" src="src/huffman.js"></script>
+<script type="text/javascript" src="src/bit.js"></script>
+<script type="text/javascript" src="src/stream.js"></script>
+<script type="text/javascript" src="src/layer3.js"></script>
+<script type="text/javascript" src="src/frame.js"></script>
+<script type="text/javascript" src="src/synth.js"></script>
+
+<script type="text/javascript" src="src/bytestream.js"></script>
+<script type="text/javascript" src="src/filestream.js"></script>
+<script type="text/javascript" src="src/substream.js"></script>
+<script type="text/javascript" src="src/id3v22stream.js"></script>
+<script type="text/javascript" src="src/id3v23stream.js"></script>
+<script type="text/javascript" src="src/mp3file.js"></script>
+
+<script type="text/javascript" src="src/ajaxstream.js"></script>
+<script type="text/javascript" src="src/stringstream.js"></script>
+<script type="text/javascript" src="src/player.js"></script>
+
+<script type="text/javascript" src="audiolib.js/lib/audiolib.js"></script>
+<script type="text/javascript" src="mhd.js"></script>
+
+<link rel="stylesheet" href="css/style.css" type="text/css" media="screen" />
+<title>JSMAD - 100% JavaScript MPEG Audio Decoder</title>
+</head>
+
+<body onload="domReady()">
+  <div id="container">
+    <div id="header">
+      <h1><span>JSMAD - JavaScript MPEG Audio Decoder</span></h1>
+      <div class="github">
+        <a href="https://github.com/nddrylliog/jsmad">https://github.com/nddrylliog/jsmad</a>
+      </div>
+      <div class="select">
+        <form id="streamData" action="#">
+          <label for="ofm" class="ofm">official.fm track ID</label> 
+          <input id="ofm" type="text"/>
+        </form>
+        <span>or</span>
+        <form id="uploadData">
+          <label for="fileChooser">local MP3 file</label> 
+          <input id="fileChooser" type="file" onchange="readFile()" value="select"></input>
+
+        </form>
+
+      </div>
+    </div>
+    <div id="content">
+      <div id='ID3'>
+        <div class="intro">
+          <h2>JSMAD is a pure JavaScript MPEG Audio Decoder</h2>
+          <p>no flash, blah blah</p>
+        </div>
+      </div>
+    </div>
+    <div id="footer">
+      <p>Made in <a href="http://musichackday.org" class="mhd"><img src="images/mhd.png" alt="musichackday" /></a> by <a href="http://twitter.com/nddrylliog">@nddrylliog <span>official.fm</span></a> <a href="http://twitter.com/antoinem">@antoinem <span>official.fm</span></a> <a href="http://twitter.com/mgeorgi">@mgeorgi</a> <a href="http://twitter.com/jensnockert">@jensnockert</a> </p>
+    </div>
+  </div>
+  
+  
+
+</body>
+</html>
