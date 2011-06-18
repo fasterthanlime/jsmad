@@ -133,20 +133,17 @@ Mad.AjaxStream.prototype.peek = function(n) {
 Mad.AjaxStream.prototype.get = function(offset, length) {
 	var tmpbuffer,i,j;
     if (this.absoluteAvailable(offset + length)) {
-		tmpbuffer = new Uint8Array(length);
 		if(this.state['byteBuffer']) {
-			for(j = 0, i = offset; i < offset + length; i += 1, j += 1) {
-				tmpbuffer[j] = this.state['byteBuffer'][i];
-			}
+			return Array.prototype.slice.call(this.state['byteBuffer'], offset, offset + length);
 		} else {
+			tmpbuffer = new Uint8Array(length)
 			for(j = 0, i = offset; i < offset + length; i += 1, j += 1) {
 				tmpbuffer[j] = this.state['buffer'].charCodeAt(i) & 0xff;
 			}
+			return tmpbuffer;
 		}
-		return tmpbuffer;
     } else {
-		throw new Error("buffer underflow with get!");        
-        return;
+		throw new Error("buffer underflow with get!");
     }
 }
 
