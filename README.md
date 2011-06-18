@@ -2,7 +2,7 @@
 
 jsmad is a pure javascript MP3 decoder, based on [libmad](http://www.underbit.com/products/mad/), with an ID3 written from scratch.
 
-For example, jsmad allows Firefox 4.0+ to play MP3s without any Flash. Faster loading times. Less security holes. No 64-bit headaches on Linux. Less memory leaks.
+For example, jsmad allows Firefox 4.0+ to play MP3s without any Flash. Faster loading times. Fewer security holes. No 64-bit headaches on Linux. Fewer memory leaks.
 
 jsmad is GPL-ed, fork yours today!
 
