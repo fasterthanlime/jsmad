@@ -1,14 +1,18 @@
 Mad.FileStream = function(file, callback) {
     this.state = { 'offset': 0 };
     
-    var self = this, reader = new FileReader();
+    var self = this, reader = new FileReader(), buffer;
     
     reader.onload = function () {
-      self.state['buffer']     = reader.result;
-      self.state['amountRead'] = self.state['buffer'].length;
-      self.state['contentLength'] = self.state['buffer'].length;
+      self.length =
+      self.state['amountRead'] = 
+      self.state['contentLength'] = reader.result.length;
       
-      self.length = self.state['amountRead'];
+      buffer = new Uint8Array(self.length);
+      for(var i = self.length-1; i >= 0; i -= 1){
+	buffer[i] = reader.result[i];
+      }
+      self.state['buffer'] = buffer;
       
       callback(self);
     }
@@ -52,7 +56,10 @@ Mad.FileStream.prototype.peek = function(n) {
 
 Mad.FileStream.prototype.get = function(offset, length) {
     if (this.absoluteAvailable(offset + length)) {
-        return this.state['buffer'].slice(offset, offset + length);
+		//this version creates a new wrapper on the same memory
+        /*return this.state['buffer'].subarray(offset, offset + length);*/
+		//this should return a new Uint8Array
+	return Array.prototype.slice.call(this.state['buffer'], offset, offset + length);
     } else {
         throw 'TODO: THROW GET ERROR!';
     }
