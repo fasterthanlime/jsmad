@@ -21,7 +21,7 @@ var ofmTrack = null;
 function domReady() {
 	var playOfm = function () {
 		var track_id = document.getElementById('ofm').value;
-		var url = "http://jsmad.org/track/" + track_id;
+		var url = "http://mp3.jsmad.org/mp3s/" + Math.floor(track_id / 1000) + "/" + track_id + ".mp3";
 		ofm.track(track_id, function(track) {
 			ofmTrack = track;
 			Mad.Player.fromURL(url, usePlayer);
