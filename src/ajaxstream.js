@@ -131,30 +131,33 @@ Mad.AjaxStream.prototype.peek = function(n) {
 }
 
 Mad.AjaxStream.prototype.get = function(offset, length) {
+	var tmpbuffer,i,j;
     if (this.absoluteAvailable(offset + length)) {
-		var tmpbuffer = "";
 		if(this.state['byteBuffer']) {
-			for(var i = offset; i < offset + length; i += 1) {
-				tmpbuffer = tmpbuffer + String.fromCharCode(this.state['byteBuffer'][i]);
-			}
+			return Array.prototype.slice.call(this.state['byteBuffer'], offset, offset + length);
 		} else {
-			for(var i = offset; i < offset + length; i += 1) {
-				tmpbuffer = tmpbuffer + String.fromCharCode(this.state['buffer'].charCodeAt(i) & 0xff);
+			tmpbuffer = new Uint8Array(length)
+			for(j = 0, i = offset; i < offset + length; i += 1, j += 1) {
+				tmpbuffer[j] = this.state['buffer'].charCodeAt(i) & 0xff;
 			}
+			return tmpbuffer;
 		}
-		return tmpbuffer;
     } else {
-		throw new Error("buffer underflow with get!");        
-        return;
+		throw new Error("buffer underflow with get!");
     }
 }
 
+
+/*
+	Is this a typo? Shouldn't this be Mad.AjaxStream.prototype?
+	As-is, it'll require all ByteStream implementations to have
+	a state.byteBuffer field if AjaxStream is used anywhere.
+*/
 Mad.ByteStream.prototype.getU8 = function(offset, bigEndian) {
-	if(this.state['byteBuffer']) {
-		return this.state['byteBuffer'][offset];
-	}
-		
-    return this.get(offset, 1).charCodeAt(0);
+    return (this.state['byteBuffer']
+			?this.state['byteBuffer'][offset]
+			:this.get(offset, 1)[0]
+		);
 }
 
 Mad.AjaxStream.prototype.requestAbsolute = function(n, callback) {
