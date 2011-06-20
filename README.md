@@ -7,7 +7,7 @@ For example, jsmad allows Firefox 4.0+ to play MP3s without any Flash. Faster lo
 jsmad opens up a whole world of realtime audio applications implemented in javascript: 
 dj-mixers, samplers, sequencers, all these applications benefit from using mp3s as audio source.  
 
-jsmad is GPL-ed, fork yours today!
+jsmad is released under the GPLv2 license.
 
 ## Demo
 
@@ -53,12 +53,11 @@ under the GPL, there is absolutely no warranty of any kind, to the extent permit
 
 What GPL means for a javascript library is not exactly clear to us. What's clear is that you have
 to release any fork/changes under the GPL as well, so that everyone can profit from it. However,
-using it on a commercial platform is pobably alright. Remember: no guarantees, and we'd love to know
+using it on a commercial platform is probably alright. Remember: no guarantees, and we'd love to know
 about it!
 
 libmad has commercial license. As for jsmad, we're in a sort of grey legal area. If you're from
-Underbit and want to work this out with us (nddrylliog, mgeorgi, jensnockert) please drop me a note
-at amos@official.fm
+Underbit and want to work this out with us please drop me a note at amos@official.fm
 
 ## Future
 
