@@ -8,172 +8,150 @@ implemented by concrete streams:
 .seek(n)
 .state.offset
 
-There's still a heckuvalotta code duplication here that could probably be fixed.
-
 */
-
 (function(){
-	function composeBytes(bytes,len,bigEndian,step){
-		var res,shift=step;
-		if (bigEndian) {
-			res = bytes[0];
-			for(i=1;i<len;i++,shift+=step){
-				res |= bytes[i] << shift;
+	var types = {
+		'U8'	: 1, 'uint8'	: 1,
+		'U16'	: 2, 'uint16'	: 2,
+		'U24'	: 3, 'uint24'	: 3,
+		'U32'	: 4, 'uint32'	: 4,
+		'I8'	: -1, 'int8'	: -1,
+		'I16'	: -2, 'int16'	: -2,
+		'I24'	: -3, 'int24'	: -3,
+		'I32'	: -4, 'int32'	: -4
+	};
+
+	Mad.ByteStream = function (url) { };
+
+	Mad.ByteStream.prototype = {
+		composeBytes : function (offset,len,bigEndian,step) {
+			var res,shift=step||8,i,
+				bytes = this.get(offset,len);
+			if (bigEndian) {
+				i = len - 1;
+				res = bytes.charCodeAt(i);
+				for (i--; i >= 0; i--, shift += step) {
+					res |= bytes.charCodeAt(i) << shift;
+				}
+			} else {
+				res = bytes.charCodeAt(0);
+				for(i = 1; i < len; i++, shift += step) {
+					res |= bytes.charCodeAt(i) << shift;
+				}
 			}
-		} else {
-			i=len-1;
-			res = bytes[i];
-			for(i--;i>=0;i--,shift+=step){
-				res |= bytes[i] << shift;
+			return res;
+		},
+		available : function (n) {
+			return this.absoluteAvailable(this.state.offset + n);
+		},
+		get_size : function (size, offset, bigEndian) {
+			switch(size){
+				case 1:
+					return this.get(offset, 1).charCodeAt(0);
+				case -1:
+					return this.get(offset, 1).charCodeAt(0) - 1<<7;
+				default:
+					if (size < 0) {
+						return this.composeBytes(offset, -1*size, bigEndian) - 1<<(-8*size-1);
+					} else {
+						return this.composeBytes(offset, size, bigEndian);
+					}
 			}
+		},
+		getInt : function (size, offset, bigEndian) {
+			return this.get_size(
+				typeof size === 'string' ? types[size] || 1 : size,
+				offset, bigEndian);
+		},
+		getSyncInteger : function (offset) {
+			return this.composeBytes(offset, 4, true, 7);
+		},
+		peek_size : function (size, bigEndian) {
+			return this.get_size(size, this.state.offset, bigEndian);
+		},
+		peekInt : function (size, bigEndian) {
+			return this.get(size, this.state.offset, bigEndian);
+		},
+		peekSyncInteger : function () {
+			return this.composeBytes(this.state.offset, 4, true, 7);
+		},
+		read_size : function (size, bigEndian){
+			var result = this.get_size(size, this.state.offset, bigEndian);
+			this.seek(size < 0 ? -1 * size : size);
+			return result;
+		},
+		readInt : function (size, bigEndian) {
+			return this.read_size(
+				typeof size === 'string' ? types[size] || 1 : size,
+				bigEndian);
+		},
+		readSyncInteger : function () {
+			var result = this.getSyncInteger(this.state.offset);	
+			this.seek(4);
+			return result;
+		},
+		getU8 : function (offset, bigEndian) {
+			return this.get_size(1, offset);
+		},
+		getU16 : function (offset, bigEndian) {
+			return this.get_size(2, offset, bigEndian);
+		},
+		getU24 : function (offset, bigEndian) {
+			return this.get_size(3, offset, bigEndian);
+		},
+		getU32 : function (offset, bigEndian) {
+			return this.get_size(4, offset, bigEndian);
+		},
+		getI8 : function (offset, bigEndian) {
+			return this.get_size(-1, offset);
+		},
+		getI16 : function (offset, bigEndian) {
+			return this.get_size(-2, offset, bigEndian);
+		},
+		getI32 : function (offset, bigEndian) {
+			return this.get_size(-4, offset, bigEndian);
+		},
+		peekU8 : function (bigEndian) {
+			return this.getU8(this.state.offset, bigEndian);
+		},
+		peekU16 : function (bigEndian) {
+			return this.getU16(this.state.offset, bigEndian);
+		},
+		peekU24 : function (bigEndian) {
+			return this.getU24(this.state.offset, bigEndian);
+		},
+		peekU32 : function (bigEndian) {
+			return this.getU32(this.state.offset, bigEndian);
+		},
+		peekI8 : function (bigEndian) {
+			return this.getI8(this.state.offset, bigEndian);
+		},
+		peekI16 : function (bigEndian) {
+			return this.getI16(this.state.offset, bigEndian);
+		},
+		peekI32 : function (bigEndian) {
+			return this.getI32(this.state.offset, bigEndian);
+		},
+		readU8 : function (bigEndian) {
+			return this.read_size(1, bigEndian);
+		},
+		readU16 : function (bigEndian) {
+			return this.read_size(2, bigEndian);
+		},
+		readU24 : function (bigEndian) {
+			return this.read_size(3, bigEndian);
+		},
+		readU32 : function (bigEndian) {
+			return this.read_size(4, bigEndian);
+		},
+		readI8 : function (bigEndian) {
+			return this.read_size(-1, bigEndian);
+		},
+		readI16 : function (bigEndian) {
+			return this.read_size(-2, bigEndian);
+		},
+		readI32 : function (bigEndian) {
+			return this.read_size(-4, bigEndian);
 		}
-		return res;
-	}
-
-	Mad.ByteStream = function(url) { }
-
-	Mad.ByteStream.prototype.available = function(n) {
-		return this.absoluteAvailable(this.state.offset + n);
-	}
-
-	/*Unsigned integer getters*/
-	
-	Mad.ByteStream.prototype.getU8 = function(offset, bigEndian) {
-		return this.get(offset, 1)[0];
-	}
-
-	//it'd be nice to abstract this out with .bind(), but that's not supported everywhere
-	Mad.ByteStream.prototype.getU16 = function(offset, bigEndian) {
-		return composeBytes(this.get(offset, 2), 2, bigEndian,8);
-	}
-
-	Mad.ByteStream.prototype.getU24 = function(offset, bigEndian) {
-		return composeBytes(this.get(offset, 3), 3, bigEndian,8);
-	}
-
-	Mad.ByteStream.prototype.getU32 = function(offset, bigEndian) {
-		return composeBytes(this.get(offset, 4),4,bigEndian,8);
-	}
-
-	/*Signed integer getters*/
-	
-	Mad.ByteStream.prototype.getI8 = function(offset, bigEndian) {
-		return this.getU8(offset, bigEndian) - 128;            // 2 ** 7
-	}
-
-	Mad.ByteStream.prototype.getI16 = function(offset, bigEndian) {
-		return this.getU16(offset, bigEndian) - 65536;         // 2 ** 15
-	}
-
-	Mad.ByteStream.prototype.getI32 = function(offset, bigEndian) {
-		return this.getU32(offset, bigEndian) - 2147483648;    // 2 ** 31
-	}
-
-	Mad.ByteStream.prototype.getSyncInteger = function(offset) {
-		return composeBytes(this.get(offset, 4), 4, false, 7);
-	}
-
-	/*Unsigned integer peeks*/
-	
-	Mad.ByteStream.prototype.peekU8 = function(bigEndian) {
-		return this.getU8(this.state.offset, bigEndian);
-	}
-
-	Mad.ByteStream.prototype.peekU16 = function(bigEndian) {
-		return this.getU16(this.state.offset, bigEndian);
-	}
-
-	Mad.ByteStream.prototype.peekU24 = function(bigEndian) {
-		return this.getU24(this.state.offset, bigEndian);
-	}
-
-	Mad.ByteStream.prototype.peekU32 = function(bigEndian) {
-		return this.getU32(this.state.offset, bigEndian);
-	}
-
-	/*Signed integer peeks*/
-	
-	Mad.ByteStream.prototype.peekI8 = function(bigEndian) {
-		return this.getI8(this.state.offset, bigEndian);
-	}
-
-	Mad.ByteStream.prototype.peekI16 = function(bigEndian) {
-		return this.getI16(this.state.offset, bigEndian);
-	}
-
-	Mad.ByteStream.prototype.peekI32 = function(bigEndian) {
-		return this.getI32(this.state.offset, bigEndian);
-	}
-
-	Mad.ByteStream.prototype.peekSyncInteger = function() {
-		return this.getSyncInteger(this.state.offset);
-	}
-
-	/*Unsigned integer reads*/
-	
-	Mad.ByteStream.prototype.readU8 = function(bigEndian) {
-		var result = this.peekU8(bigEndian);
-		
-		this.seek(1);
-		
-		return result;
-	}
-
-	Mad.ByteStream.prototype.readU16 = function(bigEndian) {
-		var result = this.peekU16(bigEndian);
-		
-		this.seek(2);
-		
-		return result;
-	}
-
-	Mad.ByteStream.prototype.readU24 = function(bigEndian) {
-		var result = this.peekU24(bigEndian);
-		
-		this.seek(3);
-		
-		return result;
-	}
-
-	Mad.ByteStream.prototype.readU32 = function(bigEndian) {
-		var result = this.peekU32(bigEndian);
-		
-		this.seek(4);
-		
-		return result;
-	}
-
-	/*Signed integer reads*/
-	
-	Mad.ByteStream.prototype.readI8 = function(bigEndian) {
-		var result = this.peekI8(bigEndian);
-		
-		this.seek(1);
-		
-		return result;
-	}
-
-	Mad.ByteStream.prototype.readI16 = function(bigEndian) {
-		var result = this.peekI16(bigEndian);
-		
-		this.seek(2);
-		
-		return result;
-	}
-
-	Mad.ByteStream.prototype.readI32 = function(bigEndian) {
-		var result = this.peekI32(bigEndian);
-		
-		this.seek(4);
-		
-		return result;
-	}
-
-	Mad.ByteStream.prototype.readSyncInteger = function() {
-		var result = this.getSyncInteger(this.state.offset);
-		
-		this.seek(4);
-		
-		return result;
-	}
+	};
 }());
