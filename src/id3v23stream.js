@@ -83,7 +83,7 @@ var decodeTerminatedString = function(header, stream) {
 	var objectName = stream.read(4);
 	
 	// skip 4 bytes, then read binary length
-	stream.read(4);
+	stream.seek(4);
 	var length = stream.readU32(true) - 4;
 	
 	if(length > header.length) return null;
@@ -529,7 +529,7 @@ Mad.ID3v23Stream.prototype.readFrame = function() {
             'header': header
         };
         
-        this.stream.read(Math.min(length, this.header.length - this.offset));
+        this.stream.seek(Math.min(length, this.header.length - this.offset));
 	}
     
     if(result) {
