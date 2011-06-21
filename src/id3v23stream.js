@@ -48,36 +48,24 @@ var decodeTerminatedString = function(header, stream) {
 	// skip text encoding (nobody cares, always ISO-8559-15)
 	stream.read(1);
 
-	var c;
+	var i;
 	
-	var mimetype = "";
-	while(true) {
-		c = stream.read(1);
-		if(c == "\0") {
-			break;
-		}
-		mimetype += c;
-	}
+	for(i = 0; stream.look(1, i) !== '\0'; i++) { }
+	var mimetype = stream.read(i-1);
+	stream.seek(1);
+	
 	console.log("mimetype = " + mimetype);
 	
-	var filename = "";
-	while(true) {
-		c = stream.read(1);
-		if(c == "\0") {
-			break;
-		}
-		filename += c;
-	}
+	for(i = 0; stream.look(1, i) !== '\0'; i++) { }
+	var filename = stream.read(i-1);
+	stream.seek(1);
+	
 	console.log("filename = " + filename);
 	
-	var contentDescription = "";
-	while(true) {
-		c = stream.read(1);
-		if(c == "\0") {
-			break;
-		}
-		contentDescription += c;
-	}
+	for(i = 0; stream.look(1, i) !== '\0'; i++) { }
+	var contentDescription = stream.read(i-1);
+	stream.seek(1);
+	
 	console.log("contentDescription = " + contentDescription);
 	
 	var objectName = stream.read(4);
