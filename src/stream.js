@@ -48,7 +48,7 @@ Mad.Stream = function (stream) {
     this.anc_ptr = /* MadBit */ null;               /* ancillary bits pointer */
     this.anc_bitlen = 0;                            /* number of ancillary bits */
 
-    this.main_data = /* string */ Mad.mul("\0", Mad.BUFFER_MDLEN); /* Layer III main_data() */
+    this.main_data = new Uint8Array(Mad.BUFFER_MDLEN);
     this.md_len = 0; /* bytes in main_data */
 
 	this.readShort = stream.readU16.bind(stream);
@@ -89,4 +89,4 @@ Mad.Stream.prototype.doSync = function() {
     this.ptr = new Mad.Bit(this.stream, ptr);
     
     return 0;
-}
+};
