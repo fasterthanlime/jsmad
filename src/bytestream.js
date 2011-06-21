@@ -40,6 +40,22 @@ Mad.ByteStream.prototype.peekb = function(n) {
     }
 };
 
+Mad.ByteStream.prototype.look = function(n, offset) {
+    try {
+        return this.get(this.state.offset + offset, n);
+    } catch (e) {
+        throw 'TODO: THROW PEEK ERROR!';
+    }
+};
+
+Mad.ByteStream.prototype.lookb = function(n, offset) {
+    try {
+        return this.getb(this.state.offset + offset, n);
+    } catch (e) {
+        throw 'TODO: THROW PEEK ERROR!';
+    }
+};
+
 Mad.ByteStream.prototype.getU8 = function(offset, bigEndian) {
     return this.getb(offset, 1)[0];
 };
