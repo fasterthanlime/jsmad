@@ -16,40 +16,43 @@ Mad.mul = function (str, num) {
 };
 
 Mad.memcpy = function (dst, dstOffset, src, srcOffset, length) {
-    // this is a pretty weird memcpy actually - it constructs a new version of dst, because we have no other way to do it
-    return dst.slice(0, dstOffset) + src.slice(srcOffset, srcOffset + length) + dst.slice(dstOffset + length);
+	//console.log(typeof src); //src is always a stream
+    if (typeof dst === 'string') {// this is a pretty weird memcpy actually - it constructs a new version of dst, because we have no other way to do it
+        return dst.slice(0, dstOffset) + src.get(srcOffset, length) + dst.slice(dstOffset + length);
+		//String.fromCharCode.apply(String, src.subarray(srcOffset, srcOffset + length))
+	} else {
+	    dst.set(src.getb(srcOffset, length),dstOffset);
+		//src.subarray(srcOffset, srcOffset + length)
+		return dst;
+	}
 };
 
 Mad.rshift = function (num, bits) {
-    return Math.floor(num / Math.pow(2, bits));
+    return Math.floor(num / (1<<bits));
 };
 
 Mad.lshiftU32 = function (num, bits) {
-    return Mad.bitwiseAnd(Mad.lshift(num, bits), 4294967295 /* 2^32 - 1 */);
+    return Mad.bitwiseAnd(Mad.lshift(num, bits), (1<<32)-1 /* 2^32 - 1 */);
 };
 
 Mad.lshift = function (num, bits) {
-    return num * Math.pow(2, bits);
+    return num * (1<<bits);
 };
 
 Mad.bitwiseOr = function (a, b) {
-    var w = 2147483648; // 2^31
-
-    var aHI = (a / w) << 0;
-    var aLO = a % w;
-    var bHI = (b / w) << 0;
-    var bLO = b % w;
-
+    var w = 1<<31, // 2^31
+        aHI = (a / w) << 0,
+        aLO = a % w,
+        bHI = (b / w) << 0,
+        bLO = b % w;
     return ((aHI | bHI) * w + (aLO | bLO));
 };
 
 Mad.bitwiseAnd = function (a, b) {
-    var w = 2147483648; // 2^31
-
-    var aHI = (a / w) << 0;
-    var aLO = a % w;
-    var bHI = (b / w) << 0;
-    var bLO = b % w;
-
+    var w = 1<<31, // 2^31
+        aHI = (a / w) << 0,
+        aLO = a % w,
+        bHI = (b / w) << 0,
+        bLO = b % w;
     return ((aHI & bHI) * w + (aLO & bLO));
 };
