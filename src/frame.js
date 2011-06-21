@@ -205,11 +205,7 @@ Mad.Header.decode = function(stream) {
     }
 
     // emulating goto in JS, yay! this was a 'sync:' label
-    var syncing = true;
-
-    while(syncing) {
-        syncing = false;
- 
+    do {
         /* synchronize */
         try {
             if (stream.sync) {
@@ -310,12 +306,12 @@ Mad.Header.decode = function(stream) {
                 ptr = stream.next_frame = stream.this_frame + 1;
           
                 // emulating 'goto sync'
-                syncing = true;
                 continue;
             }
             stream.sync = 1;
         }
-    } // end of goto emulation (label 'sync')
+		break;
+    } while(true); // end of goto emulation (label 'sync')
     
     header.flags |= Mad.Flag.INCOMPLETE;
     return header;
