@@ -4,13 +4,12 @@ Mad.FileStream = function(file, callback) {
     var self = this, reader = new FileReader();
     
     reader.onload = function () {
-      self.state['buffer']     = reader.result;
-      self.state['amountRead'] = self.state['buffer'].length;
-      self.state['contentLength'] = self.state['buffer'].length;
-      
-      self.length = self.state['amountRead'];
-      
-      callback(self);
+		self.length =
+		self.state.amountRead = 
+		self.state.contentLength = reader.result.length;
+		self.state.buffer = reader.result;
+		  
+		callback(self);
     }
     
     reader.onerror = function () {
@@ -18,17 +17,17 @@ Mad.FileStream = function(file, callback) {
     }
     
     reader.readAsBinaryString(file);
-}
+};
 
 Mad.FileStream.prototype = new Mad.ByteStream();
 
 Mad.FileStream.prototype.absoluteAvailable = function(n, updated) {
-    return n < this.state['amountRead'];
-}
+    return n < this.state.amountRead;
+};
 
 Mad.FileStream.prototype.seek = function(n) {
-    this.state['offset'] += n;
-}
+    this.state.offset += n;
+};
 
 Mad.FileStream.prototype.read = function(n) {
     var result = this.peek(n);
@@ -36,24 +35,32 @@ Mad.FileStream.prototype.read = function(n) {
     this.seek(n);
     
     return result;
-}
+};
 
 Mad.FileStream.prototype.peek = function(n) {
-    if (this.available(n)) {
-        var offset = this.state['offset'];
-        
-        var result = this.get(offset, n);
-        
-        return result;
-    } else {
+    try {
+        return this.get(this.state.offset, n);
+    } catch (e) {
         throw 'TODO: THROW PEEK ERROR!';
     }
-}
+};
 
 Mad.FileStream.prototype.get = function(offset, length) {
     if (this.absoluteAvailable(offset + length)) {
-        return this.state['buffer'].slice(offset, offset + length);
+        return this.state.buffer.slice(offset, offset + length);
     } else {
         throw 'TODO: THROW GET ERROR!';
     }
-}
+};
+
+Mad.FileStream.prototype.getb = function(offset, length) {
+    if (this.absoluteAvailable(offset + length)) {
+		var i,buffer = new Uint8Array(length);
+		for(i = 0; i < length; i++) {
+			buffer[i] = this.state.buffer.charCodeAt(i+offset);
+		}
+		return buffer;
+    } else {
+        throw 'TODO: THROW GET ERROR!';
+    }
+};
