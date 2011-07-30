@@ -9,6 +9,8 @@ var CHAR_BIT = 8;
 Mad.Bit = function (stream, offset) {
     if (typeof(stream) == 'string') {
         this.stream = new Mad.StringStream(stream);
+    } else if(stream.subarray) {
+        this.stream = new Mad.ArrayStream(stream);
     } else {
         this.stream = stream;
     }
@@ -17,7 +19,7 @@ Mad.Bit = function (stream, offset) {
     
     this.cache = 0;
     this.left = CHAR_BIT;
-}
+};
 
 Mad.Bit.prototype.clone = function() {
     var c = new Mad.Bit(this.stream, this.offset);
@@ -26,7 +28,7 @@ Mad.Bit.prototype.clone = function() {
     c.left = this.left;
     
     return c;
-}
+};
 
 /*
  * NAME:    bit.length()
@@ -34,7 +36,7 @@ Mad.Bit.prototype.clone = function() {
  */
 Mad.Bit.prototype.length = function(end) {
     return this.left + CHAR_BIT * (end.offset - (this.offset + 1)) + (CHAR_BIT - end.left);
-}
+};
 
 /*
  * NAME:    bit.nextbyte()
@@ -42,7 +44,7 @@ Mad.Bit.prototype.length = function(end) {
  */
 Mad.Bit.prototype.nextbyte = function() {
     return this.left == CHAR_BIT ? this.offset : this.offset + 1;
-}
+};
 
 /*
  * NAME:    bit.skip()
@@ -60,7 +62,7 @@ Mad.Bit.prototype.skip = function(len) {
     if (this.left < CHAR_BIT) {
         this.cache = this.stream.getU8(this.offset);
     }
-}
+};
 
 /*
  * NAME:    bit.read()
@@ -105,7 +107,7 @@ Mad.Bit.prototype.read = function(len) {
     }
     
     return value;
-}
+};
 
 Mad.Bit.prototype.readBig = function(len) {
     var value = 0;
@@ -142,5 +144,4 @@ Mad.Bit.prototype.readBig = function(len) {
     }
     
     return value;
-}
-
+};

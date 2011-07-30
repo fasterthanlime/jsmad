@@ -43,50 +43,32 @@ Mad.Stream = function (stream) {
     this.this_frame = 0;                            /* start of current frame */
     this.next_frame = 0;                            /* start of next frame */
     
-    this.ptr = new Mad.Bit(this.stream, this.buffer); /* current processing bit pointer */
+    this.ptr = new Mad.Bit(stream, this.buffer); /* current processing bit pointer */
     
     this.anc_ptr = /* MadBit */ null;               /* ancillary bits pointer */
     this.anc_bitlen = 0;                            /* number of ancillary bits */
 
-    this.main_data = /* string */ Mad.mul("\0", Mad.BUFFER_MDLEN); /* Layer III main_data() */
+    this.main_data = new Uint8Array(Mad.BUFFER_MDLEN);
     this.md_len = 0; /* bytes in main_data */
 
-    var options = 0;                                /* decoding options (see below) */
-    var error = Mad.Error.NONE;                     /* error code (see above) */
+	this.readShort = stream.readU16.bind(stream);
+	this.readSShort = stream.readI16.bind(stream);
+	this.getU8 = stream.getU8.bind(stream);
+	this.readU8 = stream.readU8.bind(stream);
+	this.readChars = stream.read.bind(stream);
+	this.peekChars = stream.peek.bind(stream);
+	
 };
 
 Mad.Stream.fromFile = function(file, callback) {
     var reader = new FileReader();
     reader.onloadend = function (evt) {
-        callback(new Mad.Stream(evt.target.result));
+        callback(new Mad.Stream(
+			new Mad.StringStream(evt.target.result)
+		));
     };
     reader.readAsBinaryString(file);
 };
-
-Mad.Stream.prototype.readShort = function(bBigEndian) {
-    return this.stream.readU16(bBigEndian);
-};
-    
-Mad.Stream.prototype.readSShort = function(bBigEndian) {
-    return this.stream.readI16(bBigEndian);
-};
-
-Mad.Stream.prototype.getU8 = function(index) {
-    return this.stream.getU8(index);
-};
-
-
-Mad.Stream.prototype.readU8 = function() {
-    return this.stream.readU8(index);
-};
-
-Mad.Stream.prototype.readChars = function(length) {
-    return this.stream.read(length);
-};
-
-Mad.Stream.prototype.peekChars = function(length) {
-    return this.stream.peek(length);
-}
 
 /*
  * NAME:        stream->sync()
@@ -107,6 +89,4 @@ Mad.Stream.prototype.doSync = function() {
     this.ptr = new Mad.Bit(this.stream, ptr);
     
     return 0;
-}
-
-
+};
