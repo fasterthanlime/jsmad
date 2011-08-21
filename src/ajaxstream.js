@@ -93,8 +93,7 @@ Mad.AjaxStream.prototype.updateBuffer = function() {
 Mad.AjaxStream.prototype.absoluteAvailable = function(n, updated) {
     if (n > this.state['amountRead']) {
         if (updated) {
-			throw new Error("buffer underflow with absoluteAvailable!");
-            return false;
+            throw new Error("buffer underflow with absoluteAvailable!");
         } else if (this.updateBuffer()) {
             return this.absoluteAvailable(n, true);
         } else {
