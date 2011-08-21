@@ -69,9 +69,9 @@ Mad.Decoder.run_sync = function() {
         error_data = null; // used to be &bad_last_frame, but meh.
     }
 
-    this.sync.stream = Mad.Stream.new();
-    this.sync.frame  = Mad.Frame.new();
-    this.sync.synth  = Mad.Synth.new();
+    this.sync.stream = new Mad.Stream();
+    this.sync.frame  = new Mad.Frame();
+    this.sync.synth  = new Mad.Synth();
 
     stream   = this.sync.stream;
     frame    = this.sync.frame;
