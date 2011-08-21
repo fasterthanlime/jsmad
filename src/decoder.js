@@ -84,9 +84,9 @@ Mad.Decoder.run_sync = function() {
         // input_func should fill the Uint8Array cb_data with, well, bytes of input. 
         switch (this.input_func(this.cb_data, stream)) {
         case Mad.Flow.STOP:
-            goto done;
+            // goto done;
         case Mad.Flow.BREAK:
-            goto fail;
+            // goto fail;
         case Mad.Flow.IGNORE:
             continue;
         case Mad.Flow.CONTINUE:
@@ -102,9 +102,9 @@ Mad.Decoder.run_sync = function() {
 
                     switch (error_func(error_data, stream, frame)) {
                     case Mad.Flow.STOP:
-                        goto done;
+                        // goto done;
                     case Mad.Flow.BREAK:
-                        goto fail;
+                        // goto fail;
                     case Mad.Flow.IGNORE:
                     case Mad.Flow.CONTINUE:
                     default:
@@ -114,9 +114,9 @@ Mad.Decoder.run_sync = function() {
 
 	switch (this.header_func(this.cb_data, frame.header)) {
 	case Mad.Flow.STOP:
-	    goto done;
+	    // goto done;
 	case Mad.Flow.BREAK:
-	    goto fail;
+	    // goto fail;
 	case Mad.Flow.IGNORE:
 	    continue;
 	case Mad.Flow.CONTINUE:
@@ -130,9 +130,9 @@ Mad.Decoder.run_sync = function() {
 
 	switch (error_func(error_data, stream, frame)) {
 	case Mad.Flow.STOP:
-	    goto done;
+	    // goto done;
 	case Mad.Flow.BREAK:
-	    goto fail;
+	    // goto fail;
 	case Mad.Flow.IGNORE:
 	    break;
 	case Mad.Flow.CONTINUE:
@@ -146,9 +146,9 @@ Mad.Decoder.run_sync = function() {
             if (this.filter_func) {
 	switch (this.filter_func(this.cb_data, stream, frame)) {
 	case Mad.Flow.STOP:
-	    goto done;
+	    // goto done;
 	case Mad.Flow.BREAK:
-	    goto fail;
+	    // goto fail;
 	case Mad.Flow.IGNORE:
 	    continue;
 	case Mad.Flow.CONTINUE:
@@ -162,9 +162,9 @@ Mad.Decoder.run_sync = function() {
 	switch (this.output_func(this.cb_data,
 				         frame.header, synth.pcm)) {
 	case Mad.Flow.STOP:
-	    goto done;
+	    // goto done;
 	case Mad.Flow.BREAK:
-	    goto fail;
+	    // goto fail;
 	case Mad.Flow.IGNORE:
 	case Mad.Flow.CONTINUE:
 	    break;
