@@ -356,7 +356,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
             clumpsz = startbits;
             pair    = table[ (((bitcache) >> ((cachesz) - (clumpsz))) & ((1 << (clumpsz)) - 1))];
             
-            while (!pair.final) {
+            while (!pair['final']) {
                 cachesz -= clumpsz;
 
                 clumpsz = pair.ptr.bits;
@@ -505,7 +505,7 @@ Mad.III_huffdecode = function(ptr, xr /* Float64Array(576) */, channel, sfbwidth
             var quad = table[ (((bitcache) >> ((cachesz) - (4))) & ((1 << (4)) - 1))];
 
             /* quad tables guaranteed to have at most one extra lookup */
-            if (!quad.final) {
+            if (!quad['final']) {
                 cachesz -= 4;
 
                 quad = table[quad.ptr.offset +
