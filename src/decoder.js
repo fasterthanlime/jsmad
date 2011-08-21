@@ -49,7 +49,7 @@ Mad.Decoder.prototype.error_default = function (data, stream, frame) {
     }
 };
 
-Mad.Decoder.run_sync () {
+Mad.Decoder.run_sync = function() {
     var error_func; // callback, returns a mad_flow, takes a stream and a frame.
     var error_data; // pointer to a bad frame, in case of eror
     var bad_last_frame = 0; // used when no custom error func is set. wtf?
