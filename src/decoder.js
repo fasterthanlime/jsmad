@@ -112,7 +112,7 @@ Mad.Decoder.run_sync = function() {
                     }
 	}
 
-	switch (this.header_func(this.cb_data, &frame.header)) {
+	switch (this.header_func(this.cb_data, frame.header)) {
 	case Mad.Flow.STOP:
 	    goto done;
 	case Mad.Flow.BREAK:
@@ -160,7 +160,7 @@ Mad.Decoder.run_sync = function() {
 
             if (this.output_func) {
 	switch (this.output_func(this.cb_data,
-				         &frame.header, &synth.pcm)) {
+				         frame.header, synth.pcm)) {
 	case Mad.Flow.STOP:
 	    goto done;
 	case Mad.Flow.BREAK:
