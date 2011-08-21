@@ -261,7 +261,7 @@ Mad.ID3v22Stream = function(header, stream) {
         'TOL': extendWithValueFrame,
         'TOR': extendWithValueFrame,
         
-        'COM': extendWithCommentFrame,
+        'COM': extendWithCommentFrame
     };
 }
 
