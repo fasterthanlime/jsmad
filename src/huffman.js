@@ -60,7 +60,7 @@ var PTR = function(offs, bits) {
             offset: offs
         }
     };
-}
+};
 
 var huffquad_V = function (v, w, x, y, hlen) {
     return {
@@ -72,7 +72,7 @@ var huffquad_V = function (v, w, x, y, hlen) {
             y: y
         }
     };
-}
+};
 
 /*
 # if defined(__GNUC__) ||  \
@@ -174,7 +174,7 @@ var V = function (x, y, hlen) {
             hlen: hlen
         }
     };
-}
+};
 
 var hufftab0 = [
   /*      */ V(0, 0, 0)
