@@ -47,7 +47,7 @@ Mad.Decoder.prototype.error_default = function (data, stream, frame) {
     default:
         return Mad.Flow.CONTINUE;
     }
-}
+};
 
 Mad.Decoder.run_sync () {
     var error_func; // callback, returns a mad_flow, takes a stream and a frame.
