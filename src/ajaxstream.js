@@ -142,8 +142,7 @@ Mad.AjaxStream.prototype.get = function(offset, length) {
 		}
 		return tmpbuffer;
     } else {
-		throw new Error("buffer underflow with get!");        
-        return;
+		throw new Error("buffer underflow with get!");
     }
 }
 
