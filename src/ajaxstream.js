@@ -124,8 +124,7 @@ Mad.AjaxStream.prototype.peek = function(n) {
         
         return result;
     } else {
-		throw new Error("buffer underflow with peek!");
-        return;
+        throw new Error("buffer underflow with peek!");
     }
 }
 
