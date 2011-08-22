@@ -47,9 +47,9 @@ Mad.Decoder.prototype.error_default = function (data, stream, frame) {
     default:
         return Mad.Flow.CONTINUE;
     }
-}
+};
 
-Mad.Decoder.run_sync () {
+Mad.Decoder.run_sync = function() {
     var error_func; // callback, returns a mad_flow, takes a stream and a frame.
     var error_data; // pointer to a bad frame, in case of eror
     var bad_last_frame = 0; // used when no custom error func is set. wtf?
@@ -69,9 +69,9 @@ Mad.Decoder.run_sync () {
         error_data = null; // used to be &bad_last_frame, but meh.
     }
 
-    this.sync.stream = Mad.Stream.new();
-    this.sync.frame  = Mad.Frame.new();
-    this.sync.synth  = Mad.Synth.new();
+    this.sync.stream = new Mad.Stream();
+    this.sync.frame  = new Mad.Frame();
+    this.sync.synth  = new Mad.Synth();
 
     stream   = this.sync.stream;
     frame    = this.sync.frame;
@@ -84,9 +84,9 @@ Mad.Decoder.run_sync () {
         // input_func should fill the Uint8Array cb_data with, well, bytes of input. 
         switch (this.input_func(this.cb_data, stream)) {
         case Mad.Flow.STOP:
-            goto done;
+            // goto done;
         case Mad.Flow.BREAK:
-            goto fail;
+            // goto fail;
         case Mad.Flow.IGNORE:
             continue;
         case Mad.Flow.CONTINUE:
@@ -102,9 +102,9 @@ Mad.Decoder.run_sync () {
 
                     switch (error_func(error_data, stream, frame)) {
                     case Mad.Flow.STOP:
-                        goto done;
+                        // goto done;
                     case Mad.Flow.BREAK:
-                        goto fail;
+                        // goto fail;
                     case Mad.Flow.IGNORE:
                     case Mad.Flow.CONTINUE:
                     default:
@@ -112,11 +112,11 @@ Mad.Decoder.run_sync () {
                     }
 	}
 
-	switch (this.header_func(this.cb_data, &frame.header)) {
+	switch (this.header_func(this.cb_data, frame.header)) {
 	case Mad.Flow.STOP:
-	    goto done;
+	    // goto done;
 	case Mad.Flow.BREAK:
-	    goto fail;
+	    // goto fail;
 	case Mad.Flow.IGNORE:
 	    continue;
 	case Mad.Flow.CONTINUE:
@@ -130,9 +130,9 @@ Mad.Decoder.run_sync () {
 
 	switch (error_func(error_data, stream, frame)) {
 	case Mad.Flow.STOP:
-	    goto done;
+	    // goto done;
 	case Mad.Flow.BREAK:
-	    goto fail;
+	    // goto fail;
 	case Mad.Flow.IGNORE:
 	    break;
 	case Mad.Flow.CONTINUE:
@@ -146,9 +146,9 @@ Mad.Decoder.run_sync () {
             if (this.filter_func) {
 	switch (this.filter_func(this.cb_data, stream, frame)) {
 	case Mad.Flow.STOP:
-	    goto done;
+	    // goto done;
 	case Mad.Flow.BREAK:
-	    goto fail;
+	    // goto fail;
 	case Mad.Flow.IGNORE:
 	    continue;
 	case Mad.Flow.CONTINUE:
@@ -160,11 +160,11 @@ Mad.Decoder.run_sync () {
 
             if (this.output_func) {
 	switch (this.output_func(this.cb_data,
-				         &frame.header, &synth.pcm)) {
+				         frame.header, synth.pcm)) {
 	case Mad.Flow.STOP:
-	    goto done;
+	    // goto done;
 	case Mad.Flow.BREAK:
-	    goto fail;
+	    // goto fail;
 	case Mad.Flow.IGNORE:
 	case Mad.Flow.CONTINUE:
 	    break;
