@@ -54,17 +54,17 @@ Mad.huff_pair_table = []; /* 32 */
 
 var PTR = function(offs, bits) {
     return {
-        final:  0,
+        'final':  0, // final is a reserved word in JavaScript and GSC will complain about it.
         ptr: {
             bits:   bits,
             offset: offs
         }
     };
-}
+};
 
 var huffquad_V = function (v, w, x, y, hlen) {
     return {
-        final:  1,
+        'final':  1, // final is a reserved word in JavaScript and GSC will complain about it.
         value: {
             v: v,
             w: w,
@@ -72,7 +72,7 @@ var huffquad_V = function (v, w, x, y, hlen) {
             y: y
         }
     };
-}
+};
 
 /*
 # if defined(__GNUC__) ||  \
@@ -167,14 +167,14 @@ var huffquad_V = function (v, w, x, y, hlen) {
 
 var V = function (x, y, hlen) {
     return {
-        final:  1,
+        'final':  1, // final is a reserved word in JavaScript and GSC will complain about it.
         value: {
             x: x,
             y: y,
             hlen: hlen
         }
     };
-}
+};
 
 var hufftab0 = [
   /*      */ V(0, 0, 0)
