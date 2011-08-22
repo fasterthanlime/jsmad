@@ -1,0 +1,65 @@
+#!/usr/bin/env node
+
+var sys    = require( 'sys' ),
+    path   = require( 'path' ),
+    fs     = require( 'fs' ),
+    uglify = require( 'uglify-js' );
+
+var root  = path.dirname( __dirname ) + '/',
+    files = [
+        'src/mad.js',
+        'src/rq_table.js',
+        'src/imdct_s.js',
+        'src/huffman.js',
+        'src/bit.js',
+        'src/stream.js',
+        'src/layer3.js',
+        'src/frame.js',
+        'src/synth.js',
+        'src/bytestream.js',
+        'src/filestream.js',
+        'src/substream.js',
+        'src/id3v22stream.js',
+        'src/id3v23stream.js',
+        'src/mp3file.js',
+        'src/ajaxstream.js',
+        'src/stringstream.js',
+        'src/player.js'
+    ],
+    i,
+    file,
+    code = '';
+    
+for( i = 0; i < files.length; i++ ) {
+    
+    console.log( 'Reading ' + files[ i ] + '...' );
+    
+    file  = root + files[ i ];
+    code += '\n/* File: ' + files[ i ] + ' */\n';
+    code += fs.readFileSync( file, 'utf-8' );
+}
+
+try {
+    
+    console.log( 'UglifyJS: Parsing the source code...' );
+    var ast = uglify.parser.parse( code );
+    
+    console.log( 'UglifyJS: Mangling the code...' );
+    ast = uglify.uglify.ast_mangle( ast ); // get a new AST with mangled names
+    
+    console.log( 'UglifyJS: Squeezing the code...' );
+    ast = uglify.uglify.ast_squeeze( ast ); // get an AST with compression optimizations
+    
+    console.log( 'UglifyJS: Generating the code...' );
+    var finalCode = uglify.uglify.gen_code( ast ); // compressed code here
+    
+    console.log( 'Writing the code into src/jsmad.min.js...' );
+    fs.writeFileSync( root + 'src/jsmad.min.js', finalCode, 'utf-8' );
+    
+    console.log( 'Success! The uglified source code has been stored into src/jsmad.min.js.' );
+    
+} catch( e )
+{
+    console.error( 'Error: something went wrong.' );
+    console.error( e.toString() );
+}
