@@ -126,8 +126,16 @@ div#progressbar { width: 0; height: 20px; background-color: #FA5945; }
 div#preloadbar { width: 0; height: 20px; background-color: rgba(255,228,0,0.5); }
 
 div.meta { background-color: rgba(0, 0, 0, 0.1); width:460px; padding:20px; font-size:16px; display:inline-block; }
-    
-    
+
+#shareTrack {
+    text-align: right;
+    margin: 20px 0 40px 0;
+}
+
+#playUrl {
+    width: 320px;
+}
+
 #footer {
   clear:both;
   padding:0 20px 20px;
