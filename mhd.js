@@ -58,6 +58,7 @@
         onPageLoad : function()
         {
             this.bindEvents();
+            this.checkLocation();
             this.playOfm();
         },
         
@@ -79,11 +80,20 @@
             this.el.progressBar.style.width = (current / total * 360) + 'px';
         },
         
+        checkLocation: function()
+        {
+            var match = /^\/play\/(\d+)\/?/.exec( window.location.pathname );
+            
+            match && ( this.el.trackId.value = match[ 1 ] );
+        },
+        
         playOfm : function()
         {
             var trackId = this.el.trackId.value,
                 url     = MHD.MP3_URL + "/mp3s/" + Math.floor( trackId / 1000 ) + "/" + trackId + ".mp3",
                 self    = this;
+            
+            this.el.playUrl.value = window.location.origin + '/play/' + trackId;
             
             this.ofm.track( trackId, function( track )
             {
@@ -264,7 +274,8 @@
             // progressBar: '#progressbar',
             fileChooser: '#fileChooser',
             trackId    : '#ofm',
-            id3        : '#ID3'
+            id3        : '#ID3',
+            playUrl    : '#playUrl'
         }
     } );
     
