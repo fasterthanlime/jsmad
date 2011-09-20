@@ -82,8 +82,9 @@
         
         checkLocation: function()
         {
-            var match = /^\/play\/(\d+)\/?/.exec( window.location.pathname );
+            this.location = window.location;
             
+            var match = /^\/play\/(\d+)\/?/.exec( this.location.pathname );
             match && ( this.el.trackId.value = match[ 1 ] );
         },
         
@@ -93,7 +94,7 @@
                 url     = MHD.MP3_URL + "/mp3s/" + Math.floor( trackId / 1000 ) + "/" + trackId + ".mp3",
                 self    = this;
             
-            this.el.playUrl.value = window.location.origin + '/play/' + trackId;
+            this.el.playUrl.value = this.location.protocol + '//' + this.location.host + '/play/' + trackId;
             
             this.ofm.track( trackId, function( track )
             {
