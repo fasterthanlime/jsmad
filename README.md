@@ -1,3 +1,8 @@
+**NOTICE: This project has been absorbed by the audiocogs js codecs initiative**
+
+**See <http://audiocogs.org/codecs/mp3/> for details.**
+
+
 ## About
 
 jsmad is a pure javascript MP3 decoder, based on [libmad](http://www.underbit.com/products/mad/), with an ID3 decoder written from scratch.
